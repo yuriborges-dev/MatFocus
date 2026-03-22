@@ -1,13 +1,21 @@
+import { NavLink, useNavigate } from "react-router-dom"
 import logoMatFocus from "../assets/logo - matfocus.png"
-import { useNavigate } from "react-router-dom"
+import UserProfileCard from "../components/UserProfileCard"
 
 type AppLayoutProps = {
   children: React.ReactNode
 }
 
 function AppLayout({ children }: AppLayoutProps) {
-    const navigate = useNavigate()
-    return (
+  const navigate = useNavigate()
+  const navItemClass = ({ isActive }: { isActive: boolean }) =>
+  `flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium transition ${
+    isActive
+      ? "bg-[#eef4ff] text-[#3b82d0]"
+      : "text-slate-500 hover:bg-slate-50"
+  }`
+
+  return (
     <div className="min-h-screen bg-[#f7f8fb]">
       <div className="flex min-h-screen">
         <aside className="flex w-[285px] flex-col border-r border-slate-200 bg-white px-8 py-6">
@@ -21,28 +29,25 @@ function AppLayout({ children }: AppLayoutProps) {
 
           <nav className="flex flex-1 flex-col justify-between">
             <div className="space-y-3">
-              <button className="flex w-full items-center gap-4 rounded-2xl bg-[#eef4ff] px-5 py-4 text-left text-[18px] font-medium text-[#3b82d0]">
+              <NavLink to="/dashboard" className={navItemClass}>
                 <span>⌂</span>
                 Início
-              </button>
+              </NavLink>
 
-              <button
-                onClick={() => navigate("/atividades")}
-                className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-500 transition hover:bg-slate-50"
-              >
+              <NavLink to="/atividades" className={navItemClass}>
                 <span>📖</span>
                 Atividades
-              </button>
+              </NavLink>
 
-              <button className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-500 transition hover:bg-slate-50">
+              <NavLink to="/progresso" className={navItemClass}>
                 <span>📊</span>
                 Progresso
-              </button>
+              </NavLink>
 
-              <button className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-500 transition hover:bg-slate-50">
+              <NavLink to="/avatar" className={navItemClass}>
                 <span>⭐</span>
                 Avatar
-              </button>
+              </NavLink>
             </div>
 
             <div className="border-t border-slate-200 pt-6">
@@ -53,11 +58,10 @@ function AppLayout({ children }: AppLayoutProps) {
                 </button>
 
                 <button
-                    type="button"
-                    onClick={() => navigate("/")} 
-                    className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-400 transition hover:bg-slate-50"
+                  onClick={() => navigate("/")}
+                  className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-400 transition hover:bg-slate-50"
                 >
-                    <span>↪</span>
+                  <span>↪</span>
                   Sair
                 </button>
               </div>
@@ -65,7 +69,13 @@ function AppLayout({ children }: AppLayoutProps) {
           </nav>
         </aside>
 
-        <main className="flex-1 px-9 py-8">{children}</main>
+        <div className="flex min-h-screen flex-1 flex-col">
+          <header className="flex justify-end px-9 pb-2 pt-7">
+            <UserProfileCard />
+          </header>
+
+          <main className="flex-1 px-9 pb-8 pt-2">{children}</main>
+        </div>
       </div>
     </div>
   )

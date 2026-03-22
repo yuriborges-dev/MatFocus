@@ -12,21 +12,6 @@ function DashboardPage() {
             Pronto para aprender hoje?
           </p>
         </div>
-
-        <button>
-          <div className="flex items-center gap-4 rounded-3xl bg-white px-5 py-4 shadow-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f7e7c8] text-xl">
-              👦🏽
-            </div>
-
-            <div className="leading-tight">
-              <p className="text-[1.1rem] font-semibold text-slate-700">
-                Yuri Borges
-              </p>
-              <p className="text-sm text-slate-400">0 pts</p>
-            </div>
-          </div>
-        </button>
       </div>
 
       <div className="mt-8 rounded-[2rem] bg-gradient-to-r from-[#4a8fd3] to-[#68b1eb] px-9 py-10 text-white shadow-lg">
