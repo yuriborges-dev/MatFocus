@@ -222,6 +222,7 @@ function RegisterPage() {
 
             <button
               type="submit"
+              onClick={() => navigate("/dashboard")}
               className="mt-2 rounded-[1.4rem] bg-[#79c6a1] px-6 py-4 text-2xl font-bold text-white shadow-md transition hover:brightness-105"
             >
               Cadastrar aluno

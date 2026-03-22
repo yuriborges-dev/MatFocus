@@ -65,6 +65,7 @@ function LoginPage() {
 
             <button
               type="submit"
+              onClick={() => navigate("/dashboard")}
               className="mt-2 rounded-3xl bg-sky-400 px-6 py-4 text-2xl font-bold text-white shadow-md hover:bg-sky-500"
             >
               Entrar
