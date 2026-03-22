@@ -13,18 +13,20 @@ function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4 rounded-3xl bg-white px-5 py-4 shadow-md">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f7e7c8] text-xl">
-            👦🏽
-          </div>
+        <button>
+          <div className="flex items-center gap-4 rounded-3xl bg-white px-5 py-4 shadow-md">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f7e7c8] text-xl">
+              👦🏽
+            </div>
 
-          <div className="leading-tight">
-            <p className="text-[1.1rem] font-semibold text-slate-700">
-              Yuri Borges
-            </p>
-            <p className="text-sm text-slate-400">0 pts</p>
+            <div className="leading-tight">
+              <p className="text-[1.1rem] font-semibold text-slate-700">
+                Yuri Borges
+              </p>
+              <p className="text-sm text-slate-400">0 pts</p>
+            </div>
           </div>
-        </div>
+        </button>
       </div>
 
       <div className="mt-8 rounded-[2rem] bg-gradient-to-r from-[#4a8fd3] to-[#68b1eb] px-9 py-10 text-white shadow-lg">
@@ -119,19 +121,23 @@ function DashboardPage() {
       </div>
 
       <div className="mt-7 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <button>
         <div className="flex min-h-[150px] flex-col items-center justify-center rounded-[2rem] bg-white px-6 py-8 text-center shadow-sm">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#f6efff] text-3xl">
             ✨
           </div>
           <h3 className="text-[1.15rem] font-bold text-slate-800">Meu Avatar</h3>
         </div>
+        </button>
 
+        <button>
         <div className="flex min-h-[150px] flex-col items-center justify-center rounded-[2rem] bg-white px-6 py-8 text-center shadow-sm">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eefaf2] text-3xl">
             📊
           </div>
           <h3 className="text-[1.15rem] font-bold text-slate-800">Histórico</h3>
         </div>
+        </button>
       </div>
     </AppLayout>
   )

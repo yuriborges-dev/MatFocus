@@ -26,7 +26,10 @@ function AppLayout({ children }: AppLayoutProps) {
                 Início
               </button>
 
-              <button className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-500 transition hover:bg-slate-50">
+              <button
+                onClick={() => navigate("/atividades")}
+                className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-500 transition hover:bg-slate-50"
+              >
                 <span>📖</span>
                 Atividades
               </button>
