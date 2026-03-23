@@ -5,6 +5,7 @@ import DashboardPage from "../pages/DashboardPage"
 import ActivitiesPage from "../pages/ActivitiesPage"
 import ProgressPage from "../pages/ProgressPage"
 import DifficultyPage from "../pages/DifficultyPage"
+import LevelPathPage from "../pages/LevelPathPage"
 
 function AppRoutes() {
   return (
@@ -15,10 +16,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/atividades" element={<ActivitiesPage />} />
         <Route path="/atividades/:conteudo" element={<DifficultyPage />} />
-        <Route
-          path="/atividades/:conteudo/:nivel"
-          element={<div className="p-10 text-2xl">Tela do nível</div>}
-        />
+        <Route path="/atividades/:conteudo/:nivel" element={<LevelPathPage />} />
         <Route path="/progresso" element={<ProgressPage />} />
       </Routes>
     </BrowserRouter>
