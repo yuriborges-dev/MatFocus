@@ -23,6 +23,7 @@ function ActivitiesPage() {
           borderColor="border-blue-400"
           bgColor="bg-blue-100"
           textColor="text-blue-500"
+          path="/atividades/adicao"
         />
 
         <ActivityCard
@@ -32,6 +33,7 @@ function ActivitiesPage() {
           borderColor="border-green-400"
           bgColor="bg-green-100"
           textColor="text-green-500"
+          path="/atividades/subtracao"
         />
 
         <ActivityCard
@@ -41,6 +43,7 @@ function ActivitiesPage() {
           borderColor="border-yellow-400"
           bgColor="bg-yellow-100"
           textColor="text-yellow-500"
+          path="/atividades/multiplicacao"
         />
 
         <ActivityCard
@@ -50,6 +53,7 @@ function ActivitiesPage() {
           borderColor="border-purple-400"
           bgColor="bg-purple-100"
           textColor="text-purple-500"
+          path="/atividades/divisao"
         />
 
         <ActivityCard
@@ -59,6 +63,7 @@ function ActivitiesPage() {
           borderColor="border-red-400"
           bgColor="bg-red-100"
           textColor="text-red-500"
+          path="/atividades/problemas"
         />
       </div>
     </AppLayout>

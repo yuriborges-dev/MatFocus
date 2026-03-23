@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom"
+
 type ActivityCardProps = {
   title: string
   description: string
@@ -5,6 +7,7 @@ type ActivityCardProps = {
   borderColor: string
   bgColor: string
   textColor: string
+  path: string
 }
 
 function ActivityCard({
@@ -14,7 +17,10 @@ function ActivityCard({
   borderColor,
   bgColor,
   textColor,
+  path,
 }: ActivityCardProps) {
+  const navigate = useNavigate()
+
   return (
     <div
       className={`flex items-center justify-between rounded-[1.8rem] border-2 ${borderColor} bg-white px-7 py-6 transition hover:shadow-md`}
@@ -27,16 +33,14 @@ function ActivityCard({
         </div>
 
         <div>
-          <h3 className="text-[1.3rem] font-bold text-slate-800">
-            {title}
-          </h3>
-          <p className="text-[1rem] text-slate-400">
-            {description}
-          </p>
+          <h3 className="text-[1.3rem] font-bold text-slate-800">{title}</h3>
+          <p className="text-[1rem] text-slate-400">{description}</p>
         </div>
       </div>
 
       <button
+        type="button"
+        onClick={() => navigate(path)}
         className={`text-[1.1rem] font-bold ${textColor}`}
       >
         Iniciar
