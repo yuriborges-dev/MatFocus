@@ -34,7 +34,7 @@ function LevelPathPage() {
   const progressPercent = 0
 
   const handlePhaseClick = (phaseNumber: number) => {
-    navigate(`/atividades/${conteudo}/${nivel}/fase-${phaseNumber}`)
+    navigate(`/atividades/${conteudo}/${nivel}/fase/${phaseNumber}`)
   }
 
   const getOffsetClass = (index: number) => {
