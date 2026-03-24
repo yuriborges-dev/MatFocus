@@ -19,13 +19,13 @@ function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-screen bg-[#f7f8fb]">
       <div className="flex min-h-screen">
         <aside className="flex w-[285px] flex-col border-r border-slate-200 bg-white px-8 py-6">
-          <div className="mb-10">
+          <button className="mb-10" onClick={() => navigate("/dashboard")}>
             <img
               src={logoMatFocus}
               alt="Logo MatFocus"
               className="w-24 object-contain"
             />
-          </div>
+          </button>
 
           <nav className="flex flex-1 flex-col justify-between">
             <div className="space-y-3">

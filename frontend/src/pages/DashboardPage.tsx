@@ -1,6 +1,8 @@
+import { useNavigate } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 
 function DashboardPage() {
+  const navigate = useNavigate();
   return (
     <AppLayout>
       <div className="flex items-start justify-between gap-6">
@@ -23,7 +25,10 @@ function DashboardPage() {
             </p>
           </div>
 
-          <button className="rounded-[1.5rem] bg-white px-10 py-5 text-[1.2rem] font-bold text-[#3b82d0] shadow-md">
+          <button 
+            className="rounded-[1.5rem] bg-white px-10 py-5 text-[1.2rem] font-bold text-[#3b82d0] shadow-md"
+            onClick={() => navigate("/atividades")}
+          >
             ▷ Começar
           </button>
         </div>
