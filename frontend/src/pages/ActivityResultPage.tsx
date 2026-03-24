@@ -1,0 +1,144 @@
+import { useMemo } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import AppLayout from "../layouts/AppLayout"
+
+const contentTitles: Record<string, string> = {
+  adicao: "Adição",
+  subtracao: "Subtração",
+  multiplicacao: "Multiplicação",
+  divisao: "Divisão",
+  problemas: "Problemas",
+}
+
+const levelLabels: Record<string, string> = {
+  "nivel-1": "Nível 1",
+  "nivel-2": "Nível 2",
+  "nivel-3": "Nível 3",
+  "nivel-4": "Nível 4",
+}
+
+const motivationalMessages = [
+  "Você foi muito bem! Continue assim 🌟",
+  "Excelente trabalho! Cada fase concluída é uma conquista 🚀",
+  "Parabéns pelo esforço! Você está evoluindo bastante 💪",
+  "Muito bom! Continue praticando para ficar ainda melhor 😄",
+  "Você mandou muito bem! Vamos para o próximo desafio? 🎯",
+]
+
+function ActivityResultPage() {
+  const navigate = useNavigate()
+  const { conteudo, nivel } = useParams()
+
+  const contentTitle = contentTitles[conteudo || ""] || "Conteúdo"
+  const levelTitle = levelLabels[nivel || ""] || "Nível"
+
+  const totalScore = 130
+  const correctAnswers = 4
+  const wrongAnswers = 1
+  const totalQuestions = correctAnswers + wrongAnswers
+  const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0
+  const averageTime = "12s"
+
+  const motivationalMessage = useMemo(() => {
+    const index = (correctAnswers + wrongAnswers) % motivationalMessages.length
+    return motivationalMessages[index]
+  }, [correctAnswers, wrongAnswers])
+
+  const currentLevelNumber = Number(nivel?.replace("nivel-", "") || "1")
+  const nextLevel = currentLevelNumber < 4 ? `nivel-${currentLevelNumber + 1}` : null
+
+  return (
+    <AppLayout>
+      <div className="flex justify-center pt-6">
+        <div className="w-full max-w-[520px] rounded-[2.2rem] border border-[#c7efd8] bg-white shadow-[0_20px_50px_rgba(121,198,161,0.18)]">
+          <div className="h-3 rounded-t-[2.2rem] bg-[#79c6a1]" />
+
+          <div className="px-9 py-10 text-center">
+            <div className="mx-auto mb-7 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-[#eefaf2] text-[3rem] text-[#79c6a1]">
+              🏆
+            </div>
+
+            <h1 className="text-[2.4rem] font-extrabold text-slate-900">
+              Parabéns!
+            </h1>
+
+            <p className="mt-2 text-[1.2rem] text-slate-400">
+              {contentTitle} • {levelTitle}
+            </p>
+
+            <p className="mt-4 text-[1.05rem] font-medium text-slate-500">
+              {motivationalMessage}
+            </p>
+
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              <div className="rounded-[1.4rem] bg-slate-50 px-4 py-5">
+                <p className="text-[2rem] font-extrabold text-slate-900">
+                  {totalScore}
+                </p>
+                <p className="mt-1 text-sm text-slate-400">Pontuação total</p>
+              </div>
+
+              <div className="rounded-[1.4rem] bg-slate-50 px-4 py-5">
+                <p className="text-[2rem] font-extrabold text-slate-900">
+                  {accuracy}%
+                </p>
+                <p className="mt-1 text-sm text-slate-400">Taxa de acerto</p>
+              </div>
+
+              <div className="rounded-[1.4rem] bg-[#eefaf2] px-4 py-5">
+                <p className="text-[2rem] font-extrabold text-[#79c6a1]">
+                  {correctAnswers}
+                </p>
+                <p className="mt-1 text-sm text-slate-400">Acertos</p>
+              </div>
+
+              <div className="rounded-[1.4rem] bg-[#fff1f1] px-4 py-5">
+                <p className="text-[2rem] font-extrabold text-[#ff6b6b]">
+                  {wrongAnswers}
+                </p>
+                <p className="mt-1 text-sm text-slate-400">Erros</p>
+              </div>
+
+              <div className="col-span-2 rounded-[1.4rem] bg-[#f6efff] px-4 py-5">
+                <p className="text-[2rem] font-extrabold text-[#9b5cf6]">
+                  {averageTime}
+                </p>
+                <p className="mt-1 text-sm text-slate-400">Tempo médio</p>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-col gap-4">
+              <button
+                type="button"
+                onClick={() => navigate(`/atividades/${conteudo}/${nivel}/fase/1`)}
+                className="rounded-[1.3rem] bg-[#4a8fd3] px-6 py-4 text-xl font-bold text-white shadow-md transition hover:brightness-105"
+              >
+                ↻ Jogar novamente
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate(`/atividades/${conteudo}/${nivel}`)}
+                className="rounded-[1.3rem] border border-slate-200 bg-white px-6 py-4 text-xl font-bold text-slate-800 shadow-sm transition hover:bg-slate-50"
+              >
+                🗺 Voltar ao mapa de fases
+              </button>
+
+              {nextLevel && (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/atividades/${conteudo}/${nextLevel}`)}
+                  className="rounded-[1.3rem] bg-[#79c6a1] px-6 py-4 text-xl font-bold text-white shadow-md transition hover:brightness-105"
+                >
+                  ➜ Ir para próxima fase
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </AppLayout>
+  )
+}
+
+export default ActivityResultPage

@@ -159,8 +159,7 @@ function ExercisePage() {
       return
     }
 
-    setFeedback("Sessão concluída com sucesso! ✅")
-    setFeedbackType("")
+    navigate(`/atividades/${conteudo}/${nivel}/resultado`)
   }
 
   const feedbackClasses = {
