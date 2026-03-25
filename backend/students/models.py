@@ -10,11 +10,10 @@ class Student(models.Model):
     ]
 
     GRADE_CHOICES = [
-        ('1', '1º ano'),
-        ('2', '2º ano'),
         ('3', '3º ano'),
         ('4', '4º ano'),
         ('5', '5º ano'),
+        ('6', '6º ano'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student')
