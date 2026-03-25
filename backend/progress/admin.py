@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import StudentPhaseProgress, StudentAnswer
 
-# Register your models here.
+admin.site.register(StudentPhaseProgress)
+admin.site.register(StudentAnswer)
