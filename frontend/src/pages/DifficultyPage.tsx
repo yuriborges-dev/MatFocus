@@ -1,108 +1,78 @@
+import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
+import { api } from "../services/api"
 
-const contentTitles: Record<string, string> = {
-  adicao: "Adição",
-  subtracao: "Subtração",
-  multiplicacao: "Multiplicação",
-  divisao: "Divisão",
-  problemas: "Problemas",
+type Level = {
+  id: number
+  code: string
+  title: string
+  difficulty_order: number
 }
 
 function DifficultyPage() {
-  const navigate = useNavigate()
   const { conteudo } = useParams()
+  const navigate = useNavigate()
 
-  const title = contentTitles[conteudo || ""] || "Conteúdo"
+  const [levels, setLevels] = useState<Level[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  const handleGoToLevel = (level: string) => {
-    navigate(`/atividades/${conteudo}/${level}`)
-  }
+  useEffect(() => {
+    const fetchLevels = async () => {
+      try {
+        const response = await api.get("/activities/levels/")
+        setLevels(response.data)
+      } catch {
+        setError("Não foi possível carregar os níveis.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchLevels()
+  }, [])
 
   return (
     <AppLayout>
       <div>
-        <button
-          type="button"
-          onClick={() => navigate("/atividades")}
-          className="mb-3 text-2xl text-slate-600 transition hover:text-slate-800"
-        >
-          ←
-        </button>
-
         <h1 className="text-[2.5rem] font-extrabold text-slate-900">
-          {title}
+          Escolha o nível
         </h1>
         <p className="mt-1 text-[1.1rem] text-slate-400">
-          Escolha o nível de dificuldade
+          Selecione a dificuldade
         </p>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => handleGoToLevel("nivel-1")}
-          className="overflow-hidden rounded-2xl bg-white text-left shadow-sm transition hover:shadow-md active:scale-[0.99]"
-        >
-          <div className="h-2 bg-[#4a8fd3]" />
+      {loading && (
+        <div className="mt-8">Carregando níveis...</div>
+      )}
 
-          <div className="flex items-center gap-4 px-6 py-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#4a8fd3] text-lg font-bold text-white">
-              1
-            </div>
+      {error && (
+        <div className="mt-8 text-red-500">{error}</div>
+      )}
 
-            <div>
-              <h2 className="text-xl font-bold text-slate-800">Nível 1</h2>
-              <p className="text-sm text-slate-400">0/20 fases • Fácil</p>
-            </div>
-          </div>
-        </button>
+      {!loading && !error && (
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          {levels.map((level) => (
+            <button
+              key={level.id}
+              onClick={() =>
+                navigate(`/atividades/${conteudo}/${level.code}`)
+              }
+              className="rounded-[1.8rem] border border-slate-200 bg-white px-7 py-6 text-left shadow-sm transition hover:shadow-md"
+            >
+              <h3 className="text-[1.4rem] font-bold text-slate-800">
+                {level.title}
+              </h3>
 
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm opacity-50">
-          <div className="h-2 bg-[#8adfb2]" />
-
-          <div className="flex items-center gap-4 px-6 py-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-base text-slate-400">
-              🔒
-            </div>
-
-            <div>
-              <h2 className="text-xl font-bold text-slate-500">Nível 2</h2>
-              <p className="text-sm text-slate-400">Bloqueado</p>
-            </div>
-          </div>
+              <p className="text-slate-400">
+                Dificuldade {level.difficulty_order}
+              </p>
+            </button>
+          ))}
         </div>
-
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm opacity-50">
-          <div className="h-2 bg-[#f0d76d]" />
-
-          <div className="flex items-center gap-4 px-6 py-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-base text-slate-400">
-              🔒
-            </div>
-
-            <div>
-              <h2 className="text-xl font-bold text-slate-500">Nível 3</h2>
-              <p className="text-sm text-slate-400">Bloqueado</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm opacity-50">
-          <div className="h-2 bg-[#d3a8ff]" />
-
-          <div className="flex items-center gap-4 px-6 py-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-base text-slate-400">
-              🔒
-            </div>
-
-            <div>
-              <h2 className="text-xl font-bold text-slate-500">Nível 4</h2>
-              <p className="text-sm text-slate-400">Bloqueado</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
     </AppLayout>
   )
 }
