@@ -126,34 +126,56 @@ function ExercisePage() {
     setFeedbackType("")
   }
 
-  const handleSubmitAnswer = () => {
+  const handleSubmitAnswer = async () => {
     if (!answer.trim()) {
       setFeedback("Digite uma resposta antes de enviar.")
       setFeedbackType("warning")
       return
     }
 
-    const simulatedCorrectAnswer = "teste"
+    if (!currentQuestion || !phaseData) return
 
-    if (answer.trim().toLowerCase() === simulatedCorrectAnswer) {
-      const randomMessage =
-        successMessages[Math.floor(Math.random() * successMessages.length)]
+    try {
+      const studentId = 1
 
-      setSuccessMessage(randomMessage)
-      setShowSuccessModal(true)
-      setFeedback("")
-      setFeedbackType("")
-      setScore((prev) => prev + 10)
-      setCorrectAnswers((prev) => prev + 1)
-      return
+      const response = await api.post(
+        `/activities/questions/${currentQuestion.id}/submit-answer/`,
+        {
+          student_id: studentId,
+          answer: answer.trim(),
+        }
+      )
+
+      const data = response.data
+
+      if (data.is_correct) {
+        const randomMessage =
+          successMessages[Math.floor(Math.random() * successMessages.length)]
+
+        setSuccessMessage(randomMessage)
+        setShowSuccessModal(true)
+        setFeedback("")
+        setFeedbackType("")
+
+        setScore(data.score)
+        setCorrectAnswers(data.correct_answers)
+
+        return
+      }
+
+      const randomErrorMessage =
+        errorMessages[Math.floor(Math.random() * errorMessages.length)]
+
+      setFeedback(randomErrorMessage)
+      setFeedbackType("error")
+
+      setWrongAnswers(data.wrong_answers)
+    } catch (error) {
+      console.error("Erro ao enviar resposta:", error)
+
+      setFeedback("Erro ao validar resposta.")
+      setFeedbackType("error")
     }
-
-    const randomErrorMessage =
-      errorMessages[Math.floor(Math.random() * errorMessages.length)]
-
-    setFeedback(randomErrorMessage)
-    setFeedbackType("error")
-    setWrongAnswers((prev) => prev + 1)
   }
 
   const handleNextQuestion = () => {
@@ -168,7 +190,9 @@ function ExercisePage() {
       return
     }
 
-    navigate(`/atividades/${conteudo}/${nivel}/resultado`)
+    if (!phaseData) return
+
+    navigate(`/atividades/${conteudo}/${nivel}/fase/${phaseData.id}/resultado`)
   }
 
   const feedbackClasses = {

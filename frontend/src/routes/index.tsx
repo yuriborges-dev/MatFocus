@@ -19,14 +19,8 @@ function AppRoutes() {
         <Route path="/atividades" element={<ActivitiesPage />} />
         <Route path="/atividades/:conteudo" element={<DifficultyPage />} />
         <Route path="/atividades/:conteudo/:nivel" element={<LevelPathPage />} />
-        <Route
-          path="/atividades/:conteudo/:nivel/fase/:fase"
-          element={<ExercisePage />}
-        />
-        <Route
-          path="/atividades/:conteudo/:nivel/resultado"
-          element={<ActivityResultPage />}
-        />
+        <Route path="/atividades/:conteudo/:nivel/fase/:fase" element={<ExercisePage />}/>
+        <Route path="/atividades/:conteudo/:nivel/fase/:phaseId/resultado" element={<ActivityResultPage />}/>
         <Route path="/progresso" element={<ProgressPage />} />
       </Routes>
     </BrowserRouter>
