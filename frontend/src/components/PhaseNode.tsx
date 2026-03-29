@@ -7,14 +7,15 @@ type PhaseNodeProps = {
 }
 
 function PhaseNode({ number, status, onClick }: PhaseNodeProps) {
-  const isClickable = status === "current" || status === "unlocked"
+  const isClickable =
+    status === "current" || status === "unlocked" || status === "completed"
 
   const baseClasses =
     "relative flex h-20 w-20 items-center justify-center rounded-full border-4 text-2xl font-bold shadow-sm transition"
 
   const statusClasses: Record<PhaseStatus, string> = {
     completed:
-      "border-[#79c6a1] bg-[#79c6a1] text-white",
+      "border-[#79c6a1] bg-[#79c6a1] text-white hover:scale-105",
     current:
       "border-[#4a8fd3] bg-white text-[#4a8fd3] hover:scale-105",
     unlocked:

@@ -3,9 +3,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from students.models import Student
-from activities.models import Phase
+from activities.models import Phase, Content, Level
 from .models import StudentPhaseProgress, StudentAnswer, StudentPhaseSession
-from .serializers import (PhaseProgressDetailSerializer, PhaseResultSerializer, PhaseSessionSerializer, )
+from .serializers import (
+    PhaseProgressDetailSerializer,
+    PhaseResultSerializer,
+    PhaseSessionSerializer,
+    PhaseMapItemSerializer,
+)
 
 
 class PhaseProgressDetailView(APIView):
@@ -263,3 +268,93 @@ class StartPhaseSessionView(APIView):
 
         serializer = PhaseSessionSerializer(data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class PhaseMapStatusView(APIView):
+    def get(self, request):
+        student_id = request.query_params.get('student_id')
+        content_slug = request.query_params.get('content')
+        level_code = request.query_params.get('level')
+
+        if not student_id:
+            return Response(
+                {'detail': 'student_id é obrigatório.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not content_slug or not level_code:
+            return Response(
+                {'detail': 'content e level são obrigatórios.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            student = Student.objects.get(pk=student_id)
+        except Student.DoesNotExist:
+            return Response(
+                {'detail': 'Aluno não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+            content = Content.objects.get(slug=content_slug)
+        except Content.DoesNotExist:
+            return Response(
+                {'detail': 'Conteúdo não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+            level = Level.objects.get(code=level_code)
+        except Level.DoesNotExist:
+            return Response(
+                {'detail': 'Nível não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        phases = Phase.objects.filter(
+            content=content,
+            level=level,
+            is_active=True
+        ).order_by('phase_number')
+
+        result = []
+
+        for phase in phases:
+            phase_progress = StudentPhaseProgress.objects.filter(
+                student=student,
+                phase=phase
+            ).first()
+
+            result.append({
+                'phase_id': phase.id,
+                'phase_number': phase.phase_number,
+                'is_active': phase.is_active,
+                'is_unlocked': self._is_phase_unlocked(student, phase),
+                'is_completed': phase_progress.completed if phase_progress else False,
+                'score': phase_progress.score if phase_progress else 0,
+                'total_questions': phase.questions.count(),
+            })
+
+        serializer = PhaseMapItemSerializer(result, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def _is_phase_unlocked(self, student, phase):
+        if phase.phase_number == 1:
+            return True
+
+        previous_phase = Phase.objects.filter(
+            content=phase.content,
+            level=phase.level,
+            phase_number=phase.phase_number - 1,
+            is_active=True
+        ).first()
+
+        if not previous_phase:
+            return False
+
+        return StudentPhaseProgress.objects.filter(
+            student=student,
+            phase=previous_phase,
+            completed=True
+        ).exists()

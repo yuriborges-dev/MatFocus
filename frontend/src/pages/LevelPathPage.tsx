@@ -4,33 +4,38 @@ import AppLayout from "../layouts/AppLayout"
 import PhaseNode from "../components/PhaseNode"
 import { api } from "../services/api"
 
-type Phase = {
-  id: number
+type PhaseMapItem = {
+  phase_id: number
   phase_number: number
   is_active: boolean
-  content: number
-  level: number
-  content_name: string
-  level_code: string
-  level_title: string
+  is_unlocked: boolean
+  is_completed: boolean
+  score: number
+  total_questions: number
 }
 
 function LevelPathPage() {
   const navigate = useNavigate()
   const { conteudo, nivel } = useParams()
 
-  const [phases, setPhases] = useState<Phase[]>([])
+  const [phases, setPhases] = useState<PhaseMapItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+
+  const studentId = 1
 
   useEffect(() => {
     const fetchPhases = async () => {
       try {
+        setLoading(true)
+
         const response = await api.get(
-          `/activities/phases/?content=${conteudo}&level=${nivel}`
+          `/progress/phase-map/?student_id=${studentId}&content=${conteudo}&level=${nivel}`
         )
+
         setPhases(response.data)
-      } catch {
+      } catch (err) {
+        console.error(err)
         setError("Não foi possível carregar as fases.")
       } finally {
         setLoading(false)
@@ -40,16 +45,24 @@ function LevelPathPage() {
     fetchPhases()
   }, [conteudo, nivel])
 
-  const progressPercent = useMemo(() => {
-    if (!phases.length) return 0
-    return Math.round((1 / phases.length) * 100)
-  }, [phases])
+  const completedPhases = useMemo(
+    () => phases.filter((p) => p.is_completed).length,
+    [phases]
+  )
 
-  const completedPhases = 0
   const totalPhases = phases.length
 
-  const handlePhaseClick = (phaseNumber: number) => {
-    navigate(`/atividades/${conteudo}/${nivel}/fase/${phaseNumber}`)
+  const progressPercent = useMemo(() => {
+    if (!totalPhases) return 0
+    return Math.round((completedPhases / totalPhases) * 100)
+  }, [completedPhases, totalPhases])
+
+  const handlePhaseClick = (phase: PhaseMapItem) => {
+    if (!phase.is_unlocked) return
+
+    navigate(
+      `/atividades/${conteudo}/${nivel}/fase/${phase.phase_number}`
+    )
   }
 
   const getOffsetClass = (index: number) => {
@@ -83,6 +96,12 @@ function LevelPathPage() {
     )
   }
 
+  const getPhaseStatus = (phase: PhaseMapItem) => {
+    if (phase.is_completed) return "completed"
+    if (phase.is_unlocked) return "current"
+    return "locked"
+  }
+
   return (
     <AppLayout>
       <div>
@@ -95,10 +114,10 @@ function LevelPathPage() {
         </button>
 
         <h1 className="text-[2.5rem] font-extrabold text-slate-900">
-          {phases[0]?.content_name || "Conteúdo"}
+          {conteudo}
         </h1>
         <p className="mt-1 text-[1.1rem] text-slate-400">
-          {phases[0]?.level_title || "Nível"}
+          {nivel}
         </p>
       </div>
 
@@ -146,18 +165,17 @@ function LevelPathPage() {
 
               <div className="relative z-10 flex flex-col items-center gap-[70px]">
                 {phases.map((phase, index) => {
-                  const status =
-                    index === 0 ? "current" : phase.is_active ? "locked" : "locked"
+                  const status = getPhaseStatus(phase)
 
                   return (
                     <div
-                      key={phase.id}
+                      key={phase.phase_id}
                       className={`transform ${getOffsetClass(index)}`}
                     >
                       <PhaseNode
                         number={phase.phase_number}
                         status={status}
-                        onClick={() => handlePhaseClick(phase.phase_number)}
+                        onClick={() => handlePhaseClick(phase)}
                       />
                     </div>
                   )
@@ -166,12 +184,6 @@ function LevelPathPage() {
             </div>
           </div>
         </>
-      )}
-
-      {!loading && !error && phases.length === 0 && (
-        <div className="mt-8 rounded-[1.8rem] bg-white px-7 py-8 text-slate-500 shadow-sm">
-          Nenhuma fase encontrada para este conteúdo e nível.
-        </div>
       )}
     </AppLayout>
   )

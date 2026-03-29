@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-
 class PhaseProgressDetailSerializer(serializers.Serializer):
     student_id = serializers.IntegerField()
     phase_id = serializers.IntegerField()
@@ -44,3 +43,13 @@ class PhaseSessionSerializer(serializers.Serializer):
     is_finished = serializers.BooleanField()
     started_at = serializers.DateTimeField()
     finished_at = serializers.DateTimeField(allow_null=True)
+
+
+class PhaseMapItemSerializer(serializers.Serializer):
+    phase_id = serializers.IntegerField()
+    phase_number = serializers.IntegerField()
+    is_active = serializers.BooleanField()
+    is_unlocked = serializers.BooleanField()
+    is_completed = serializers.BooleanField()
+    score = serializers.IntegerField()
+    total_questions = serializers.IntegerField()
