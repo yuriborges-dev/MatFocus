@@ -17,15 +17,38 @@ class StudentPhaseProgress(models.Model):
         unique_together = ('student', 'phase')
 
     def __str__(self):
-        return f'{self.student.full_name} - {self.phase}'
+        return f'{self.student} - {self.phase}'
+
+
+class StudentPhaseSession(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='phase_sessions')
+    phase = models.ForeignKey(Phase, on_delete=models.CASCADE, related_name='sessions')
+    correct_answers = models.PositiveIntegerField(default=0)
+    wrong_answers = models.PositiveIntegerField(default=0)
+    started_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    is_finished = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-started_at']
+
+    def __str__(self):
+        return f'{self.student} - {self.phase} - Sessão {self.id}'
 
 
 class StudentAnswer(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='answers')
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='student_answers')
+    session = models.ForeignKey(
+        StudentPhaseSession,
+        on_delete=models.CASCADE,
+        related_name='answers',
+        null=True,
+        blank=True
+    )
     answer_given = models.CharField(max_length=100)
     is_correct = models.BooleanField(default=False)
     answered_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.student.full_name} - Questão {self.question.id}'
+        return f'{self.student} - Questão {self.question.id}'

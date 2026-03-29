@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import { getPhaseResult } from "../services/progress"
 
@@ -68,6 +68,8 @@ function formatAverageTime(seconds: number) {
 function ActivityResultPage() {
   const navigate = useNavigate()
   const { conteudo, nivel, phaseId } = useParams()
+  const [searchParams] = useSearchParams()
+  const sessionId = searchParams.get("session_id")
 
   const [result, setResult] = useState<PhaseResult | null>(null)
   const [loading, setLoading] = useState(true)
@@ -87,7 +89,11 @@ function ActivityResultPage() {
         setLoading(true)
         setError("")
 
-        const data = await getPhaseResult(phaseId, studentId)
+        const data = await getPhaseResult(
+          phaseId,
+          studentId,
+          sessionId || undefined
+        )
         setResult(data)
       } catch (err) {
         console.error("Erro ao carregar resultado da fase:", err)
@@ -98,7 +104,7 @@ function ActivityResultPage() {
     }
 
     loadResult()
-  }, [phaseId])
+  }, [phaseId, sessionId])
 
   const contentTitle =
     result?.content_title || contentTitles[conteudo || ""] || "Conteúdo"
@@ -109,7 +115,6 @@ function ActivityResultPage() {
   const totalScore = result?.score ?? 0
   const correctAnswers = result?.correct_answers ?? 0
   const wrongAnswers = result?.wrong_answers ?? 0
-  const totalQuestions = result?.total_questions ?? 0
   const accuracy = result?.accuracy ?? 0
   const averageTime = formatAverageTime(result?.average_time_seconds ?? 0)
 

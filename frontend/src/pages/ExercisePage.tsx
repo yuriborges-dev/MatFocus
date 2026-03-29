@@ -49,6 +49,7 @@ function ExercisePage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [sessionId, setSessionId] = useState<number | null>(null)
 
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answer, setAnswer] = useState("")
@@ -84,12 +85,24 @@ function ExercisePage() {
 
         setPhaseData(currentPhase)
 
+        const studentId = 1
+
+        const sessionResponse = await api.post(
+          `/progress/phases/${currentPhase.id}/start-session/`,
+          {
+            student_id: studentId,
+          }
+        )
+
+        setSessionId(sessionResponse.data.session_id)
+
         const questionsResponse = await api.get(
           `/activities/questions/?phase_id=${currentPhase.id}`
         )
 
         setQuestions(questionsResponse.data)
-      } catch {
+      } catch (err) {
+        console.error(err)
         setError("Não foi possível carregar a atividade.")
       } finally {
         setLoading(false)
@@ -135,6 +148,12 @@ function ExercisePage() {
 
     if (!currentQuestion || !phaseData) return
 
+    if (!sessionId) {
+      setFeedback("Sessão da atividade não iniciada.")
+      setFeedbackType("error")
+      return
+    }
+
     try {
       const studentId = 1
 
@@ -142,6 +161,7 @@ function ExercisePage() {
         `/activities/questions/${currentQuestion.id}/submit-answer/`,
         {
           student_id: studentId,
+          session_id: sessionId,
           answer: answer.trim(),
         }
       )
@@ -156,10 +176,8 @@ function ExercisePage() {
         setShowSuccessModal(true)
         setFeedback("")
         setFeedbackType("")
-
         setScore(data.score)
         setCorrectAnswers(data.correct_answers)
-
         return
       }
 
@@ -168,11 +186,9 @@ function ExercisePage() {
 
       setFeedback(randomErrorMessage)
       setFeedbackType("error")
-
       setWrongAnswers(data.wrong_answers)
     } catch (error) {
       console.error("Erro ao enviar resposta:", error)
-
       setFeedback("Erro ao validar resposta.")
       setFeedbackType("error")
     }
@@ -190,9 +206,11 @@ function ExercisePage() {
       return
     }
 
-    if (!phaseData) return
+    if (!phaseData || !sessionId) return
 
-    navigate(`/atividades/${conteudo}/${nivel}/fase/${phaseData.id}/resultado`)
+    navigate(
+      `/atividades/${conteudo}/${nivel}/fase/${phaseData.id}/resultado?session_id=${sessionId}`
+    )
   }
 
   const feedbackClasses = {

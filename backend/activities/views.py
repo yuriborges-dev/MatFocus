@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from students.models import Student
-from progress.models import StudentPhaseProgress, StudentAnswer
+from progress.models import StudentPhaseProgress, StudentAnswer, StudentPhaseSession
 
 from .models import Content, Level, Phase, Question
 from .serializers import (
@@ -72,6 +72,7 @@ class SubmitAnswerView(APIView):
         serializer.is_valid(raise_exception=True)
 
         student_id = serializer.validated_data['student_id']
+        session_id = serializer.validated_data['session_id']
         submitted_answer = serializer.validated_data['answer']
 
         try:
@@ -82,11 +83,43 @@ class SubmitAnswerView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        try:
+            session = StudentPhaseSession.objects.get(
+                pk=session_id,
+                student=student,
+                phase=question.phase
+            )
+        except StudentPhaseSession.DoesNotExist:
+            return Response(
+                {'detail': 'Sessão da fase não encontrada.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if session.is_finished:
+            return Response(
+                {'detail': 'Essa sessão já foi finalizada.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         correct = is_answer_correct(submitted_answer, question.correct_answer)
+
+        already_correct_in_session = StudentAnswer.objects.filter(
+            student=student,
+            question=question,
+            session=session,
+            is_correct=True
+        ).exists()
+
+        already_correct_in_phase = StudentAnswer.objects.filter(
+            student=student,
+            question=question,
+            is_correct=True
+        ).exists()
 
         StudentAnswer.objects.create(
             student=student,
             question=question,
+            session=session,
             answer_given=submitted_answer,
             is_correct=correct
         )
@@ -96,43 +129,62 @@ class SubmitAnswerView(APIView):
             phase=question.phase
         )
 
-        already_correct = StudentAnswer.objects.filter(
-            student=student,
-            question=question,
-            is_correct=True
-        ).exists()
+        earned_points = 0
+        counted_as_new_correct = False
 
-        if correct and not already_correct:
-            phase_progress.correct_answers += 1
-            phase_progress.score += 10
+        if correct and not already_correct_in_session:
+            session.correct_answers += 1
+            counted_as_new_correct = True
+
+            if not already_correct_in_phase:
+                phase_progress.score += 10
+                earned_points = 10
 
         elif not correct:
-            phase_progress.wrong_answers += 1
-            total_questions = question.phase.questions.count()
+            session.wrong_answers += 1
 
-        correct_question_ids = StudentAnswer.objects.filter(
+        correct_question_ids_in_session = StudentAnswer.objects.filter(
             student=student,
+            session=session,
             question__phase=question.phase,
             is_correct=True
         ).values_list('question_id', flat=True).distinct()
 
         total_questions = question.phase.questions.count()
 
-        if len(correct_question_ids) == total_questions and total_questions > 0:
-            phase_progress.completed = True
+        phase_completed_now = False
+
+        if len(correct_question_ids_in_session) == total_questions and total_questions > 0:
+            session.is_finished = True
+
+            if not session.finished_at:
+                from django.utils import timezone
+                session.finished_at = timezone.now()
+
+            phase_completed_now = True
+
+            if not phase_progress.completed:
+                phase_progress.completed = True
 
         phase_progress.save()
+        session.save()
 
         return Response({
             'question_id': question.id,
             'student_id': student.id,
             'phase_id': question.phase.id,
+            'session_id': session.id,
             'is_correct': correct,
             'feedback': 'Resposta correta! Muito bem.' if correct else 'Resposta incorreta. Tente novamente.',
             'correct_answer': None if correct else question.correct_answer,
             'tip': None if correct else question.tip,
             'phase_completed': phase_progress.completed,
+            'phase_completed_now': phase_completed_now,
+            'session_finished': session.is_finished,
             'score': phase_progress.score,
-            'correct_answers': phase_progress.correct_answers,
-            'wrong_answers': phase_progress.wrong_answers,
+            'correct_answers': session.correct_answers,
+            'wrong_answers': session.wrong_answers,
+            'already_correct_before': already_correct_in_session,
+            'counted_as_new_correct': counted_as_new_correct,
+            'earned_points': earned_points,
         }, status=status.HTTP_200_OK)

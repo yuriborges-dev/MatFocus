@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 
 from students.models import Student
 from activities.models import Phase
-from .models import StudentPhaseProgress, StudentAnswer
-from .serializers import PhaseProgressDetailSerializer, PhaseResultSerializer
+from .models import StudentPhaseProgress, StudentAnswer, StudentPhaseSession
+from .serializers import (PhaseProgressDetailSerializer, PhaseResultSerializer, PhaseSessionSerializer, )
 
 
 class PhaseProgressDetailView(APIView):
@@ -106,6 +106,7 @@ class PhaseProgressDetailView(APIView):
 class PhaseResultView(APIView):
     def get(self, request, phase_id):
         student_id = request.query_params.get('student_id')
+        session_id = request.query_params.get('session_id')
 
         if not student_id:
             return Response(
@@ -134,11 +135,29 @@ class PhaseResultView(APIView):
             phase=phase
         )
 
+        session = None
+
+        if session_id:
+            session = StudentPhaseSession.objects.filter(
+                pk=session_id,
+                student=student,
+                phase=phase
+            ).first()
+
+        if not session:
+            session = StudentPhaseSession.objects.filter(
+                student=student,
+                phase=phase
+            ).first()
+
+        session_correct_answers = session.correct_answers if session else 0
+        session_wrong_answers = session.wrong_answers if session else 0
+
         total_questions = phase.questions.count()
 
         accuracy = 0
         if total_questions > 0:
-            accuracy = round((phase_progress.correct_answers / total_questions) * 100)
+            accuracy = round((session_correct_answers / total_questions) * 100)
 
         next_phase = Phase.objects.filter(
             content=phase.content,
@@ -166,8 +185,8 @@ class PhaseResultView(APIView):
             'level_title': phase.level.title,
             'completed': phase_progress.completed,
             'score': phase_progress.score,
-            'correct_answers': phase_progress.correct_answers,
-            'wrong_answers': phase_progress.wrong_answers,
+            'correct_answers': session_correct_answers,
+            'wrong_answers': session_wrong_answers,
             'total_questions': total_questions,
             'accuracy': accuracy,
             'average_time_seconds': phase_progress.average_time_seconds,
@@ -198,3 +217,49 @@ class PhaseResultView(APIView):
             phase=previous_phase,
             completed=True
         ).exists()
+
+
+class StartPhaseSessionView(APIView):
+    def post(self, request, phase_id):
+        student_id = request.data.get('student_id')
+
+        if not student_id:
+            return Response(
+                {'detail': 'student_id é obrigatório.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            student = Student.objects.get(pk=student_id)
+        except Student.DoesNotExist:
+            return Response(
+                {'detail': 'Aluno não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+            phase = Phase.objects.get(pk=phase_id)
+        except Phase.DoesNotExist:
+            return Response(
+                {'detail': 'Fase não encontrada.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        session = StudentPhaseSession.objects.create(
+            student=student,
+            phase=phase
+        )
+
+        data = {
+            'session_id': session.id,
+            'student_id': student.id,
+            'phase_id': phase.id,
+            'correct_answers': session.correct_answers,
+            'wrong_answers': session.wrong_answers,
+            'is_finished': session.is_finished,
+            'started_at': session.started_at,
+            'finished_at': session.finished_at,
+        }
+
+        serializer = PhaseSessionSerializer(data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

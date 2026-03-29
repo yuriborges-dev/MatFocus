@@ -33,3 +33,14 @@ class PhaseResultSerializer(serializers.Serializer):
     next_phase_id = serializers.IntegerField(allow_null=True)
     next_phase_number = serializers.IntegerField(allow_null=True)
     next_phase_unlocked = serializers.BooleanField()
+
+
+class PhaseSessionSerializer(serializers.Serializer):
+    session_id = serializers.IntegerField()
+    student_id = serializers.IntegerField()
+    phase_id = serializers.IntegerField()
+    correct_answers = serializers.IntegerField()
+    wrong_answers = serializers.IntegerField()
+    is_finished = serializers.BooleanField()
+    started_at = serializers.DateTimeField()
+    finished_at = serializers.DateTimeField(allow_null=True)
