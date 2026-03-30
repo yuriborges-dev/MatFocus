@@ -58,6 +58,8 @@ function ExercisePage() {
   const [sessionId, setSessionId] = useState<number | null>(null)
   const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [pauseStartedAt, setPauseStartedAt] = useState<number | null>(null)
+  const [totalPausedSeconds, setTotalPausedSeconds] = useState(0)
 
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answer, setAnswer] = useState("")
@@ -122,19 +124,23 @@ function ExercisePage() {
   }, [conteudo, nivel, fase])
 
   useEffect(() => {
-    if (!sessionStartedAt) return
+    if (!sessionStartedAt || isPaused) return
 
     const updateTimer = () => {
+      if (!sessionStartedAt) return
+
       const start = new Date(sessionStartedAt).getTime()
       const now = Date.now()
-      setElapsedSeconds(Math.max(0, Math.floor((now - start) / 1000)))
+
+      const elapsed = Math.floor((now - start) / 1000) - totalPausedSeconds
+      setElapsedSeconds(Math.max(0, elapsed))
     }
 
     updateTimer()
     const interval = setInterval(updateTimer, 1000)
 
     return () => clearInterval(interval)
-  }, [sessionStartedAt])
+  }, [sessionStartedAt, totalPausedSeconds, isPaused])
 
   const currentQuestion = useMemo(
     () => questions[questionIndex],
@@ -146,10 +152,19 @@ function ExercisePage() {
     totalQuestions > 0 ? ((questionIndex + 1) / totalQuestions) * 100 : 0
 
   const handlePause = () => {
+    setPauseStartedAt(Date.now())
     setIsPaused(true)
   }
 
   const handleResume = () => {
+    if (pauseStartedAt) {
+      const pausedDuration =
+        Math.floor((Date.now() - pauseStartedAt) / 1000)
+
+      setTotalPausedSeconds(prev => prev + pausedDuration)
+    }
+
+    setPauseStartedAt(null)
     setIsPaused(false)
   }
 
