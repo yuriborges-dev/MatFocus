@@ -41,6 +41,12 @@ const errorMessages = [
   "Vamos com calma! Tente outra vez ✨",
 ]
 
+function formatTimer(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+}
+
 function ExercisePage() {
   const navigate = useNavigate()
   const { conteudo, nivel, fase } = useParams()
@@ -50,6 +56,8 @@ function ExercisePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [sessionId, setSessionId] = useState<number | null>(null)
+  const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null)
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
 
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answer, setAnswer] = useState("")
@@ -95,6 +103,7 @@ function ExercisePage() {
         )
 
         setSessionId(sessionResponse.data.session_id)
+        setSessionStartedAt(sessionResponse.data.started_at)
 
         const questionsResponse = await api.get(
           `/activities/questions/?phase_id=${currentPhase.id}`
@@ -111,6 +120,21 @@ function ExercisePage() {
 
     fetchExerciseData()
   }, [conteudo, nivel, fase])
+
+  useEffect(() => {
+    if (!sessionStartedAt) return
+
+    const updateTimer = () => {
+      const start = new Date(sessionStartedAt).getTime()
+      const now = Date.now()
+      setElapsedSeconds(Math.max(0, Math.floor((now - start) / 1000)))
+    }
+
+    updateTimer()
+    const interval = setInterval(updateTimer, 1000)
+
+    return () => clearInterval(interval)
+  }, [sessionStartedAt])
 
   const currentQuestion = useMemo(
     () => questions[questionIndex],
@@ -289,6 +313,9 @@ function ExercisePage() {
                 <p className="text-[1.1rem] text-slate-400">
                   {phaseData.level_title} • Fase {phaseData.phase_number} •
                   Questão {questionIndex + 1} de {totalQuestions}
+                </p>
+                <p className="mt-2 text-[1rem] font-semibold text-[#4a8fd3]">
+                  Tempo: {formatTimer(elapsedSeconds)}
                 </p>
               </div>
             </div>

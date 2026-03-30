@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -158,11 +159,18 @@ class PhaseResultView(APIView):
         session_correct_answers = session.correct_answers if session else 0
         session_wrong_answers = session.wrong_answers if session else 0
 
-        total_questions = phase.questions.count()
+        attempts_count = session_correct_answers + session_wrong_answers
 
         accuracy = 0
-        if total_questions > 0:
-            accuracy = round((session_correct_answers / total_questions) * 100)
+        if attempts_count > 0:
+            accuracy = round((session_correct_answers / attempts_count) * 100)
+
+        time_spent_seconds = 0
+        if session and session.started_at:
+            end_time = session.finished_at or timezone.now()
+            time_spent_seconds = max(0, int((end_time - session.started_at).total_seconds()))
+
+        total_questions = phase.questions.count()
 
         next_phase = Phase.objects.filter(
             content=phase.content,
@@ -194,7 +202,7 @@ class PhaseResultView(APIView):
             'wrong_answers': session_wrong_answers,
             'total_questions': total_questions,
             'accuracy': accuracy,
-            'average_time_seconds': phase_progress.average_time_seconds,
+            'time_spent_seconds': time_spent_seconds,
             'next_phase_id': next_phase_id,
             'next_phase_number': next_phase_number,
             'next_phase_unlocked': next_phase_unlocked,

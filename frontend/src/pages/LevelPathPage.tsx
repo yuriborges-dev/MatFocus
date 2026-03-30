@@ -60,9 +60,7 @@ function LevelPathPage() {
   const handlePhaseClick = (phase: PhaseMapItem) => {
     if (!phase.is_unlocked) return
 
-    navigate(
-      `/atividades/${conteudo}/${nivel}/fase/${phase.phase_number}`
-    )
+    navigate(`/atividades/${conteudo}/${nivel}/fase/${phase.phase_number}`)
   }
 
   const getOffsetClass = (index: number) => {
@@ -175,6 +173,7 @@ function LevelPathPage() {
                       <PhaseNode
                         number={phase.phase_number}
                         status={status}
+                        score={phase.score}
                         onClick={() => handlePhaseClick(phase)}
                       />
                     </div>
@@ -184,6 +183,12 @@ function LevelPathPage() {
             </div>
           </div>
         </>
+      )}
+
+      {!loading && !error && phases.length === 0 && (
+        <div className="mt-8 rounded-[1.8rem] bg-white px-7 py-8 text-slate-500 shadow-sm">
+          Nenhuma fase encontrada para este conteúdo e nível.
+        </div>
       )}
     </AppLayout>
   )

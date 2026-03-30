@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+
 class PhaseProgressDetailSerializer(serializers.Serializer):
     student_id = serializers.IntegerField()
     phase_id = serializers.IntegerField()
@@ -28,7 +29,7 @@ class PhaseResultSerializer(serializers.Serializer):
     wrong_answers = serializers.IntegerField()
     total_questions = serializers.IntegerField()
     accuracy = serializers.IntegerField()
-    average_time_seconds = serializers.IntegerField()
+    time_spent_seconds = serializers.IntegerField()
     next_phase_id = serializers.IntegerField(allow_null=True)
     next_phase_number = serializers.IntegerField(allow_null=True)
     next_phase_unlocked = serializers.BooleanField()

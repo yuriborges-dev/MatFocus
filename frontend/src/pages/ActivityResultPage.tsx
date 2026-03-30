@@ -40,7 +40,7 @@ type PhaseResult = {
   wrong_answers: number
   total_questions: number
   accuracy: number
-  average_time_seconds: number
+  time_spent_seconds: number
   next_phase_id: number | null
   next_phase_number: number | null
   next_phase_unlocked: boolean
@@ -116,7 +116,7 @@ function ActivityResultPage() {
   const correctAnswers = result?.correct_answers ?? 0
   const wrongAnswers = result?.wrong_answers ?? 0
   const accuracy = result?.accuracy ?? 0
-  const averageTime = formatAverageTime(result?.average_time_seconds ?? 0)
+  const totalTime = formatAverageTime(result?.time_spent_seconds ?? 0)
 
   const motivationalMessage = useMemo(() => {
     const index = (correctAnswers + wrongAnswers) % motivationalMessages.length
@@ -213,9 +213,9 @@ function ActivityResultPage() {
 
               <div className="col-span-2 rounded-[1.4rem] bg-[#f6efff] px-4 py-5">
                 <p className="text-[2rem] font-extrabold text-[#9b5cf6]">
-                  {averageTime}
+                  {totalTime}
                 </p>
-                <p className="mt-1 text-sm text-slate-400">Tempo médio</p>
+                <p className="mt-1 text-sm text-slate-400">Tempo total</p>
               </div>
             </div>
 

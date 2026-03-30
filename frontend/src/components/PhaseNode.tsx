@@ -3,10 +3,11 @@ type PhaseStatus = "completed" | "current" | "unlocked" | "locked"
 type PhaseNodeProps = {
   number: number
   status: PhaseStatus
+  score?: number
   onClick?: () => void
 }
 
-function PhaseNode({ number, status, onClick }: PhaseNodeProps) {
+function PhaseNode({ number, status, score = 0, onClick }: PhaseNodeProps) {
   const isClickable =
     status === "current" || status === "unlocked" || status === "completed"
 
@@ -25,20 +26,26 @@ function PhaseNode({ number, status, onClick }: PhaseNodeProps) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={isClickable ? onClick : undefined}
-      disabled={!isClickable}
-      className={`${baseClasses} ${statusClasses[status]} ${
-        isClickable ? "cursor-pointer" : "cursor-not-allowed"
-      }`}
-    >
-      {status === "locked" ? "🔒" : status === "completed" ? "✓" : number}
+    <div className="flex flex-col items-center gap-2">
+      <button
+        type="button"
+        onClick={isClickable ? onClick : undefined}
+        disabled={!isClickable}
+        className={`${baseClasses} ${statusClasses[status]} ${
+          isClickable ? "cursor-pointer" : "cursor-not-allowed"
+        }`}
+      >
+        {status === "locked" ? "🔒" : status === "completed" ? "✓" : number}
 
-      {status === "current" && (
-        <span className="absolute -right-1 -top-1 text-lg">⭐</span>
-      )}
-    </button>
+        {status === "current" && (
+          <span className="absolute -right-1 -top-1 text-lg">⭐</span>
+        )}
+      </button>
+
+      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm">
+        {score} pts
+      </span>
+    </div>
   )
 }
 
