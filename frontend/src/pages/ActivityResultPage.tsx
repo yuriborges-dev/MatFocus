@@ -236,11 +236,11 @@ function ActivityResultPage() {
                 🗺 Voltar ao mapa de fases
               </button>
 
-              {result.next_phase_id && result.next_phase_unlocked && (
+              {result.next_phase_number && result.next_phase_unlocked && (
                 <button
                   type="button"
                   onClick={() =>
-                    navigate(`/atividades/${conteudo}/${nivel}/fase/${result.next_phase_id}`)
+                    navigate(`/atividades/${conteudo}/${nivel}/fase/${result.next_phase_number}`)
                   }
                   className="rounded-[1.3rem] bg-[#79c6a1] px-6 py-4 text-xl font-bold text-white shadow-md transition hover:brightness-105"
                 >
