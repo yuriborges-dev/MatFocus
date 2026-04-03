@@ -36,6 +36,7 @@ export type PhaseMapItem = {
 export type DifficultyOptionWithProgress = DifficultyOption & {
   completedPhases: number
   unlocked: boolean
+  isCompleted: boolean
 }
 
 export async function getDifficultyOptions(
@@ -71,13 +72,14 @@ export async function getDifficultyOptionsWithProgress(
 ): Promise<DifficultyOptionWithProgress[]> {
   const baseLevels = await getDifficultyOptions(contentSlug)
 
-  const results = await Promise.all(
+  const levelsWithProgress = await Promise.all(
     baseLevels.map(async (level) => {
       if (!level.hasPhases) {
         return {
           ...level,
           completedPhases: 0,
           unlocked: false,
+          isCompleted: false,
         }
       }
 
@@ -92,22 +94,46 @@ export async function getDifficultyOptionsWithProgress(
 
         const phases = response.data
         const completedPhases = phases.filter((phase) => phase.is_completed).length
-        const unlocked = phases.some((phase) => phase.is_unlocked)
+        const isCompleted =
+          phases.length > 0 && completedPhases === phases.length
 
         return {
           ...level,
           completedPhases,
-          unlocked,
+          unlocked: false,
+          isCompleted,
         }
       } catch {
         return {
           ...level,
           completedPhases: 0,
           unlocked: false,
+          isCompleted: false,
         }
       }
     })
   )
 
-  return results
+  return levelsWithProgress.map((level, index, array) => {
+    if (!level.hasPhases) {
+      return {
+        ...level,
+        unlocked: false,
+      }
+    }
+
+    if (index === 0) {
+      return {
+        ...level,
+        unlocked: true,
+      }
+    }
+
+    const previousLevel = array[index - 1]
+
+    return {
+      ...level,
+      unlocked: previousLevel.isCompleted,
+    }
+  })
 }
