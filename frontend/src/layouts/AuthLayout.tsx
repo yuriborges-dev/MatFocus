@@ -4,8 +4,8 @@ type AuthLayoutProps = {
 
 function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-10">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-center">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-sky-50 to-emerald-50 px-4">
+      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-center">
         {children}
       </div>
     </div>
