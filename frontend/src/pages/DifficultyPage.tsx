@@ -22,19 +22,19 @@ const levelStyles: Record<
     lockedBadgeText: "text-slate-500",
   },
   "nivel-2": {
-    accent: "bg-green-300",
+    accent: "bg-green-400",
     activeBadge: "bg-green-400 text-white",
     lockedBadge: "bg-slate-200",
     lockedBadgeText: "text-slate-500",
   },
   "nivel-3": {
-    accent: "bg-yellow-300",
+    accent: "bg-yellow-400",
     activeBadge: "bg-yellow-400 text-white",
     lockedBadge: "bg-slate-200",
     lockedBadgeText: "text-slate-500",
   },
   "nivel-4": {
-    accent: "bg-purple-300",
+    accent: "bg-purple-400",
     activeBadge: "bg-purple-400 text-white",
     lockedBadge: "bg-slate-200",
     lockedBadgeText: "text-slate-500",
@@ -184,6 +184,12 @@ function DifficultyPage() {
                     {!isLocked && isCompleted && (
                       <p className="mt-1 text-sm font-semibold text-green-600">
                         Concluído
+                      </p>
+                    )}
+
+                    {!isLocked && !isCompleted && (
+                      <p className="mt-1 text-sm font-semibold text-blue-600">
+                        Atual
                       </p>
                     )}
                   </div>

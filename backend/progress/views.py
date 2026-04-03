@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
@@ -11,6 +12,7 @@ from .serializers import (
     PhaseResultSerializer,
     PhaseSessionSerializer,
     PhaseMapItemSerializer,
+    LevelProgressItemSerializer,
 )
 
 
@@ -366,3 +368,88 @@ class PhaseMapStatusView(APIView):
             phase=previous_phase,
             completed=True
         ).exists()
+
+
+class LevelProgressSummaryView(APIView):
+    def get(self, request):
+        student_id = request.query_params.get('student_id')
+        content_slug = request.query_params.get('content')
+
+        if not student_id:
+            return Response(
+                {'detail': 'student_id é obrigatório.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not content_slug:
+            return Response(
+                {'detail': 'content é obrigatório.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            student = Student.objects.get(pk=student_id)
+        except Student.DoesNotExist:
+            return Response(
+                {'detail': 'Aluno não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+            content = Content.objects.get(slug=content_slug)
+        except Content.DoesNotExist:
+            return Response(
+                {'detail': 'Conteúdo não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        levels = Level.objects.all().order_by('difficulty_order')
+
+        result = []
+        previous_level_completed = True
+
+        for index, level in enumerate(levels):
+            phases = Phase.objects.filter(
+                content=content,
+                level=level,
+                is_active=True
+            )
+
+            total_phases = phases.count()
+
+            completed_phases = StudentPhaseProgress.objects.filter(
+                student=student,
+                phase__in=phases,
+                completed=True
+            ).count()
+
+            total_score = StudentPhaseProgress.objects.filter(
+                student=student,
+                phase__in=phases
+            ).aggregate(total=Sum('score'))['total'] or 0
+
+            level_completed = total_phases > 0 and completed_phases == total_phases
+
+            if total_phases == 0:
+                unlocked = False
+            elif index == 0:
+                unlocked = True
+            else:
+                unlocked = previous_level_completed
+
+            result.append({
+                'level_id': level.id,
+                'level_code': level.code,
+                'level_title': level.title,
+                'difficulty_order': level.difficulty_order,
+                'total_phases': total_phases,
+                'completed_phases': completed_phases,
+                'total_score': total_score,
+                'unlocked': unlocked,
+                'completed': level_completed,
+            })
+
+            previous_level_completed = level_completed
+
+        serializer = LevelProgressItemSerializer(result, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

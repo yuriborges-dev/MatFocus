@@ -57,8 +57,16 @@ function LevelPathPage() {
     return Math.round((completedPhases / totalPhases) * 100)
   }, [completedPhases, totalPhases])
 
+  const currentPhaseId = useMemo(() => {
+    const currentPhase = phases.find(
+      (phase) => phase.is_unlocked && !phase.is_completed
+    )
+
+    return currentPhase?.phase_id ?? null
+  }, [phases])
+
   const handlePhaseClick = (phase: PhaseMapItem) => {
-    if (!phase.is_unlocked) return
+    if (phase.phase_id !== currentPhaseId && !phase.is_completed) return
 
     navigate(`/atividades/${conteudo}/${nivel}/fase/${phase.phase_number}`)
   }
@@ -96,7 +104,7 @@ function LevelPathPage() {
 
   const getPhaseStatus = (phase: PhaseMapItem) => {
     if (phase.is_completed) return "completed"
-    if (phase.is_unlocked) return "current"
+    if (phase.phase_id === currentPhaseId) return "current"
     return "locked"
   }
 

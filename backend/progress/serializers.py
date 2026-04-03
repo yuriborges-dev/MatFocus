@@ -54,3 +54,15 @@ class PhaseMapItemSerializer(serializers.Serializer):
     is_completed = serializers.BooleanField()
     score = serializers.IntegerField()
     total_questions = serializers.IntegerField()
+
+
+class LevelProgressItemSerializer(serializers.Serializer):
+    level_id = serializers.IntegerField()
+    level_code = serializers.CharField()
+    level_title = serializers.CharField()
+    difficulty_order = serializers.IntegerField()
+    total_phases = serializers.IntegerField()
+    completed_phases = serializers.IntegerField()
+    total_score = serializers.IntegerField()
+    unlocked = serializers.BooleanField()
+    completed = serializers.BooleanField()

@@ -33,10 +33,29 @@ export type PhaseMapItem = {
   total_questions: number
 }
 
-export type DifficultyOptionWithProgress = DifficultyOption & {
+export type LevelProgressSummaryItem = {
+  level_id: number
+  level_code: string
+  level_title: string
+  difficulty_order: number
+  total_phases: number
+  completed_phases: number
+  total_score: number
+  unlocked: boolean
+  completed: boolean
+}
+
+export type DifficultyOptionWithProgress = {
+  id: number
+  code: string
+  title: string
+  difficulty_order: number
+  totalPhases: number
+  hasPhases: boolean
   completedPhases: number
   unlocked: boolean
   isCompleted: boolean
+  totalScore: number
 }
 
 export async function getDifficultyOptions(
@@ -70,70 +89,26 @@ export async function getDifficultyOptionsWithProgress(
   contentSlug: string,
   studentId: number
 ): Promise<DifficultyOptionWithProgress[]> {
-  const baseLevels = await getDifficultyOptions(contentSlug)
-
-  const levelsWithProgress = await Promise.all(
-    baseLevels.map(async (level) => {
-      if (!level.hasPhases) {
-        return {
-          ...level,
-          completedPhases: 0,
-          unlocked: false,
-          isCompleted: false,
-        }
-      }
-
-      try {
-        const response = await api.get<PhaseMapItem[]>("/progress/phase-map/", {
-          params: {
-            student_id: studentId,
-            content: contentSlug,
-            level: level.code,
-          },
-        })
-
-        const phases = response.data
-        const completedPhases = phases.filter((phase) => phase.is_completed).length
-        const isCompleted =
-          phases.length > 0 && completedPhases === phases.length
-
-        return {
-          ...level,
-          completedPhases,
-          unlocked: false,
-          isCompleted,
-        }
-      } catch {
-        return {
-          ...level,
-          completedPhases: 0,
-          unlocked: false,
-          isCompleted: false,
-        }
-      }
-    })
+  const response = await api.get<LevelProgressSummaryItem[]>(
+    "/progress/level-progress/",
+    {
+      params: {
+        student_id: studentId,
+        content: contentSlug,
+      },
+    }
   )
 
-  return levelsWithProgress.map((level, index, array) => {
-    if (!level.hasPhases) {
-      return {
-        ...level,
-        unlocked: false,
-      }
-    }
-
-    if (index === 0) {
-      return {
-        ...level,
-        unlocked: true,
-      }
-    }
-
-    const previousLevel = array[index - 1]
-
-    return {
-      ...level,
-      unlocked: previousLevel.isCompleted,
-    }
-  })
+  return response.data.map((level) => ({
+    id: level.level_id,
+    code: level.level_code,
+    title: level.level_title,
+    difficulty_order: level.difficulty_order,
+    totalPhases: level.total_phases,
+    hasPhases: level.total_phases > 0,
+    completedPhases: level.completed_phases,
+    unlocked: level.unlocked,
+    isCompleted: level.completed,
+    totalScore: level.total_score,
+  }))
 }
