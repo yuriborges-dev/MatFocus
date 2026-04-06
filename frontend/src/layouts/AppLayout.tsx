@@ -1,4 +1,12 @@
 import { NavLink, useNavigate } from "react-router-dom"
+import {
+  BarChart3,
+  BookOpen,
+  Home,
+  LogOut,
+  Settings,
+  Star,
+} from "lucide-react"
 import logoMatFocus from "../assets/logo - matfocus.png"
 import UserProfileCard from "../components/UserProfileCard"
 
@@ -16,6 +24,11 @@ function AppLayout({ children }: AppLayoutProps) {
         : "text-slate-500 hover:bg-slate-50"
     }`
 
+  const secondaryItemClass =
+    "flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-400 transition hover:bg-slate-50"
+
+  const iconClass = "h-5 w-5 shrink-0"
+
   return (
     <div className="min-h-screen bg-[#f7f8fb]">
       <aside className="fixed left-0 top-0 flex h-screen w-[285px] flex-col border-r border-slate-200 bg-white px-8 py-6">
@@ -30,39 +43,36 @@ function AppLayout({ children }: AppLayoutProps) {
         <nav className="flex flex-1 flex-col justify-between overflow-y-auto">
           <div className="space-y-3">
             <NavLink to="/dashboard" className={navItemClass}>
-              <span>⌂</span>
-              Início
+              <Home className={iconClass} />
+              <span>Início</span>
             </NavLink>
 
             <NavLink to="/atividades" className={navItemClass}>
-              <span>📖</span>
-              Atividades
+              <BookOpen className={iconClass} />
+              <span>Atividades</span>
             </NavLink>
 
             <NavLink to="/progresso" className={navItemClass}>
-              <span>📊</span>
-              Progresso
+              <BarChart3 className={iconClass} />
+              <span>Progresso</span>
             </NavLink>
 
             <NavLink to="/avatar" className={navItemClass}>
-              <span>⭐</span>
-              Avatar
+              <Star className={iconClass} />
+              <span>Avatar</span>
             </NavLink>
           </div>
 
           <div className="mt-6 border-t border-slate-200 pt-4">
             <div className="space-y-3">
-              <button className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-400 transition hover:bg-slate-50">
-                <span>⚙</span>
-                Configurações
+              <button className={secondaryItemClass}>
+                <Settings className={iconClass} />
+                <span>Configurações</span>
               </button>
 
-              <button
-                onClick={() => navigate("/")}
-                className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-400 transition hover:bg-slate-50"
-              >
-                <span>↪</span>
-                Sair
+              <button onClick={() => navigate("/")} className= "flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-400 transition hover:bg-red-50 hover:text-red-500 active:bg-red-100">
+                <LogOut className="h-5 w-5 shrink-0"/>
+                <span>Sair</span>
               </button>
             </div>
           </div>
