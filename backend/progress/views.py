@@ -3,6 +3,8 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from datetime import timedelta
+from django.db.models import Count
 
 from students.models import Student
 from activities.models import Phase, Content, Level
@@ -453,3 +455,112 @@ class LevelProgressSummaryView(APIView):
 
         serializer = LevelProgressItemSerializer(result, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class ProgressSummaryView(APIView):
+    def get(self, request):
+        student_id = request.query_params.get("student_id")
+        period = request.query_params.get("period", "all")
+
+        if not student_id:
+            return Response(
+                {"detail": "student_id é obrigatório."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            student = Student.objects.get(pk=student_id)
+        except Student.DoesNotExist:
+            return Response(
+                {"detail": "Aluno não encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        now = timezone.now()
+
+        if period == "7d":
+            start_date = now - timedelta(days=7)
+        elif period == "14d":
+            start_date = now - timedelta(days=14)
+        elif period == "30d":
+            start_date = now - timedelta(days=30)
+        else:
+            start_date = None
+
+        answers = StudentAnswer.objects.filter(student=student)
+
+        if start_date:
+            answers = answers.filter(answered_at__gte=start_date)
+
+        correct_answers = answers.filter(is_correct=True).count()
+        wrong_answers = answers.filter(is_correct=False).count()
+
+        total_answers = correct_answers + wrong_answers
+
+        accuracy = (
+            round((correct_answers / total_answers) * 100)
+            if total_answers > 0 else 0
+        )
+
+        activities = StudentPhaseSession.objects.filter(
+            student=student,
+            is_finished=True
+        )
+
+        if start_date:
+            activities = activities.filter(started_at__gte=start_date)
+
+        total_activities = activities.count()
+
+        contents = Content.objects.all()
+
+        content_progress = []
+
+        for content in contents:
+            phases = Phase.objects.filter(content=content)
+
+            total_phases = phases.count()
+
+            completed = StudentPhaseProgress.objects.filter(
+                student=student,
+                phase__in=phases,
+                completed=True
+            ).count()
+
+            progress_percent = (
+                round((completed / total_phases) * 100)
+                if total_phases > 0 else 0
+            )
+
+            content_progress.append({
+                "content": content.name,
+                "progress": progress_percent
+            })
+
+        history_sessions = StudentPhaseSession.objects.filter(
+            student=student,
+            is_finished=True
+        ).select_related("phase__content", "phase__level")[:5]
+
+        history = []
+
+        for session in history_sessions:
+            total = session.correct_answers + session.wrong_answers
+
+            history.append({
+                "title": f"{session.phase.content.name} - {session.phase.level.title}",
+                "correct": session.correct_answers,
+                "total": total,
+                "seconds": (
+                    int((session.finished_at - session.started_at).total_seconds())
+                    if session.finished_at else 0
+                )
+            })
+
+        return Response({
+            "accuracy": accuracy,
+            "correct_answers": correct_answers,
+            "wrong_answers": wrong_answers,
+            "total_activities": total_activities,
+            "content_progress": content_progress,
+            "history": history
+        })
