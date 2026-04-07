@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { ArrowLeft, Lock } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import {
@@ -13,6 +14,7 @@ const levelStyles: Record<
     activeBadge: string
     lockedBadge: string
     lockedBadgeText: string
+    statusText: string
   }
 > = {
   "nivel-1": {
@@ -20,24 +22,28 @@ const levelStyles: Record<
     activeBadge: "bg-blue-500 text-white",
     lockedBadge: "bg-slate-200",
     lockedBadgeText: "text-slate-500",
+    statusText: "text-blue-600",
   },
   "nivel-2": {
     accent: "bg-green-400",
     activeBadge: "bg-green-400 text-white",
     lockedBadge: "bg-slate-200",
     lockedBadgeText: "text-slate-500",
+    statusText: "text-green-600",
   },
   "nivel-3": {
     accent: "bg-yellow-400",
     activeBadge: "bg-yellow-400 text-white",
     lockedBadge: "bg-slate-200",
     lockedBadgeText: "text-slate-500",
+    statusText: "text-yellow-600",
   },
   "nivel-4": {
     accent: "bg-purple-400",
     activeBadge: "bg-purple-400 text-white",
     lockedBadge: "bg-slate-200",
     lockedBadgeText: "text-slate-500",
+    statusText: "text-purple-600",
   },
 }
 
@@ -102,9 +108,10 @@ function DifficultyPage() {
         <button
           type="button"
           onClick={() => navigate("/atividades")}
-          className="mb-3 text-2xl text-slate-600 transition hover:text-slate-800"
+          className="mb-4 flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-white hover:text-slate-800"
+          aria-label="Voltar para conteúdos"
         >
-          ←
+          <ArrowLeft className="h-6 w-6" />
         </button>
 
         <h1 className="text-[2.5rem] font-extrabold text-slate-900">
@@ -136,6 +143,7 @@ function DifficultyPage() {
               activeBadge: "bg-slate-500 text-white",
               lockedBadge: "bg-slate-200",
               lockedBadgeText: "text-slate-500",
+              statusText: "text-slate-600",
             }
 
             const isLocked = !level.unlocked
@@ -151,7 +159,7 @@ function DifficultyPage() {
                   if (isLocked) return
                   navigate(`/atividades/${conteudo}/${level.code}`)
                 }}
-                className={`relative overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white px-6 py-6 text-left shadow-sm transition ${
+                className={`relative min-h-[168px] overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white px-6 py-6 text-left shadow-sm transition ${
                   isLocked
                     ? "cursor-not-allowed opacity-70"
                     : "hover:-translate-y-0.5 hover:shadow-md"
@@ -161,37 +169,45 @@ function DifficultyPage() {
 
                 <div className="mt-4 flex items-center gap-4">
                   <div
-                    className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.1rem] text-xl font-extrabold ${
+                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.1rem] ${
                       isLocked
                         ? `${styles.lockedBadge} ${styles.lockedBadgeText}`
                         : styles.activeBadge
                     }`}
                   >
-                    {isLocked ? "🔒" : level.difficulty_order}
+                    {isLocked ? (
+                      <Lock className="h-7 w-7" />
+                    ) : (
+                      <span className="text-2xl font-extrabold leading-none">
+                        {level.difficulty_order}
+                      </span>
+                    )}
                   </div>
 
-                  <div className="min-w-0">
+                  <div className="flex min-h-[92px] min-w-0 flex-col justify-center">
                     <h3 className="text-[1.8rem] font-bold leading-none text-slate-800">
                       {level.title}
                     </h3>
 
-                    <p className="mt-2 text-[1rem] text-slate-400">
+                    <p className="mt-3 text-[1rem] text-slate-400">
                       {isLocked
                         ? "Bloqueado"
                         : `${level.completedPhases}/${level.totalPhases} fases • ${getDifficultyLabel(level.difficulty_order)}`}
                     </p>
 
-                    {!isLocked && isCompleted && (
-                      <p className="mt-1 text-sm font-semibold text-green-600">
-                        Concluído
-                      </p>
-                    )}
+                    <div className="mt-2 min-h-[20px]">
+                      {!isLocked && isCompleted && (
+                        <p className="text-sm font-semibold text-green-600">
+                          Concluído
+                        </p>
+                      )}
 
-                    {!isLocked && !isCompleted && (
-                      <p className="mt-1 text-sm font-semibold text-blue-600">
-                        Atual
-                      </p>
-                    )}
+                      {!isLocked && !isCompleted && (
+                        <p className={`text-sm font-semibold ${styles.statusText}`}>
+                          Atual
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </button>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import AppLayout from "../layouts/AppLayout"
 import ActivityCard from "../components/ActivityCard"
 import { api } from "../services/api"
@@ -51,6 +51,14 @@ const cardStyles: Record<
   },
 }
 
+const contentOrder = [
+  "adicao",
+  "subtracao",
+  "multiplicacao",
+  "divisao",
+  "problemas",
+]
+
 function ActivitiesPage() {
   const [contents, setContents] = useState<Content[]>([])
   const [loading, setLoading] = useState(true)
@@ -70,6 +78,18 @@ function ActivitiesPage() {
 
     fetchContents()
   }, [])
+
+  const orderedContents = useMemo(() => {
+    return [...contents].sort((a, b) => {
+      const indexA = contentOrder.indexOf(a.slug)
+      const indexB = contentOrder.indexOf(b.slug)
+
+      const safeIndexA = indexA === -1 ? Number.MAX_SAFE_INTEGER : indexA
+      const safeIndexB = indexB === -1 ? Number.MAX_SAFE_INTEGER : indexB
+
+      return safeIndexA - safeIndexB
+    })
+  }, [contents])
 
   return (
     <AppLayout>
@@ -96,7 +116,7 @@ function ActivitiesPage() {
 
       {!loading && !error && (
         <div className="mt-8 grid gap-6 md:grid-cols-2">
-          {contents.map((content) => {
+          {orderedContents.map((content) => {
             const style = cardStyles[content.slug] || {
               icon: "•",
               borderColor: "border-slate-300",

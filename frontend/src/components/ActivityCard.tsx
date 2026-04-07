@@ -22,30 +22,29 @@ function ActivityCard({
   const navigate = useNavigate()
 
   return (
-    <div
-      className={`flex items-center justify-between rounded-[1.8rem] border-2 ${borderColor} bg-white px-7 py-6 transition hover:shadow-md`}
+    <button
+      onClick={() => navigate(path)}
+      className={`flex w-full items-center justify-between rounded-[2rem] border-2 ${borderColor} bg-white px-8 py-7 text-left transition hover:-translate-y-0.5 hover:shadow-md`}
     >
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-6">
         <div
-          className={`flex h-14 w-14 items-center justify-center rounded-2xl ${bgColor} text-2xl`}
+          className={`flex h-[72px] w-[72px] items-center justify-center rounded-[1.4rem] ${bgColor} ${textColor}`}
         >
-          {icon}
+          <span className="text-[2rem] font-bold leading-none">{icon}</span>
         </div>
 
         <div>
-          <h3 className="text-[1.3rem] font-bold text-slate-800">{title}</h3>
-          <p className="text-[1rem] text-slate-400">{description}</p>
+          <h3 className="text-[1.05rem] font-extrabold text-slate-900 md:text-[1.1rem]">
+            {title}
+          </h3>
+          <p className="mt-1 text-[1rem] text-slate-400">{description}</p>
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => navigate(path)}
-        className={`text-[1.1rem] font-bold ${textColor}`}
-      >
+      <span className={`text-[1rem] font-bold ${textColor} md:text-[1.1rem]`}>
         Iniciar
-      </button>
-    </div>
+      </span>
+    </button>
   )
 }
 
