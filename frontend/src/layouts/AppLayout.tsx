@@ -12,9 +12,13 @@ import UserProfileCard from "../components/UserProfileCard"
 
 type AppLayoutProps = {
   children: React.ReactNode
+  showProfileCard?: boolean
 }
 
-function AppLayout({ children }: AppLayoutProps) {
+function AppLayout({
+  children,
+  showProfileCard = true,
+}: AppLayoutProps) {
   const navigate = useNavigate()
 
   const navItemClass = ({ isActive }: { isActive: boolean }) =>
@@ -70,8 +74,11 @@ function AppLayout({ children }: AppLayoutProps) {
                 <span>Configurações</span>
               </button>
 
-              <button onClick={() => navigate("/")} className= "flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-400 transition hover:bg-red-50 hover:text-red-500 active:bg-red-100">
-                <LogOut className="h-5 w-5 shrink-0"/>
+              <button
+                onClick={() => navigate("/")}
+                className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-400 transition hover:bg-red-50 hover:text-red-500 active:bg-red-100"
+              >
+                <LogOut className="h-5 w-5 shrink-0" />
                 <span>Sair</span>
               </button>
             </div>
@@ -80,9 +87,11 @@ function AppLayout({ children }: AppLayoutProps) {
       </aside>
 
       <div className="ml-[285px] flex min-h-screen flex-1 flex-col">
-        <header className="flex justify-end px-9 pb-2 pt-7">
-          <UserProfileCard />
-        </header>
+        {showProfileCard && (
+          <header className="flex justify-end px-9 pb-2 pt-7">
+            <UserProfileCard />
+          </header>
+        )}
 
         <main className="flex-1 px-9 pb-8 pt-2">{children}</main>
       </div>

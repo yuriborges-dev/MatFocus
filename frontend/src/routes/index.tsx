@@ -8,6 +8,8 @@ import DifficultyPage from "../pages/DifficultyPage"
 import LevelPathPage from "../pages/LevelPathPage"
 import ExercisePage from "../pages/ExercisePage"
 import ActivityResultPage from "../pages/ActivityResultPage"
+import ProfilePage from "../pages/ProfilePage"
+import SettingsPage from "../pages/SettingsPage"
 
 function AppRoutes() {
   return (
@@ -22,6 +24,8 @@ function AppRoutes() {
         <Route path="/atividades/:conteudo/:nivel/fase/:fase" element={<ExercisePage />}/>
         <Route path="/atividades/:conteudo/:nivel/fase/:phaseId/resultado" element={<ActivityResultPage />}/>
         <Route path="/progresso" element={<ProgressPage />} />
+        <Route path="/perfil" element={<ProfilePage />} />
+        <Route path="/configuracoes" element={<SettingsPage />} />
       </Routes>
     </BrowserRouter>
   )
