@@ -66,23 +66,6 @@ function AppLayout({
               <span>Avatar</span>
             </NavLink>
           </div>
-
-          <div className="mt-6 border-t border-slate-200 pt-4">
-            <div className="space-y-3">
-              <button className={secondaryItemClass}>
-                <Settings className={iconClass} />
-                <span>Configurações</span>
-              </button>
-
-              <button
-                onClick={() => navigate("/")}
-                className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-400 transition hover:bg-red-50 hover:text-red-500 active:bg-red-100"
-              >
-                <LogOut className="h-5 w-5 shrink-0" />
-                <span>Sair</span>
-              </button>
-            </div>
-          </div>
         </nav>
       </aside>
 

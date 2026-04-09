@@ -564,3 +564,240 @@ class ProgressSummaryView(APIView):
             "content_progress": content_progress,
             "history": history
         })
+    
+class DashboardSummaryView(APIView):
+    CONTENT_ORDER = ["adicao", "subtracao", "multiplicacao", "divisao", "problemas"]
+
+    def get(self, request):
+        student_id = request.query_params.get("student_id")
+
+        if not student_id:
+            return Response(
+                {"detail": "student_id é obrigatório"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        student = Student.objects.get(pk=student_id)
+
+        answers = StudentAnswer.objects.filter(student=student)
+
+        correct_answers = answers.filter(is_correct=True).count()
+        wrong_answers = answers.filter(is_correct=False).count()
+
+        total_answers = correct_answers + wrong_answers
+
+        accuracy = (
+            round((correct_answers / total_answers) * 100)
+            if total_answers > 0 else 0
+        )
+
+        activities = StudentPhaseSession.objects.filter(
+            student=student,
+            is_finished=True
+        )
+
+        total_activities = activities.count()
+
+        points = StudentPhaseProgress.objects.filter(
+            student=student
+        ).aggregate(
+            total=Sum("score")
+        )["total"] or 0
+
+        continue_section = self._get_next_playable_target(student)
+
+        contents = Content.objects.all()
+
+        content_progress = []
+
+        for content in contents:
+            phases = Phase.objects.filter(content=content)
+
+            total_phases = phases.count()
+
+            completed = StudentPhaseProgress.objects.filter(
+                student=student,
+                phase__in=phases,
+                completed=True
+            ).count()
+
+            percent = (
+                round((completed / total_phases) * 100)
+                if total_phases else 0
+            )
+
+            content_progress.append({
+                "content": content.name,
+                "progress": percent
+            })
+
+        recent_sessions = activities[:3]
+
+        recent_activities = []
+
+        for session in recent_sessions:
+            total = session.correct_answers + session.wrong_answers
+
+            recent_activities.append({
+                "title": session.phase.content.name,
+                "detail": f"{session.phase.level.title} • {session.correct_answers}/{total} acertos",
+                "points": f"+{session.correct_answers * 10} pts"
+            })
+
+        return Response({
+            "student_name": student.full_name,
+            "accuracy": accuracy,
+            "points": points,
+            "activities": total_activities,
+            "continue_section": continue_section,
+            "content_progress": content_progress,
+            "recent_activities": recent_activities
+        })
+
+    def _get_next_playable_target(self, student):
+        last_completed_progress = StudentPhaseProgress.objects.filter(
+            student=student,
+            completed=True
+        ).select_related(
+            "phase__content",
+            "phase__level"
+        ).order_by("-updated_at").first()
+
+        if not last_completed_progress:
+            first_content = Content.objects.filter(slug=self.CONTENT_ORDER[0]).first()
+            first_level = Level.objects.filter(code="nivel-1").first()
+
+            if first_content and first_level:
+                return {
+                    "content": first_content.name,
+                    "content_slug": first_content.slug,
+                    "level": first_level.title,
+                    "level_code": first_level.code,
+                    "phase": 1,
+                }
+
+            return {
+                "content": None,
+                "content_slug": None,
+                "level": None,
+                "level_code": None,
+                "phase": None,
+            }
+
+        current_phase = last_completed_progress.phase
+        current_content = current_phase.content
+        current_level = current_phase.level
+
+        next_phase_same_level = Phase.objects.filter(
+            content=current_content,
+            level=current_level,
+            phase_number=current_phase.phase_number + 1,
+            is_active=True
+        ).first()
+
+        if next_phase_same_level:
+            return {
+                "content": current_content.name,
+                "content_slug": current_content.slug,
+                "level": current_level.title,
+                "level_code": current_level.code,
+                "phase": next_phase_same_level.phase_number,
+            }
+
+        next_level = Level.objects.filter(
+            difficulty_order=current_level.difficulty_order + 1
+        ).first()
+
+        if next_level:
+            first_phase_next_level = Phase.objects.filter(
+                content=current_content,
+                level=next_level,
+                phase_number=1,
+                is_active=True
+            ).first()
+
+            if first_phase_next_level:
+                first_uncompleted_phase = self._get_first_uncompleted_phase(
+                    student,
+                    current_content,
+                    next_level
+                )
+
+                target_phase = first_uncompleted_phase or first_phase_next_level
+
+                return {
+                    "content": current_content.name,
+                    "content_slug": current_content.slug,
+                    "level": next_level.title,
+                    "level_code": next_level.code,
+                    "phase": target_phase.phase_number,
+                }
+
+        next_content = self._get_next_content(current_content.slug)
+
+        if next_content:
+            first_level = Level.objects.filter(code="nivel-1").first()
+
+            if first_level:
+                first_phase = Phase.objects.filter(
+                    content=next_content,
+                    level=first_level,
+                    phase_number=1,
+                    is_active=True
+                ).first()
+
+                if first_phase:
+                    first_uncompleted_phase = self._get_first_uncompleted_phase(
+                        student,
+                        next_content,
+                        first_level
+                    )
+
+                    target_phase = first_uncompleted_phase or first_phase
+
+                    return {
+                        "content": next_content.name,
+                        "content_slug": next_content.slug,
+                        "level": first_level.title,
+                        "level_code": first_level.code,
+                        "phase": target_phase.phase_number,
+                    }
+
+        return {
+            "content": current_content.name,
+            "content_slug": current_content.slug,
+            "level": current_level.title,
+            "level_code": current_level.code,
+            "phase": current_phase.phase_number,
+        }
+
+    def _get_first_uncompleted_phase(self, student, content, level):
+        phases = Phase.objects.filter(
+            content=content,
+            level=level,
+            is_active=True
+        ).order_by("phase_number")
+
+        for phase in phases:
+            completed = StudentPhaseProgress.objects.filter(
+                student=student,
+                phase=phase,
+                completed=True
+            ).exists()
+
+            if not completed:
+                return phase
+
+        return None
+
+    def _get_next_content(self, current_slug):
+        try:
+            current_index = self.CONTENT_ORDER.index(current_slug)
+        except ValueError:
+            return None
+
+        if current_index + 1 >= len(self.CONTENT_ORDER):
+            return None
+
+        next_slug = self.CONTENT_ORDER[current_index + 1]
+        return Content.objects.filter(slug=next_slug).first()

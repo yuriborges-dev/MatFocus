@@ -47,3 +47,36 @@ export async function getProgressSummary(
 
   return response.data
 }
+
+export type DashboardSummaryResponse = {
+  student_name: string
+  accuracy: number
+  points: number
+  activities: number
+  continue_section: {
+    content: string | null
+    content_slug: string | null
+    level: string | null
+    level_code: string | null
+    phase: number | null
+  }
+  content_progress: {
+    content: string
+    progress: number
+  }[]
+  recent_activities: {
+    title: string
+    detail: string
+    points: string
+  }[]
+}
+
+export async function getDashboardSummary(studentId: number | string) {
+  const response = await api.get<DashboardSummaryResponse>("/progress/dashboard/", {
+    params: {
+      student_id: studentId,
+    },
+  })
+
+  return response.data
+}

@@ -66,3 +66,32 @@ class LevelProgressItemSerializer(serializers.Serializer):
     total_score = serializers.IntegerField()
     unlocked = serializers.BooleanField()
     completed = serializers.BooleanField()
+
+
+class DashboardContinueSectionSerializer(serializers.Serializer):
+    content = serializers.CharField(allow_null=True)
+    content_slug = serializers.CharField(allow_null=True)
+    level = serializers.CharField(allow_null=True)
+    level_code = serializers.CharField(allow_null=True)
+    phase = serializers.IntegerField(allow_null=True)
+
+
+class DashboardContentProgressSerializer(serializers.Serializer):
+    content = serializers.CharField()
+    progress = serializers.IntegerField()
+
+
+class DashboardRecentActivitySerializer(serializers.Serializer):
+    title = serializers.CharField()
+    detail = serializers.CharField()
+    points = serializers.CharField()
+
+
+class DashboardSummarySerializer(serializers.Serializer):
+    student_name = serializers.CharField()
+    accuracy = serializers.IntegerField()
+    points = serializers.IntegerField()
+    activities = serializers.IntegerField()
+    continue_section = DashboardContinueSectionSerializer()
+    content_progress = DashboardContentProgressSerializer(many=True)
+    recent_activities = DashboardRecentActivitySerializer(many=True)
