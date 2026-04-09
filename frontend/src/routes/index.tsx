@@ -10,6 +10,7 @@ import ExercisePage from "../pages/ExercisePage"
 import ActivityResultPage from "../pages/ActivityResultPage"
 import ProfilePage from "../pages/ProfilePage"
 import SettingsPage from "../pages/SettingsPage"
+import AboutPage from "../pages/AboutPage"
 
 function AppRoutes() {
   return (
@@ -26,6 +27,7 @@ function AppRoutes() {
         <Route path="/progresso" element={<ProgressPage />} />
         <Route path="/perfil" element={<ProfilePage />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
+        <Route path="/sobre" element={<AboutPage />} />
       </Routes>
     </BrowserRouter>
   )

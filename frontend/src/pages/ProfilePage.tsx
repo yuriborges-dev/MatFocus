@@ -99,6 +99,7 @@ function ProfilePage() {
           <div className="rounded-[1.75rem] bg-white px-6 py-6 shadow-md">
             <button
               type="button"
+              onClick={() => navigate("/sobre")}
               className="flex w-full items-center text-left"
             >
               <div className="flex items-center gap-3">
