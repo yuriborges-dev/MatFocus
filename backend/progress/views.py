@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from datetime import timedelta
 from django.db.models import Count
+from .services.gemini_report_generator import generate_student_report
 
 from students.models import Student
 from activities.models import Phase, Content, Level
@@ -801,3 +802,37 @@ class DashboardSummaryView(APIView):
 
         next_slug = self.CONTENT_ORDER[current_index + 1]
         return Content.objects.filter(slug=next_slug).first()
+    
+class ProgressReportView(APIView):
+
+    def get(self, request):
+
+        student_id = request.query_params.get("student_id")
+        period = request.query_params.get("period", "7d")
+
+        student = Student.objects.get(pk=student_id)
+
+        summary_view = ProgressSummaryView()
+        summary_response = summary_view.get(request).data
+
+        content_progress = summary_response["content_progress"]
+
+        best_content = max(content_progress, key=lambda x: x["progress"])["content"]
+        worst_content = min(content_progress, key=lambda x: x["progress"])["content"]
+
+        report_data = {
+            "name": student.full_name,
+            "grade": student.school_grade,
+            "period": period.replace("d", " dias"),
+            "activities": summary_response["total_activities"],
+            "accuracy": summary_response["accuracy"],
+            "best_content": best_content,
+            "worst_content": worst_content,
+            "avg_time": 15
+        }
+
+        report_text = generate_student_report(report_data)
+
+        return Response({
+            "report": report_text
+        })

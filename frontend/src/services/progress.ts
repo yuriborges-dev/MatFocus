@@ -80,3 +80,23 @@ export async function getDashboardSummary(studentId: number | string) {
 
   return response.data
 }
+
+export type ProgressReportPeriod = "7d" | "14d" | "30d"
+
+export type ProgressReportResponse = {
+  report: string
+}
+
+export async function getProgressReport(
+  studentId: number | string,
+  period: ProgressReportPeriod
+) {
+  const response = await api.get<ProgressReportResponse>("/progress/report/", {
+    params: {
+      student_id: studentId,
+      period,
+    },
+  })
+
+  return response.data
+}

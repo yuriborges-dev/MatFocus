@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react"
 import AppLayout from "../layouts/AppLayout"
 import ProgressCircle from "../components/ProgressCircle"
-import { CheckCircle2, CircleX } from "lucide-react"
+import { CheckCircle2, CircleX, FileText } from "lucide-react"
 import {
   getProgressSummary,
+  getProgressReport,
   type ProgressPeriod,
   type ProgressSummaryResponse,
+  type ProgressReportPeriod,
 } from "../services/progress"
 
 const contentColors: Record<string, string> = {
@@ -51,6 +53,11 @@ function ProgressPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
+  const [reportPeriod, setReportPeriod] = useState<ProgressReportPeriod | null>(null)
+  const [reportText, setReportText] = useState("")
+  const [reportLoading, setReportLoading] = useState(false)
+  const [reportError, setReportError] = useState("")
+
   const studentId = 1
 
   useEffect(() => {
@@ -71,6 +78,23 @@ function ProgressPage() {
 
     loadProgress()
   }, [period])
+
+  async function handleGenerateReport(selectedPeriod: ProgressReportPeriod) {
+    try {
+      setReportPeriod(selectedPeriod)
+      setReportLoading(true)
+      setReportError("")
+
+      const data = await getProgressReport(studentId, selectedPeriod)
+      setReportText(data.report)
+    } catch (err) {
+      console.error("Erro ao gerar relatório:", err)
+      setReportError("Não foi possível gerar o relatório.")
+      setReportText("")
+    } finally {
+      setReportLoading(false)
+    }
+  }
 
   const totalCorrect = summary?.correct_answers ?? 0
   const totalWrong = summary?.wrong_answers ?? 0
@@ -276,6 +300,85 @@ function ProgressPage() {
                 <p className="text-[1.15rem] text-slate-400">
                   Nenhuma atividade realizada neste período.
                 </p>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-7 rounded-[2rem] border border-[#dceeed] bg-[#eef7f6] px-7 py-8 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#4a8fd3] shadow-sm">
+                <FileText className="h-5 w-5" />
+              </div>
+
+              <div>
+                <h2 className="text-[1.2rem] font-bold text-slate-800">
+                  Gerar relatório simplificado
+                </h2>
+                <p className="mt-2 text-[1rem] text-slate-500">
+                  Escolha o período para gerar um relatório para o responsável:
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <button
+                type="button"
+                onClick={() => handleGenerateReport("7d")}
+                className={`rounded-[1.1rem] border px-6 py-4 text-[1.05rem] font-semibold shadow-sm transition ${
+                  reportPeriod === "7d"
+                    ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
+                    : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                }`}
+              >
+                7 dias
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleGenerateReport("14d")}
+                className={`rounded-[1.1rem] border px-6 py-4 text-[1.05rem] font-semibold shadow-sm transition ${
+                  reportPeriod === "14d"
+                    ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
+                    : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                }`}
+              >
+                14 dias
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleGenerateReport("30d")}
+                className={`rounded-[1.1rem] border px-6 py-4 text-[1.05rem] font-semibold shadow-sm transition ${
+                  reportPeriod === "30d"
+                    ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
+                    : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                }`}
+              >
+                30 dias
+              </button>
+            </div>
+
+            {reportLoading && (
+              <div className="mt-6 rounded-[1.4rem] bg-white px-5 py-4 text-[1rem] text-slate-500 shadow-sm">
+                Gerando relatório...
+              </div>
+            )}
+
+            {reportError && (
+              <div className="mt-6 rounded-[1.4rem] border border-red-200 bg-red-50 px-5 py-4 text-[1rem] text-red-700 shadow-sm">
+                {reportError}
+              </div>
+            )}
+
+            {!reportLoading && reportText && (
+              <div className="mt-6 rounded-[1.6rem] bg-white px-6 py-6 shadow-sm">
+                <h3 className="text-[1.1rem] font-bold text-slate-800">
+                  Relatório gerado
+                </h3>
+
+                <div className="mt-4 whitespace-pre-line text-[1rem] leading-7 text-slate-700">
+                  {reportText.replace(/\*\*(.*?)\*\*/g, "$1")}
+                </div>
               </div>
             )}
           </div>
