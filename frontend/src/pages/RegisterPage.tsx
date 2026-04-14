@@ -5,22 +5,82 @@ import {
   Eye,
   EyeOff,
   Lock,
-  School,
   User,
   Users,
 } from "lucide-react"
 import AuthLayout from "../layouts/AuthLayout"
 import logoMatFocus from "../assets/logo - matfocus.png"
 import mascotefoco from "../assets/mascote - login.png"
+import { useAuth } from "../contexts/AuthContext"
 
 function RegisterPage() {
   const navigate = useNavigate()
+  const { registerUser } = useAuth()
+
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = useState({
+    full_name: "",
+    age: "",
+    sex: "",
+    school_grade: "",
+    guardian_name: "",
+    username: "",
+    password: "",
+    confirm_password: "",
+  })
+
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    navigate("/dashboard")
+
+    try {
+      setLoading(true)
+      setError("")
+
+      await registerUser({
+        full_name: formData.full_name,
+        age: Number(formData.age),
+        sex: formData.sex as "M" | "F" | "O",
+        school_grade: formData.school_grade as "3" | "4" | "5" | "6",
+        guardian_name: formData.guardian_name,
+        username: formData.username,
+        password: formData.password,
+        confirm_password: formData.confirm_password,
+      })
+
+      navigate("/dashboard")
+    } catch (err: any) {
+      console.error("Erro ao cadastrar:", err)
+
+      const data = err?.response?.data
+
+      if (typeof data?.detail === "string") {
+        setError(data.detail)
+      } else if (typeof data?.confirm_password?.[0] === "string") {
+        setError(data.confirm_password[0])
+      } else if (typeof data?.username?.[0] === "string") {
+        setError(data.username[0])
+      } else if (typeof data?.non_field_errors?.[0] === "string") {
+        setError(data.non_field_errors[0])
+      } else {
+        setError("Não foi possível realizar o cadastro.")
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -73,7 +133,7 @@ function RegisterPage() {
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div>
                   <label
-                    htmlFor="studentName"
+                    htmlFor="full_name"
                     className="mb-2 block text-lg font-semibold text-slate-600"
                   >
                     Nome do aluno
@@ -81,8 +141,11 @@ function RegisterPage() {
                   <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-300 focus-within:bg-white focus-within:shadow-sm">
                     <User size={20} className="text-slate-400" />
                     <input
-                      id="studentName"
+                      id="full_name"
+                      name="full_name"
                       type="text"
+                      value={formData.full_name}
+                      onChange={handleChange}
                       placeholder="Nome completo"
                       className="w-full bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
                     />
@@ -100,7 +163,10 @@ function RegisterPage() {
                     <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-300 focus-within:bg-white focus-within:shadow-sm">
                       <input
                         id="age"
+                        name="age"
                         type="number"
+                        value={formData.age}
+                        onChange={handleChange}
                         placeholder="Ex: 9"
                         className="w-full bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
                       />
@@ -109,23 +175,25 @@ function RegisterPage() {
 
                   <div>
                     <label
-                      htmlFor="gender"
+                      htmlFor="sex"
                       className="mb-2 block text-lg font-semibold text-slate-600"
                     >
                       Sexo
                     </label>
                     <div className="relative">
                       <select
-                        id="gender"
-                        defaultValue=""
+                        id="sex"
+                        name="sex"
+                        value={formData.sex}
+                        onChange={handleChange}
                         className="w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-base text-slate-700 outline-none transition focus:border-sky-300 focus:bg-white focus:shadow-sm"
                       >
                         <option value="" disabled>
                           Selecione
                         </option>
-                        <option value="masculino">Masculino</option>
-                        <option value="feminino">Feminino</option>
-                        <option value="outro">Outro</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Feminino</option>
+                        <option value="O">Outro</option>
                       </select>
 
                       <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
@@ -137,26 +205,26 @@ function RegisterPage() {
 
                 <div>
                   <label
-                    htmlFor="grade"
+                    htmlFor="school_grade"
                     className="mb-2 block text-lg font-semibold text-slate-600"
                   >
                     Série escolar
                   </label>
                   <div className="relative">
                     <select
-                      id="grade"
-                      defaultValue=""
+                      id="school_grade"
+                      name="school_grade"
+                      value={formData.school_grade}
+                      onChange={handleChange}
                       className="w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-base text-slate-700 outline-none transition focus:border-sky-300 focus:bg-white focus:shadow-sm"
                     >
                       <option value="" disabled>
                         Selecione a série
                       </option>
-                      <option value="1-ano">1º ano</option>
-                      <option value="2-ano">2º ano</option>
-                      <option value="3-ano">3º ano</option>
-                      <option value="4-ano">4º ano</option>
-                      <option value="5-ano">5º ano</option>
-                      <option value="6-ano">6º ano</option>
+                      <option value="3">3º ano</option>
+                      <option value="4">4º ano</option>
+                      <option value="5">5º ano</option>
+                      <option value="6">6º ano</option>
                     </select>
 
                     <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
@@ -167,7 +235,7 @@ function RegisterPage() {
 
                 <div>
                   <label
-                    htmlFor="guardianName"
+                    htmlFor="guardian_name"
                     className="mb-2 block text-lg font-semibold text-slate-600"
                   >
                     Responsável
@@ -175,8 +243,11 @@ function RegisterPage() {
                   <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-300 focus-within:bg-white focus-within:shadow-sm">
                     <Users size={20} className="text-slate-400" />
                     <input
-                      id="guardianName"
+                      id="guardian_name"
+                      name="guardian_name"
                       type="text"
+                      value={formData.guardian_name}
+                      onChange={handleChange}
                       placeholder="Nome do responsável"
                       className="w-full bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
                     />
@@ -194,7 +265,10 @@ function RegisterPage() {
                     <User size={20} className="text-slate-400" />
                     <input
                       id="username"
+                      name="username"
                       type="text"
+                      value={formData.username}
+                      onChange={handleChange}
                       placeholder="Ex: lucas123"
                       className="w-full bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
                     />
@@ -212,7 +286,10 @@ function RegisterPage() {
                     <Lock size={20} className="text-slate-400" />
                     <input
                       id="password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={handleChange}
                       placeholder="Crie uma senha"
                       className="w-full bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
                     />
@@ -229,7 +306,7 @@ function RegisterPage() {
 
                 <div>
                   <label
-                    htmlFor="confirmPassword"
+                    htmlFor="confirm_password"
                     className="mb-2 block text-lg font-semibold text-slate-600"
                   >
                     Confirmar senha
@@ -237,8 +314,11 @@ function RegisterPage() {
                   <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-300 focus-within:bg-white focus-within:shadow-sm">
                     <Lock size={20} className="text-slate-400" />
                     <input
-                      id="confirmPassword"
+                      id="confirm_password"
+                      name="confirm_password"
                       type={showConfirmPassword ? "text" : "password"}
+                      value={formData.confirm_password}
+                      onChange={handleChange}
                       placeholder="Repita a senha"
                       className="w-full bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
                     />
@@ -259,11 +339,18 @@ function RegisterPage() {
                   </div>
                 </div>
 
+                {error && (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="mt-2 rounded-2xl bg-[#79c6a1] px-6 py-3.5 text-xl font-bold text-white shadow-[0_10px_24px_rgba(121,198,161,0.35)] transition hover:-translate-y-0.5 hover:brightness-105"
+                  disabled={loading}
+                  className="mt-2 rounded-2xl bg-[#79c6a1] px-6 py-3.5 text-xl font-bold text-white shadow-[0_10px_24px_rgba(121,198,161,0.35)] transition hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Cadastrar aluno
+                  {loading ? "Cadastrando..." : "Cadastrar aluno"}
                 </button>
               </form>
 

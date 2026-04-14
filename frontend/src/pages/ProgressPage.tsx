@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import AppLayout from "../layouts/AppLayout"
 import ProgressCircle from "../components/ProgressCircle"
 import { CheckCircle2, CircleX, FileText } from "lucide-react"
+import { useAuth } from "../contexts/AuthContext"
 import {
   getProgressSummary,
   getProgressReport,
@@ -61,15 +62,22 @@ function ProgressPage() {
 
   const [downloadingPdf, setDownloadingPdf] = useState(false)
 
-  const studentId = 1
+  const { student } = useAuth()
 
   useEffect(() => {
+    if (!student?.id) return
+
+    const currentStudentId = student.id
+
     async function loadProgress() {
       try {
         setLoading(true)
         setError("")
+        setReportText("")
+        setReportError("")
+        setReportPeriod(null)
 
-        const data = await getProgressSummary(studentId, period)
+        const data = await getProgressSummary(currentStudentId, period)
         setSummary(data)
       } catch (err) {
         console.error("Erro ao carregar progresso:", err)
@@ -80,15 +88,19 @@ function ProgressPage() {
     }
 
     loadProgress()
-  }, [period])
+  }, [period, student?.id])
 
   async function handleGenerateReport(selectedPeriod: ProgressReportPeriod) {
+    if (!student?.id || !hasProgressData) return
+
+    const currentStudentId = student.id
+
     try {
       setReportPeriod(selectedPeriod)
       setReportLoading(true)
       setReportError("")
 
-      const data = await getProgressReport(studentId, selectedPeriod)
+      const data = await getProgressReport(currentStudentId, selectedPeriod)
       setReportText(data.report)
     } catch (err) {
       console.error("Erro ao gerar relatório:", err)
@@ -100,11 +112,13 @@ function ProgressPage() {
   }
 
   async function handleDownloadPdf() {
-    if (!reportPeriod) return
+    if (!reportPeriod || !student?.id) return
+
+    const currentStudentId = student.id
 
     try {
       setDownloadingPdf(true)
-      await downloadProgressReportPdf(studentId, reportPeriod)
+      await downloadProgressReportPdf(currentStudentId, reportPeriod)
     } catch (err) {
       console.error("Erro ao baixar PDF:", err)
     } finally {
@@ -116,6 +130,7 @@ function ProgressPage() {
   const totalWrong = summary?.wrong_answers ?? 0
   const totalQuestions = totalCorrect + totalWrong
   const totalActivities = summary?.total_activities ?? 0
+  const hasProgressData = totalActivities > 0
   const accuracyRate = summary?.accuracy ?? 0
 
   const contentProgress = useMemo(() => {
@@ -326,12 +341,12 @@ function ProgressPage() {
                 <FileText className="h-5 w-5" />
               </div>
 
-              <div>
+              <div className="flex-1">
                 <h2 className="text-[1.2rem] font-bold text-slate-800">
                   Gerar relatório simplificado
                 </h2>
                 <p className="mt-2 text-[1rem] text-slate-500">
-                  Escolha o período para gerar um relatório para o responsável:
+                  Escolha o período para gerar um relatório para o responsável.
                 </p>
               </div>
             </div>
@@ -339,11 +354,14 @@ function ProgressPage() {
             <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
               <button
                 type="button"
+                disabled={!hasProgressData}
                 onClick={() => handleGenerateReport("7d")}
                 className={`rounded-[1.1rem] border px-6 py-4 text-[1.05rem] font-semibold shadow-sm transition ${
-                  reportPeriod === "7d"
-                    ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
-                    : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                  !hasProgressData
+                    ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 shadow-none"
+                    : reportPeriod === "7d"
+                      ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
+                      : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
                 }`}
               >
                 7 dias
@@ -351,11 +369,14 @@ function ProgressPage() {
 
               <button
                 type="button"
+                disabled={!hasProgressData}
                 onClick={() => handleGenerateReport("14d")}
                 className={`rounded-[1.1rem] border px-6 py-4 text-[1.05rem] font-semibold shadow-sm transition ${
-                  reportPeriod === "14d"
-                    ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
-                    : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                  !hasProgressData
+                    ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 shadow-none"
+                    : reportPeriod === "14d"
+                      ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
+                      : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
                 }`}
               >
                 14 dias
@@ -363,16 +384,25 @@ function ProgressPage() {
 
               <button
                 type="button"
+                disabled={!hasProgressData}
                 onClick={() => handleGenerateReport("30d")}
                 className={`rounded-[1.1rem] border px-6 py-4 text-[1.05rem] font-semibold shadow-sm transition ${
-                  reportPeriod === "30d"
-                    ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
-                    : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                  !hasProgressData
+                    ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 shadow-none"
+                    : reportPeriod === "30d"
+                      ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
+                      : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
                 }`}
               >
                 30 dias
               </button>
             </div>
+
+            {!hasProgressData && (
+              <div className="mt-5 rounded-[1.2rem] border border-slate-200 bg-white px-5 py-4 text-[0.98rem] text-slate-500 shadow-sm">
+                O relatório será liberado após a realização das primeiras atividades.
+              </div>
+            )}
 
             {reportLoading && (
               <div className="mt-6 rounded-[1.4rem] bg-white px-5 py-4 text-[1rem] text-slate-500 shadow-sm">
@@ -386,7 +416,7 @@ function ProgressPage() {
               </div>
             )}
 
-            {!reportLoading && reportText && (
+            {!reportLoading && reportText && hasProgressData && (
               <div className="mt-6 rounded-[1.6rem] bg-white px-6 py-6 shadow-sm">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <h3 className="text-[1.1rem] font-bold text-slate-800">

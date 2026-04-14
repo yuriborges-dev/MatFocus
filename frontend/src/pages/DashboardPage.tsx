@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
 import {
   BookOpen,
   BarChart3,
@@ -37,26 +38,30 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const studentId = 1
+  const { student } = useAuth()
 
-  useEffect(() => {
-    async function loadDashboard() {
-      try {
-        setLoading(true)
-        setError("")
+useEffect(() => {
+  if (!student?.id) return
 
-        const data = await getDashboardSummary(studentId)
-        setDashboard(data)
-      } catch (err) {
-        console.error("Erro ao carregar dashboard:", err)
-        setError("Não foi possível carregar a dashboard.")
-      } finally {
-        setLoading(false)
-      }
+  const currentStudentId = student.id
+
+  async function loadDashboard() {
+    try {
+      setLoading(true)
+      setError("")
+
+      const data = await getDashboardSummary(currentStudentId)
+      setDashboard(data)
+    } catch (err) {
+      console.error("Erro ao carregar dashboard:", err)
+      setError("Não foi possível carregar a dashboard.")
+    } finally {
+      setLoading(false)
     }
+  }
 
-    loadDashboard()
-  }, [])
+  loadDashboard()
+}, [student?.id])
 
   const contentProgress = useMemo(() => {
     const mapped = (dashboard?.content_progress ?? []).map((item) => ({
@@ -76,7 +81,17 @@ function DashboardPage() {
     progress: 0,
   }
 
-  const studentName = dashboard?.student_name || "Yuri"
+  const currentHour = new Date().getHours()
+
+  const greeting =
+    currentHour >= 6 && currentHour < 12
+      ? "Bom dia"
+      : currentHour >= 12 && currentHour < 18
+        ? "Boa tarde"
+        : "Boa noite"
+
+  const fullName = dashboard?.student_name || student?.full_name || ""
+  const studentName = fullName.split(" ")[0] || ""
   const totalPoints = dashboard?.points ?? 0
   const totalAccuracy = dashboard?.accuracy ?? 0
   const totalActivities = dashboard?.activities ?? 0
@@ -113,7 +128,7 @@ function DashboardPage() {
       <div className="flex items-start justify-between gap-6">
         <div>
           <h1 className="text-[2.7rem] font-extrabold text-slate-900">
-            Boa tarde, {studentName}! 👋
+            {greeting}, {studentName}!
           </h1>
           <p className="mt-1 text-[1.1rem] text-slate-400">
             Você já avançou bastante hoje. Continue assim!

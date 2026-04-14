@@ -4,14 +4,32 @@ import { Eye, EyeOff, Lock, User } from "lucide-react"
 import AuthLayout from "../layouts/AuthLayout"
 import logoMatFocus from "../assets/logo - matfocus.png"
 import mascotefoco from "../assets/mascote - login.png"
+import { useAuth } from "../contexts/AuthContext"
 
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const navigate = useNavigate()
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const navigate = useNavigate()
+  const { loginUser } = useAuth()
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    navigate("/dashboard")
+
+    try {
+      setLoading(true)
+      setError("")
+      await loginUser({ username, password })
+      navigate("/dashboard")
+    } catch (err) {
+      console.error(err)
+      setError("Usuário ou senha inválidos.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -75,6 +93,8 @@ function LoginPage() {
                     <input
                       id="username"
                       type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       placeholder="Digite seu usuário"
                       className="w-full bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
                     />
@@ -95,6 +115,8 @@ function LoginPage() {
                     <input
                       id="password"
                       type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       placeholder="Digite sua senha"
                       className="w-full bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
                     />
@@ -110,11 +132,18 @@ function LoginPage() {
                   </div>
                 </div>
 
+                {error && (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="mt-2 rounded-2xl bg-sky-400 px-6 py-3.5 text-xl font-bold text-white shadow-[0_10px_24px_rgba(56,189,248,0.35)] transition hover:-translate-y-0.5 hover:bg-sky-500"
+                  disabled={loading}
+                  className="mt-2 rounded-2xl bg-sky-400 px-6 py-3.5 text-xl font-bold text-white shadow-[0_10px_24px_rgba(56,189,248,0.35)] transition hover:-translate-y-0.5 hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Entrar
+                  {loading ? "Entrando..." : "Entrar"}
                 </button>
               </form>
 
