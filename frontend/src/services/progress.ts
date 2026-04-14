@@ -100,3 +100,28 @@ export async function getProgressReport(
 
   return response.data
 }
+
+export async function downloadProgressReportPdf(
+  studentId: number | string,
+  period: ProgressReportPeriod
+) {
+  const response = await api.get("/progress/report/pdf/", {
+    params: {
+      student_id: studentId,
+      period,
+    },
+    responseType: "blob",
+  })
+
+  const blob = new Blob([response.data], { type: "application/pdf" })
+  const url = window.URL.createObjectURL(blob)
+
+  const link = document.createElement("a")
+  link.href = url
+  link.download = `relatorio-${period}.pdf`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+
+  window.URL.revokeObjectURL(url)
+}

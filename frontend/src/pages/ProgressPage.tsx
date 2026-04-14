@@ -5,6 +5,7 @@ import { CheckCircle2, CircleX, FileText } from "lucide-react"
 import {
   getProgressSummary,
   getProgressReport,
+  downloadProgressReportPdf,
   type ProgressPeriod,
   type ProgressSummaryResponse,
   type ProgressReportPeriod,
@@ -58,6 +59,8 @@ function ProgressPage() {
   const [reportLoading, setReportLoading] = useState(false)
   const [reportError, setReportError] = useState("")
 
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
+
   const studentId = 1
 
   useEffect(() => {
@@ -93,6 +96,19 @@ function ProgressPage() {
       setReportText("")
     } finally {
       setReportLoading(false)
+    }
+  }
+
+  async function handleDownloadPdf() {
+    if (!reportPeriod) return
+
+    try {
+      setDownloadingPdf(true)
+      await downloadProgressReportPdf(studentId, reportPeriod)
+    } catch (err) {
+      console.error("Erro ao baixar PDF:", err)
+    } finally {
+      setDownloadingPdf(false)
     }
   }
 
@@ -372,12 +388,23 @@ function ProgressPage() {
 
             {!reportLoading && reportText && (
               <div className="mt-6 rounded-[1.6rem] bg-white px-6 py-6 shadow-sm">
-                <h3 className="text-[1.1rem] font-bold text-slate-800">
-                  Relatório gerado
-                </h3>
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <h3 className="text-[1.1rem] font-bold text-slate-800">
+                    Relatório gerado
+                  </h3>
+
+                  <button
+                    type="button"
+                    onClick={handleDownloadPdf}
+                    disabled={downloadingPdf}
+                    className="rounded-full bg-[#4a8fd3] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#3b7fc2] disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {downloadingPdf ? "Baixando PDF..." : "Baixar PDF"}
+                  </button>
+                </div>
 
                 <div className="mt-4 whitespace-pre-line text-[1rem] leading-7 text-slate-700">
-                  {reportText.replace(/\*\*(.*?)\*\*/g, "$1")}
+                  {reportText.replace(/\*\*/g, "")}
                 </div>
               </div>
             )}

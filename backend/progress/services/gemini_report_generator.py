@@ -6,8 +6,7 @@ client = genai.Client(api_key=settings.GEMINI_API_KEY)
 MODEL_NAME = "gemini-3.1-flash-lite-preview"
 
 
-def generate_student_report(data):
-
+def generate_default_student_report(data):
     period_map = {
         "7d": "7 dias",
         "14d": "14 dias",
@@ -16,7 +15,40 @@ def generate_student_report(data):
 
     period_label = period_map.get(data["period"], data["period"])
 
-    # corrigindo parâmetros que estavam faltando
+    return f"""Relatório de desempenho — últimos {period_label}
+
+Aluno: {data["name"]}
+Ano escolar: {data["grade"]}
+
+Resumo do desempenho
+O aluno apresentou um bom acompanhamento pedagógico no período analisado, com desempenho geral de {data["accuracy"]}% de taxa de acerto nas atividades realizadas.
+
+Atividades realizadas
+Foram concluídas {data["activities"]} atividades no período, com tempo médio de {data["avg_time"]} segundos por questão.
+
+Desempenho por conteúdo
+O melhor desempenho foi observado em {data["best_content"]}. Já o conteúdo que precisa de mais atenção é {data["worst_content"]}.
+
+Pontos fortes
+O aluno demonstra dedicação, continuidade nas atividades e avanço no processo de aprendizagem.
+
+Áreas para melhorar
+É importante continuar reforçando principalmente o conteúdo de {data["worst_content"]}, com foco em compreensão e prática gradual.
+
+Sugestão prática pedagógica
+Recomenda-se realizar pequenas atividades de revisão com apoio do responsável, incentivando a leitura atenta dos enunciados e a resolução com calma, para fortalecer a confiança e o desempenho do aluno.
+"""
+
+
+def generate_student_report(data):
+    period_map = {
+        "7d": "7 dias",
+        "14d": "14 dias",
+        "30d": "30 dias",
+    }
+
+    period_label = period_map.get(data["period"], data["period"])
+
     student_name = data["name"]
     school_grade = data["grade"]
 
@@ -31,7 +63,7 @@ IMPORTANTE:
 - NÃO formatar como carta
 - NÃO usar emojis
 - usar linguagem simples e objetiva
-- destacar palavras importantes com negrito usando ** **
+- destacar subtópicos e palavras importantes com negrito
 - formato ideal para exibição dentro de um sistema educacional
 
 Dados:
@@ -66,9 +98,19 @@ Texto claro, positivo e apropriado para responsáveis.
 Não inventar números.
 """
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt,
-    )
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+        )
 
-    return response.text
+        text = (response.text or "").strip()
+
+        if not text:
+            return generate_default_student_report(data)
+
+        return text
+
+    except Exception as error:
+        print(f"Erro ao gerar relatório com Gemini: {error}")
+        return generate_default_student_report(data)

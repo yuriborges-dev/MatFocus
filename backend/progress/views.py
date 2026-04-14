@@ -4,7 +4,22 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from datetime import timedelta
+from datetime import datetime
 from django.db.models import Count
+from .services.gemini_report_generator import generate_student_report
+
+from django.conf import settings
+import os
+
+from rest_framework.views import APIView
+from django.http import HttpResponse
+
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import cm
+from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfgen import canvas
+
+from students.models import Student
 from .services.gemini_report_generator import generate_student_report
 
 from students.models import Student
@@ -803,36 +818,261 @@ class DashboardSummaryView(APIView):
         next_slug = self.CONTENT_ORDER[current_index + 1]
         return Content.objects.filter(slug=next_slug).first()
     
-class ProgressReportView(APIView):
+def build_progress_report_payload(request, student, period):
+        summary_view = ProgressSummaryView()
+        summary_response = summary_view.get(request).data
 
+        content_progress = summary_response.get("content_progress", [])
+
+        if content_progress:
+            best_content = max(content_progress, key=lambda x: x["progress"])["content"]
+            worst_content = min(content_progress, key=lambda x: x["progress"])["content"]
+        else:
+            best_content = "Não identificado"
+            worst_content = "Não identificado"
+
+        history = summary_response.get("history", [])
+        avg_time = 0
+        if history:
+            total_seconds = sum(item.get("seconds", 0) for item in history)
+            total_questions = sum(item.get("total", 0) for item in history)
+            if total_questions > 0:
+                avg_time = round(total_seconds / total_questions)
+
+        report_data = {
+            "name": student.full_name,
+            "grade": student.get_school_grade_display(),
+            "period": period,
+            "activities": summary_response["total_activities"],
+            "accuracy": summary_response["accuracy"],
+            "best_content": best_content,
+            "worst_content": worst_content,
+            "avg_time": avg_time,
+        }
+
+        report_text = generate_student_report(report_data) or ""
+
+        return {
+            "summary": summary_response,
+            "report_data": report_data,
+            "report_text": report_text.strip(),
+        }
+    
+class ProgressReportView(APIView):
     def get(self, request):
 
         student_id = request.query_params.get("student_id")
         period = request.query_params.get("period", "7d")
 
-        student = Student.objects.get(pk=student_id)
+        if not student_id:
+            return Response(
+                {"detail": "student_id é obrigatório."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        summary_view = ProgressSummaryView()
-        summary_response = summary_view.get(request).data
+        try:
+            student = Student.objects.get(pk=student_id)
+        except Student.DoesNotExist:
+            return Response(
+                {"detail": "Aluno não encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        content_progress = summary_response["content_progress"]
-
-        best_content = max(content_progress, key=lambda x: x["progress"])["content"]
-        worst_content = min(content_progress, key=lambda x: x["progress"])["content"]
-
-        report_data = {
-            "name": student.full_name,
-            "grade": student.school_grade,
-            "period": period.replace("d", " dias"),
-            "activities": summary_response["total_activities"],
-            "accuracy": summary_response["accuracy"],
-            "best_content": best_content,
-            "worst_content": worst_content,
-            "avg_time": 15
-        }
-
-        report_text = generate_student_report(report_data)
+        payload = build_progress_report_payload(request, student, period)
 
         return Response({
-            "report": report_text
+            "report": payload["report_text"]
         })
+
+class ProgressReportPdfView(APIView):
+    def get(self, request):
+        student_id = request.GET.get("student_id")
+        period = request.GET.get("period", "7d")
+
+        if not student_id:
+            return HttpResponse("student_id obrigatório", status=400)
+
+        try:
+            student = Student.objects.get(id=student_id)
+        except Student.DoesNotExist:
+            return HttpResponse("Aluno não encontrado", status=404)
+
+        payload = build_progress_report_payload(request, student, period)
+        report_text = payload["report_text"]
+
+        lines = [line.strip() for line in report_text.replace("**", "").split("\n")]
+
+        while lines and not lines[0]:
+            lines.pop(0)
+
+        if lines and lines[0].lower().startswith("relatório de desempenho"):
+            lines.pop(0)
+
+        if lines and lines[0].lower().startswith("aluno:"):
+            lines.pop(0)
+
+        if lines and lines[0].lower().startswith("ano escolar:"):
+            lines.pop(0)
+
+        while lines and not lines[0]:
+            lines.pop(0)
+
+        for index, line in enumerate(lines):
+            if line.lower().startswith("resumo do desempenho"):
+                lines = lines[index:]
+                break
+
+        cleaned_report_text = "\n".join(lines).strip()
+
+        response = HttpResponse(content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="relatorio-{period}.pdf"'
+
+        pdf = canvas.Canvas(response, pagesize=A4)
+
+        pdf.setTitle(f"Relatório de desempenho - {student.full_name}")
+        pdf.setAuthor("MatFocus — Sistema de apoio pedagógico para crianças com TDAH")
+        pdf.setSubject("Relatório pedagógico automático")
+
+        width, height = A4
+        margin_x = 2 * cm
+        usable_width = width - 4 * cm
+        bottom_margin = 2 * cm
+        line_height = 14
+
+        def draw_wrapped_text(text, x, y, max_width, font_name="Helvetica", font_size=11):
+            pdf.setFillColorRGB(0.12, 0.16, 0.22)
+            pdf.setFont(font_name, font_size)
+
+            words = text.split()
+            line = ""
+
+            for word in words:
+                test_line = f"{line} {word}".strip()
+
+                if stringWidth(test_line, font_name, font_size) <= max_width:
+                    line = test_line
+                else:
+                    pdf.drawString(x, y, line)
+                    y -= line_height
+                    line = word
+
+            if line:
+                pdf.drawString(x, y, line)
+                y -= line_height
+
+            return y
+
+        pdf.setFillColorRGB(0.32, 0.52, 0.75)
+        pdf.roundRect(
+            margin_x,
+            height - 4.2 * cm,
+            usable_width,
+            2.2 * cm,
+            18,
+            stroke=0,
+            fill=1
+        )
+
+        logo_path = os.path.join(settings.BASE_DIR, "static", "img", "logo - matfocus.png")
+
+        if os.path.exists(logo_path):
+            pdf.drawImage(
+                logo_path,
+                margin_x + 12,
+                height - 3.85 * cm,
+                width=1.2 * cm,
+                height=1.2 * cm,
+                mask='auto'
+            )
+
+        pdf.setFillColorRGB(1, 1, 1)
+        pdf.setFont("Helvetica-Bold", 20)
+        pdf.drawString(
+            margin_x + 55,
+            height - 3.1 * cm,
+            "Relatório de desempenho"
+        )
+
+        period_map = {
+            "7d": "7 dias",
+            "14d": "14 dias",
+            "30d": "30 dias",
+        }
+
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(
+            margin_x + 55,
+            height - 3.7 * cm,
+            f"Período analisado: últimos {period_map.get(period, period)}"
+        )
+
+        y = height - 5.5 * cm
+
+        pdf.setFillColorRGB(0.93, 0.95, 0.98)
+        pdf.roundRect(
+            margin_x,
+            y - 2.15 * cm,      
+            usable_width,
+            1.95 * cm,
+            14,
+            stroke=0,
+            fill=1
+        )
+
+        pdf.setFillColorRGB(0.12, 0.16, 0.22)   
+
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(margin_x + 22, y - 26, "Aluno:")
+
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(margin_x + 82, y - 26, student.full_name)
+
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(margin_x + 22, y - 52, "Ano escolar:")
+
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(margin_x + 115, y - 52, student.get_school_grade_display())
+
+        y -= 3.25 * cm
+
+        pdf.setFillColorRGB(0.12, 0.16, 0.22)
+        pdf.setFont("Helvetica-Bold", 14)
+        pdf.drawString(margin_x, y, "Análise pedagógica")
+        y -= 20
+
+        text_x = margin_x + 10
+        text_width = usable_width - 20
+
+        for paragraph in cleaned_report_text.split("\n"):
+            paragraph = paragraph.strip()
+
+            if not paragraph:
+                y -= 10
+                continue
+
+            if y <= bottom_margin + 30:
+                pdf.showPage()
+                y = height - 2.5 * cm
+
+                pdf.setFillColorRGB(0.12, 0.16, 0.22)
+                pdf.setFont("Helvetica-Bold", 13)
+                pdf.drawString(margin_x, y, "Análise pedagógica (continuação)")
+                y -= 20
+
+            y = draw_wrapped_text(paragraph, text_x, y, text_width)
+            y -= 6
+
+        generated_at = datetime.now().strftime("%d/%m/%Y às %H:%M")
+
+        pdf.setFont("Helvetica", 9)
+        pdf.setFillColorRGB(0.45, 0.5, 0.6)
+
+        pdf.drawCentredString(
+            width / 2,
+            1.5 * cm,
+            f"Relatório gerado em {generated_at} por MatFocus"
+        )
+
+        pdf.save()
+        
+        return response
