@@ -47,7 +47,8 @@ function AboutPage() {
                 <p className="mt-2 text-slate-600 leading-relaxed">
                   O sistema <i><strong>MatFocus</strong></i> foi desenvolvido por
                   <strong> Yuri Lima Borges</strong>, estudante do curso de
-                  Tecnologia em Análise e Desenvolvimento de Sistemas do
+                  Tecnologia em Análise e Desenvolvimento de Sistemas e orientado por 
+                  <strong> Paula Patricia Oliveira da Silva</strong> professora do
                   Instituto Federal de Educação, Ciência e Tecnologia Baiano –
                   Campus Guanambi, como parte do Trabalho de Conclusão de Curso
                   (TCC). O projeto foi concebido com o objetivo de contribuir
@@ -69,13 +70,13 @@ function AboutPage() {
                 </h2>
 
                 <p className="mt-2 text-slate-600 leading-relaxed">
-                  O MatFocus tem como objetivo auxiliar estudantes do ensino
+                  O <i>MatFocus</i> tem como objetivo auxiliar estudantes do ensino
                   fundamental no processo de aprendizagem da matemática por meio
                   de atividades estruturadas em níveis progressivos de
                   dificuldade. O sistema adota princípios de simplicidade
                   visual, organização por fases e redução de estímulos
                   distratores, buscando oferecer suporte especialmente a alunos
-                  com Transtorno do Déficit de Atenção e Hiperatividade (TDAH),
+                  com Transtorno do <i>Déficit</i> de Atenção e Hiperatividade (TDAH),
                   promovendo maior foco e engajamento durante a realização das
                   atividades propostas.
                 </p>
@@ -95,9 +96,9 @@ function AboutPage() {
 
                 <p className="mt-2 text-slate-600 leading-relaxed">
                   O sistema foi desenvolvido utilizando tecnologias modernas
-                  voltadas à construção de aplicações web. No frontend foram
+                  voltadas à construção de aplicações <i>web</i>. No <i>frontend</i> foram
                   utilizados React com TypeScript e TailwindCSS para construção
-                  da interface responsiva e acessível. No backend foi utilizado
+                  da interface responsiva e acessível. No <i>backend</i> foi utilizado
                   Django REST Framework para implementação da API responsável
                   pela comunicação entre cliente e servidor, juntamente com o
                   banco de dados PostgreSQL para armazenamento das informações.

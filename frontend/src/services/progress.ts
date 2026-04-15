@@ -35,15 +35,16 @@ export type ProgressSummaryResponse = {
 }
 
 export async function getProgressSummary(
-  studentId: number | string,
   period: ProgressPeriod = "all"
 ) {
-  const response = await api.get<ProgressSummaryResponse>("/progress/summary/", {
-    params: {
-      student_id: studentId,
-      period,
-    },
-  })
+  const response = await api.get<ProgressSummaryResponse>(
+    "/progress/summary/",
+    {
+      params: {
+        period,
+      },
+    }
+  )
 
   return response.data
 }
@@ -71,12 +72,10 @@ export type DashboardSummaryResponse = {
   }[]
 }
 
-export async function getDashboardSummary(studentId: number | string) {
-  const response = await api.get<DashboardSummaryResponse>("/progress/dashboard/", {
-    params: {
-      student_id: studentId,
-    },
-  })
+export async function getDashboardSummary() {
+  const response = await api.get<DashboardSummaryResponse>(
+    "/progress/dashboard/"
+  )
 
   return response.data
 }
@@ -88,30 +87,32 @@ export type ProgressReportResponse = {
 }
 
 export async function getProgressReport(
-  studentId: number | string,
   period: ProgressReportPeriod
 ) {
-  const response = await api.get<ProgressReportResponse>("/progress/report/", {
-    params: {
-      student_id: studentId,
-      period,
-    },
-  })
+  const response = await api.get<ProgressReportResponse>(
+    "/progress/report/",
+    {
+      params: {
+        period,
+      },
+    }
+  )
 
   return response.data
 }
 
 export async function downloadProgressReportPdf(
-  studentId: number | string,
   period: ProgressReportPeriod
 ) {
-  const response = await api.get("/progress/report/pdf/", {
-    params: {
-      student_id: studentId,
-      period,
-    },
-    responseType: "blob",
-  })
+  const response = await api.get(
+    "/progress/report/pdf/",
+    {
+      params: {
+        period,
+      },
+      responseType: "blob",
+    }
+  )
 
   const blob = new Blob([response.data], { type: "application/pdf" })
   const url = window.URL.createObjectURL(blob)

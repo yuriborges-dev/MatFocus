@@ -39,6 +39,5 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = ['id', 'phase', 'statement', 'tip', 'order']
 
 class SubmitAnswerSerializer(serializers.Serializer):
-    student_id = serializers.IntegerField()
     session_id = serializers.IntegerField()
     answer = serializers.CharField(max_length=100)

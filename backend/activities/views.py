@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 from students.models import Student
 from progress.models import StudentPhaseProgress, StudentAnswer, StudentPhaseSession
@@ -17,16 +18,19 @@ from .utils import is_answer_correct
 
 
 class ContentListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Content.objects.all().order_by('name')
     serializer_class = ContentSerializer
 
 
 class LevelListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Level.objects.all().order_by('difficulty_order')
     serializer_class = LevelSerializer
 
 
 class PhaseListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = PhaseSerializer
 
     def get_queryset(self):
@@ -45,6 +49,7 @@ class PhaseListView(generics.ListAPIView):
 
 
 class QuestionListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = QuestionSerializer
 
     def get_queryset(self):
@@ -59,7 +64,17 @@ class QuestionListView(generics.ListAPIView):
 
 
 class SubmitAnswerView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, question_id):
+        try:
+            student = request.user.student
+        except Student.DoesNotExist:
+            return Response(
+                {'detail': 'Aluno não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
         try:
             question = Question.objects.select_related('phase').get(pk=question_id)
         except Question.DoesNotExist:
@@ -71,17 +86,8 @@ class SubmitAnswerView(APIView):
         serializer = SubmitAnswerSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        student_id = serializer.validated_data['student_id']
         session_id = serializer.validated_data['session_id']
         submitted_answer = serializer.validated_data['answer']
-
-        try:
-            student = Student.objects.get(pk=student_id)
-        except Student.DoesNotExist:
-            return Response(
-                {'detail': 'Aluno não encontrado.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
 
         try:
             session = StudentPhaseSession.objects.get(

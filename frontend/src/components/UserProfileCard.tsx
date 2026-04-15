@@ -16,7 +16,7 @@ function UserProfileCard() {
 
     const fetchScore = async () => {
       try {
-        const data = await getDashboardSummary(student.id)
+        const data = await getDashboardSummary()
         setScore(data.points ?? 0)
       } catch (error) {
         console.error("Erro ao carregar pontuação:", error)

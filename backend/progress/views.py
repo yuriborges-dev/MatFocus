@@ -7,6 +7,7 @@ from datetime import timedelta
 from datetime import datetime
 from django.db.models import Count
 from .services.gemini_report_generator import generate_student_report
+from rest_framework.permissions import IsAuthenticated
 
 from django.conf import settings
 import os
@@ -35,17 +36,11 @@ from .serializers import (
 
 
 class PhaseProgressDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, phase_id):
-        student_id = request.query_params.get('student_id')
-
-        if not student_id:
-            return Response(
-                {'detail': 'student_id é obrigatório.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         try:
-            student = Student.objects.get(pk=student_id)
+            student = request.user.student
         except Student.DoesNotExist:
             return Response(
                 {'detail': 'Aluno não encontrado.'},
@@ -120,28 +115,21 @@ class PhaseProgressDetailView(APIView):
         if not previous_phase:
             return False
 
-        previous_progress = StudentPhaseProgress.objects.filter(
+        return StudentPhaseProgress.objects.filter(
             student=student,
             phase=previous_phase,
             completed=True
         ).exists()
 
-        return previous_progress
-
 
 class PhaseResultView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, phase_id):
-        student_id = request.query_params.get('student_id')
         session_id = request.query_params.get('session_id')
 
-        if not student_id:
-            return Response(
-                {'detail': 'student_id é obrigatório.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         try:
-            student = Student.objects.get(pk=student_id)
+            student = request.user.student
         except Student.DoesNotExist:
             return Response(
                 {'detail': 'Aluno não encontrado.'},
@@ -253,17 +241,11 @@ class PhaseResultView(APIView):
 
 
 class StartPhaseSessionView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, phase_id):
-        student_id = request.data.get('student_id')
-
-        if not student_id:
-            return Response(
-                {'detail': 'student_id é obrigatório.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         try:
-            student = Student.objects.get(pk=student_id)
+            student = request.user.student
         except Student.DoesNotExist:
             return Response(
                 {'detail': 'Aluno não encontrado.'},
@@ -299,16 +281,11 @@ class StartPhaseSessionView(APIView):
 
 
 class PhaseMapStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        student_id = request.query_params.get('student_id')
         content_slug = request.query_params.get('content')
         level_code = request.query_params.get('level')
-
-        if not student_id:
-            return Response(
-                {'detail': 'student_id é obrigatório.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
         if not content_slug or not level_code:
             return Response(
@@ -317,7 +294,7 @@ class PhaseMapStatusView(APIView):
             )
 
         try:
-            student = Student.objects.get(pk=student_id)
+            student = request.user.student
         except Student.DoesNotExist:
             return Response(
                 {'detail': 'Aluno não encontrado.'},
@@ -389,15 +366,10 @@ class PhaseMapStatusView(APIView):
 
 
 class LevelProgressSummaryView(APIView):
-    def get(self, request):
-        student_id = request.query_params.get('student_id')
-        content_slug = request.query_params.get('content')
+    permission_classes = [IsAuthenticated]
 
-        if not student_id:
-            return Response(
-                {'detail': 'student_id é obrigatório.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    def get(self, request):
+        content_slug = request.query_params.get('content')
 
         if not content_slug:
             return Response(
@@ -406,7 +378,7 @@ class LevelProgressSummaryView(APIView):
             )
 
         try:
-            student = Student.objects.get(pk=student_id)
+            student = request.user.student
         except Student.DoesNotExist:
             return Response(
                 {'detail': 'Aluno não encontrado.'},
@@ -422,7 +394,6 @@ class LevelProgressSummaryView(APIView):
             )
 
         levels = Level.objects.all().order_by('difficulty_order')
-
         result = []
         previous_level_completed = True
 
@@ -473,18 +444,13 @@ class LevelProgressSummaryView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class ProgressSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        student_id = request.query_params.get("student_id")
         period = request.query_params.get("period", "all")
 
-        if not student_id:
-            return Response(
-                {"detail": "student_id é obrigatório."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         try:
-            student = Student.objects.get(pk=student_id)
+            student = request.user.student
         except Student.DoesNotExist:
             return Response(
                 {"detail": "Aluno não encontrado."},
@@ -528,12 +494,10 @@ class ProgressSummaryView(APIView):
         total_activities = activities.count()
 
         contents = Content.objects.all()
-
         content_progress = []
 
         for content in contents:
             phases = Phase.objects.filter(content=content)
-
             total_phases = phases.count()
 
             completed = StudentPhaseProgress.objects.filter(
@@ -582,18 +546,17 @@ class ProgressSummaryView(APIView):
         })
     
 class DashboardSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
     CONTENT_ORDER = ["adicao", "subtracao", "multiplicacao", "divisao", "problemas"]
 
     def get(self, request):
-        student_id = request.query_params.get("student_id")
-
-        if not student_id:
+        try:
+            student = request.user.student
+        except Student.DoesNotExist:
             return Response(
-                {"detail": "student_id é obrigatório"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Aluno não encontrado."},
+                status=status.HTTP_404_NOT_FOUND
             )
-
-        student = Student.objects.get(pk=student_id)
 
         answers = StudentAnswer.objects.filter(student=student)
 
@@ -623,12 +586,10 @@ class DashboardSummaryView(APIView):
         continue_section = self._get_next_playable_target(student)
 
         contents = Content.objects.all()
-
         content_progress = []
 
         for content in contents:
             phases = Phase.objects.filter(content=content)
-
             total_phases = phases.count()
 
             completed = StudentPhaseProgress.objects.filter(
@@ -648,7 +609,6 @@ class DashboardSummaryView(APIView):
             })
 
         recent_sessions = activities[:3]
-
         recent_activities = []
 
         for session in recent_sessions:
@@ -859,19 +819,13 @@ def build_progress_report_payload(request, student, period):
         }
     
 class ProgressReportView(APIView):
-    def get(self, request):
+    permission_classes = [IsAuthenticated]
 
-        student_id = request.query_params.get("student_id")
+    def get(self, request):
         period = request.query_params.get("period", "7d")
 
-        if not student_id:
-            return Response(
-                {"detail": "student_id é obrigatório."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         try:
-            student = Student.objects.get(pk=student_id)
+            student = request.user.student
         except Student.DoesNotExist:
             return Response(
                 {"detail": "Aluno não encontrado."},
@@ -885,15 +839,13 @@ class ProgressReportView(APIView):
         })
 
 class ProgressReportPdfView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        student_id = request.GET.get("student_id")
         period = request.GET.get("period", "7d")
 
-        if not student_id:
-            return HttpResponse("student_id obrigatório", status=400)
-
         try:
-            student = Student.objects.get(id=student_id)
+            student = request.user.student
         except Student.DoesNotExist:
             return HttpResponse("Aluno não encontrado", status=404)
 
@@ -1011,7 +963,7 @@ class ProgressReportPdfView(APIView):
         pdf.setFillColorRGB(0.93, 0.95, 0.98)
         pdf.roundRect(
             margin_x,
-            y - 2.15 * cm,      
+            y - 2.15 * cm,
             usable_width,
             1.95 * cm,
             14,
@@ -1019,7 +971,7 @@ class ProgressReportPdfView(APIView):
             fill=1
         )
 
-        pdf.setFillColorRGB(0.12, 0.16, 0.22)   
+        pdf.setFillColorRGB(0.12, 0.16, 0.22)
 
         pdf.setFont("Helvetica-Bold", 12)
         pdf.drawString(margin_x + 22, y - 26, "Aluno:")
@@ -1074,5 +1026,4 @@ class ProgressReportPdfView(APIView):
         )
 
         pdf.save()
-        
         return response

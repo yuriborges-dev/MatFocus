@@ -67,8 +67,6 @@ function ProgressPage() {
   useEffect(() => {
     if (!student?.id) return
 
-    const currentStudentId = student.id
-
     async function loadProgress() {
       try {
         setLoading(true)
@@ -77,7 +75,7 @@ function ProgressPage() {
         setReportError("")
         setReportPeriod(null)
 
-        const data = await getProgressSummary(currentStudentId, period)
+        const data = await getProgressSummary(period)
         setSummary(data)
       } catch (err) {
         console.error("Erro ao carregar progresso:", err)
@@ -93,14 +91,12 @@ function ProgressPage() {
   async function handleGenerateReport(selectedPeriod: ProgressReportPeriod) {
     if (!student?.id || !hasProgressData) return
 
-    const currentStudentId = student.id
-
     try {
       setReportPeriod(selectedPeriod)
       setReportLoading(true)
       setReportError("")
 
-      const data = await getProgressReport(currentStudentId, selectedPeriod)
+      const data = await getProgressReport(selectedPeriod)
       setReportText(data.report)
     } catch (err) {
       console.error("Erro ao gerar relatório:", err)
@@ -114,11 +110,9 @@ function ProgressPage() {
   async function handleDownloadPdf() {
     if (!reportPeriod || !student?.id) return
 
-    const currentStudentId = student.id
-
     try {
       setDownloadingPdf(true)
-      await downloadProgressReportPdf(currentStudentId, reportPeriod)
+      await downloadProgressReportPdf(reportPeriod)
     } catch (err) {
       console.error("Erro ao baixar PDF:", err)
     } finally {
