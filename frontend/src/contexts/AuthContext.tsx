@@ -1,5 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
-import { getMe, login, register, type LoginPayload, type RegisterPayload, type Student } from "../services/auth"
+import {
+  getMe,
+  login,
+  register,
+  type LoginPayload,
+  type RegisterPayload,
+  type Student,
+} from "../services/auth"
+
+type UpdateStudentPayload = Partial<Student>
 
 type AuthContextType = {
   student: Student | null
@@ -8,6 +17,7 @@ type AuthContextType = {
   loginUser: (payload: LoginPayload) => Promise<void>
   registerUser: (payload: RegisterPayload) => Promise<void>
   logoutUser: () => void
+  updateStudentData: (payload: UpdateStudentPayload) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -28,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const data = await getMe()
         setStudent(data)
+        localStorage.setItem("matfocus_student", JSON.stringify(data))
       } catch {
         localStorage.removeItem("matfocus_access")
         localStorage.removeItem("matfocus_refresh")
@@ -61,6 +72,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStudent(data.student)
   }
 
+  function updateStudentData(payload: UpdateStudentPayload) {
+    setStudent((prev) => {
+      if (!prev) return prev
+
+      const updatedStudent = {
+        ...prev,
+        ...payload,
+      }
+
+      localStorage.setItem("matfocus_student", JSON.stringify(updatedStudent))
+      return updatedStudent
+    })
+  }
+
   function logoutUser() {
     localStorage.removeItem("matfocus_access")
     localStorage.removeItem("matfocus_refresh")
@@ -76,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loginUser,
       registerUser,
       logoutUser,
+      updateStudentData,
     }),
     [student, loading]
   )

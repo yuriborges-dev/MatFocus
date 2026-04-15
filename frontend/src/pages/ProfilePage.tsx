@@ -77,6 +77,7 @@ function ProfilePage() {
 
               <button
                 type="button"
+                onClick={() => navigate("/perfil/editar")}
                 className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-base font-semibold text-[#3b82f6] transition hover:bg-blue-50"
               >
                 <Pencil size={18} />

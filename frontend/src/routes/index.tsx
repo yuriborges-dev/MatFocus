@@ -11,6 +11,7 @@ import ActivityResultPage from "../pages/ActivityResultPage"
 import ProfilePage from "../pages/ProfilePage"
 import SettingsPage from "../pages/SettingsPage"
 import AboutPage from "../pages/AboutPage"
+import EditProfilePage from "../pages/EditProfilePage"
 import ProtectedRoute from "../components/ProtectedRoute"
 
 function AppRoutes() {
@@ -109,6 +110,14 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        <Route 
+          path="/perfil/editar" 
+          element={
+            <ProtectedRoute>
+              <EditProfilePage />
+            </ProtectedRoute>
+          } />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
