@@ -115,7 +115,7 @@ function ProfilePage() {
             <button
               type="button"
               onClick={() => navigate("/configuracoes")}
-              className="flex items-center justify-center gap-3 rounded-[1.75rem] border border-slate-200 bg-white px-6 py-6 text-2xl font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+              className="flex items-center justify-center gap-3 rounded-[1.75rem] border border-slate-200 bg-white px-6 py-6 text-2xl font-bold text-slate-700 shadow-md transition hover:bg-slate-50"
             >
               <Settings size={22} className="text-slate-400" />
               Configurações
@@ -124,7 +124,7 @@ function ProfilePage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex items-center justify-center gap-3 rounded-[1.75rem] border border-red-200 bg-white px-6 py-6 text-2xl font-bold text-red-500 shadow-sm transition hover:bg-red-50"
+              className="flex items-center justify-center gap-3 rounded-[1.75rem] border border-red-200 bg-white px-6 py-6 text-2xl font-bold text-red-500 shadow-md transition hover:bg-red-50"
             >
               <LogOut className="h-5 w-5 shrink-0" />
               Sair
