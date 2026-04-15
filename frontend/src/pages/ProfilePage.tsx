@@ -1,9 +1,39 @@
 import { ArrowLeft, Info, LogOut, Pencil, Settings } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
+import { useAuth } from "../contexts/AuthContext"
+
+function getSexLabel(value?: string) {
+  if (value === "M") return "Masculino"
+  if (value === "F") return "Feminino"
+  if (value === "O") return "Outro"
+  return "-"
+}
+
+function getGradeLabel(value?: string) {
+  if (value === "3") return "3º ano"
+  if (value === "4") return "4º ano"
+  if (value === "5") return "5º ano"
+  if (value === "6") return "6º ano"
+  return "-"
+}
 
 function ProfilePage() {
   const navigate = useNavigate()
+  const { student, logoutUser } = useAuth()
+
+  const fullName = student?.full_name || "Aluno"
+  const firstName = fullName.split(" ")[0] || "Aluno"
+  const username = student?.username || "-"
+  const age = student?.age ? `${student.age} anos` : "-"
+  const schoolGrade = getGradeLabel(student?.school_grade)
+  const sexLabel = getSexLabel(student?.sex)
+  const guardianName = student?.guardian_name || "-"
+
+  function handleLogout() {
+    logoutUser()
+    navigate("/")
+  }
 
   return (
     <AppLayout>
@@ -38,10 +68,10 @@ function ProfilePage() {
             <div className="mb-8 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-3xl font-extrabold text-slate-900">
-                  Yuri Borges
+                  {fullName}
                 </h2>
                 <p className="mt-1 text-lg text-slate-400">
-                  6º ano • 13 anos
+                  {schoolGrade} • {age}
                 </p>
               </div>
 
@@ -57,19 +87,23 @@ function ProfilePage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="rounded-3xl bg-slate-50 px-5 py-4">
                 <p className="mb-1 text-sm text-slate-400">Usuário</p>
-                <p className="text-2xl font-semibold text-slate-800">yuri22</p>
+                <p className="text-2xl font-semibold text-slate-800">
+                  {username}
+                </p>
               </div>
 
               <div className="rounded-3xl bg-slate-50 px-5 py-4">
                 <p className="mb-1 text-sm text-slate-400">Gênero</p>
                 <p className="text-2xl font-semibold text-slate-800">
-                  Masculino
+                  {sexLabel}
                 </p>
               </div>
 
               <div className="rounded-3xl bg-slate-50 px-5 py-4 md:col-span-2">
                 <p className="mb-1 text-sm text-slate-400">Responsável</p>
-                <p className="text-2xl font-semibold text-slate-800">Dark</p>
+                <p className="text-2xl font-semibold text-slate-800">
+                  {guardianName}
+                </p>
               </div>
             </div>
           </div>
@@ -88,10 +122,10 @@ function ProfilePage() {
 
             <button
               type="button"
-              onClick={() => navigate("/")}
-                className="flex items-center justify-center gap-3 rounded-[1.75rem] border border-red-200 bg-white px-6 py-6 text-2xl font-bold text-red-500 shadow-sm transition hover:bg-red-50"
-              >
-                <LogOut className="h-5 w-5 shrink-0" />
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-3 rounded-[1.75rem] border border-red-200 bg-white px-6 py-6 text-2xl font-bold text-red-500 shadow-sm transition hover:bg-red-50"
+            >
+              <LogOut className="h-5 w-5 shrink-0" />
               Sair
             </button>
           </div>

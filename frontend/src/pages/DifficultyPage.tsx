@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { ArrowLeft, Lock } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
 import AppLayout from "../layouts/AppLayout"
 import {
   getDifficultyOptionsWithProgress,
@@ -76,21 +77,28 @@ function DifficultyPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const studentId = 1
+  const { student } = useAuth()
 
   useEffect(() => {
-    const fetchLevels = async () => {
-      if (!conteudo) {
-        setError("Conteúdo inválido.")
-        setLoading(false)
-        return
-      }
+    if (!conteudo) {
+      setError("Conteúdo inválido.")
+      setLoading(false)
+      return
+    }
 
+    if (!student?.id) return
+
+    const currentStudentId = student.id
+
+    const fetchLevels = async () => {
       try {
         setLoading(true)
         setError("")
 
-        const data = await getDifficultyOptionsWithProgress(conteudo, studentId)
+        const data = await getDifficultyOptionsWithProgress(
+          conteudo,
+          currentStudentId
+        )
         setLevels(data)
       } catch {
         setError("Não foi possível carregar os níveis.")
@@ -100,7 +108,7 @@ function DifficultyPage() {
     }
 
     fetchLevels()
-  }, [conteudo])
+  }, [conteudo, student?.id])
 
   return (
     <AppLayout>

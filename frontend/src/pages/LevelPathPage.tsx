@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import PhaseNode from "../components/PhaseNode"
 import { api } from "../services/api"
+import { useAuth } from "../contexts/AuthContext"
 
 type PhaseMapItem = {
   phase_id: number
@@ -50,7 +51,7 @@ function LevelPathPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const studentId = 1
+  const { student } = useAuth()
 
   const nodeSize = 80
   const nodeBlockHeight = 118
@@ -123,12 +124,23 @@ function LevelPathPage() {
     }
 
   useEffect(() => {
+    if (!conteudo || !nivel) {
+      setError("Conteúdo ou nível inválido.")
+      setLoading(false)
+      return
+    }
+
+    if (!student?.id) return
+
+    const currentStudentId = student.id
+
     const fetchPhases = async () => {
       try {
         setLoading(true)
+        setError("")
 
         const response = await api.get(
-          `/progress/phase-map/?student_id=${studentId}&content=${conteudo}&level=${nivel}`
+          `/progress/phase-map/?student_id=${currentStudentId}&content=${conteudo}&level=${nivel}`
         )
 
         setPhases(response.data)
@@ -141,7 +153,7 @@ function LevelPathPage() {
     }
 
     fetchPhases()
-  }, [conteudo, nivel])
+  }, [conteudo, nivel, student?.id])
 
   const completedPhases = useMemo(
     () => phases.filter((p) => p.is_completed).length,

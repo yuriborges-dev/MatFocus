@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import { getPhaseResult } from "../services/progress"
+import { useAuth } from "../contexts/AuthContext"
 
 const contentTitles: Record<string, string> = {
   adicao: "Adição",
@@ -75,23 +76,27 @@ function ActivityResultPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const studentId = 1
+  const { student } = useAuth()
 
   useEffect(() => {
-    async function loadResult() {
-      if (!phaseId) {
-        setError("Fase não informada.")
-        setLoading(false)
-        return
-      }
+    if (!phaseId || isNaN(Number(phaseId))) {
+      setError("Fase não informada.")
+      setLoading(false)
+      return
+    }
 
+    if (!student?.id) return
+
+    const currentStudentId = student.id
+
+    async function loadResult() {
       try {
         setLoading(true)
         setError("")
 
         const data = await getPhaseResult(
-          phaseId,
-          studentId,
+          Number(phaseId),
+          currentStudentId,
           sessionId || undefined
         )
         setResult(data)
@@ -104,7 +109,7 @@ function ActivityResultPage() {
     }
 
     loadResult()
-  }, [phaseId, sessionId])
+  }, [phaseId, sessionId, student?.id])
 
   const contentTitle =
     result?.content_title || contentTitles[conteudo || ""] || "Conteúdo"

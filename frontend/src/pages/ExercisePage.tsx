@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import SuccessModal from "../components/SuccessModal"
 import { api } from "../services/api"
+import { useAuth } from "../contexts/AuthContext"
 
 type Phase = {
   id: number
@@ -73,7 +74,19 @@ function ExercisePage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
 
+  const { student } = useAuth()
+
   useEffect(() => {
+    if (!conteudo || !nivel || !fase) {
+      setError("Dados da atividade inválidos.")
+      setLoading(false)
+      return
+    }
+
+    if (!student?.id) return
+
+    const currentStudentId = student.id
+
     const fetchExerciseData = async () => {
       try {
         setLoading(true)
@@ -95,12 +108,10 @@ function ExercisePage() {
 
         setPhaseData(currentPhase)
 
-        const studentId = 1
-
         const sessionResponse = await api.post(
           `/progress/phases/${currentPhase.id}/start-session/`,
           {
-            student_id: studentId,
+            student_id: currentStudentId,
           }
         )
 
@@ -121,7 +132,7 @@ function ExercisePage() {
     }
 
     fetchExerciseData()
-  }, [conteudo, nivel, fase])
+  }, [conteudo, nivel, fase, student?.id])
 
   useEffect(() => {
     if (!sessionStartedAt || isPaused) return
@@ -193,13 +204,19 @@ function ExercisePage() {
       return
     }
 
-    try {
-      const studentId = 1
+    if (!student?.id) {
+      setFeedback("Aluno não autenticado.")
+      setFeedbackType("error")
+      return
+    }
 
+    const currentStudentId = student.id
+
+    try {
       const response = await api.post(
         `/activities/questions/${currentQuestion.id}/submit-answer/`,
         {
-          student_id: studentId,
+          student_id: currentStudentId,
           session_id: sessionId,
           answer: answer.trim(),
         }

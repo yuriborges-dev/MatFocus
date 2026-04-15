@@ -1,7 +1,31 @@
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
+import { getDashboardSummary } from "../services/progress"
 
 function UserProfileCard() {
   const navigate = useNavigate()
+  const { student } = useAuth()
+
+  const [score, setScore] = useState<number>(0)
+
+  const firstName = student?.full_name?.split(" ")[0] || "Aluno"
+
+  useEffect(() => {
+    if (!student?.id) return
+
+    const fetchScore = async () => {
+      try {
+        const data = await getDashboardSummary(student.id)
+        setScore(data.points ?? 0)
+      } catch (error) {
+        console.error("Erro ao carregar pontuação:", error)
+        setScore(0)
+      }
+    }
+
+    fetchScore()
+  }, [student?.id])
 
   return (
     <button
@@ -15,9 +39,9 @@ function UserProfileCard() {
 
       <div className="text-left leading-tight">
         <p className="text-[1.05rem] font-semibold text-slate-700">
-          Yuri Borges
+          {firstName}
         </p>
-        <p className="text-sm text-slate-400">0 pts</p>
+        <p className="text-sm text-slate-400">{score} pts</p>
       </div>
     </button>
   )
