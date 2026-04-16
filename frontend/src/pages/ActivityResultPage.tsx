@@ -99,6 +99,7 @@ function ActivityResultPage() {
           currentStudentId,
           sessionId || undefined
         )
+
         setResult(data)
       } catch (err) {
         console.error("Erro ao carregar resultado da fase:", err)
@@ -131,12 +132,8 @@ function ActivityResultPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex justify-center pt-6">
-          <div className="w-full max-w-[520px] rounded-[2.2rem] border border-[#c7efd8] bg-white p-10 text-center shadow-[0_20px_50px_rgba(121,198,161,0.18)]">
-            <p className="text-lg font-semibold text-slate-700">
-              Carregando resultado da fase...
-            </p>
-          </div>
+        <div className="mx-auto mt-8 w-full max-w-2xl rounded-[1.8rem] bg-white px-6 py-6 text-base font-semibold text-slate-500 shadow-sm">
+          Carregando resultado da fase...
         </div>
       </AppLayout>
     )
@@ -145,20 +142,16 @@ function ActivityResultPage() {
   if (error || !result) {
     return (
       <AppLayout>
-        <div className="flex justify-center pt-6">
-          <div className="w-full max-w-[520px] rounded-[2.2rem] border border-[#ffd6d6] bg-white p-10 text-center shadow-[0_20px_50px_rgba(255,107,107,0.10)]">
-            <p className="text-lg font-semibold text-red-500">
-              {error || "Não foi possível carregar o resultado."}
-            </p>
+        <div className="mx-auto mt-8 w-full max-w-2xl rounded-[1.8rem] border border-red-200 bg-red-50 px-6 py-6 text-base font-semibold text-red-700 shadow-sm">
+          <p>{error || "Não foi possível carregar o resultado."}</p>
 
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="mt-6 rounded-[1.2rem] bg-[#4a8fd3] px-5 py-3 text-base font-bold text-white transition hover:brightness-105"
-            >
-              Voltar
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="mt-5 rounded-[1rem] bg-[#4a8fd3] px-5 py-3 text-sm font-bold text-white transition hover:brightness-105"
+          >
+            Voltar
+          </button>
         </div>
       </AppLayout>
     )
@@ -166,92 +159,100 @@ function ActivityResultPage() {
 
   return (
     <AppLayout>
-      <div className="flex justify-center pt-6">
-        <div className="w-full max-w-[520px] rounded-[2.2rem] border border-[#c7efd8] bg-white shadow-[0_20px_50px_rgba(121,198,161,0.18)]">
-          <div className="h-3 rounded-t-[2.2rem] bg-[#79c6a1]" />
+      <div className="flex min-h-[calc(100vh-110px)] items-center justify-center py-4">
+        <div className="w-full max-w-[760px]">
+          <div className="overflow-hidden rounded-[1.8rem] bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+            <div className="h-2 bg-gradient-to-r from-[#4a8fd3] via-[#6aa8e5] to-[#79c6a1]" />
 
-          <div className="px-9 py-10 text-center">
-            <div className="mx-auto mb-7 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-[#eefaf2] text-[3rem] text-[#79c6a1]">
-              🏆
-            </div>
+            <div className="px-6 py-7 md:px-7 md:py-8">
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[1.2rem] bg-[#eef6ff] text-[2rem] shadow-sm">
+                  🏆
+                </div>
 
-            <h1 className="text-[2.4rem] font-extrabold text-slate-900">
-              Parabéns!
-            </h1>
+                <h1 className="text-[2.2rem] font-extrabold leading-none text-slate-900">
+                  Parabéns!
+                </h1>
 
-            <p className="mt-2 text-[1.2rem] text-slate-400">
-              {contentTitle} • {levelTitle} • Fase {result.phase_number}
-            </p>
-
-            <p className="mt-4 text-[1.05rem] font-medium text-slate-500">
-              {motivationalMessage}
-            </p>
-
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              <div className="rounded-[1.4rem] bg-slate-50 px-4 py-5">
-                <p className="text-[2rem] font-extrabold text-slate-900">
-                  {totalScore}
+                <p className="mt-3 text-[1rem] text-slate-400">
+                  {contentTitle} • {levelTitle} • Fase {result.phase_number}
                 </p>
-                <p className="mt-1 text-sm text-slate-400">Pontuação total</p>
+
+                <p className="mt-3 max-w-xl text-[0.98rem] font-medium leading-relaxed text-slate-500">
+                  {motivationalMessage}
+                </p>
               </div>
 
-              <div className="rounded-[1.4rem] bg-slate-50 px-4 py-5">
-                <p className="text-[2rem] font-extrabold text-slate-900">
-                  {accuracy}%
-                </p>
-                <p className="mt-1 text-sm text-slate-400">Taxa de acerto</p>
+              <div className="mt-7 grid gap-3 md:grid-cols-2">
+                <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-slate-50 px-4 py-4 text-center shadow-sm">
+                  <p className="text-[2rem] font-extrabold text-slate-900">
+                    {totalScore}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-400">Pontuação total</p>
+                </div>
+
+                <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-slate-50 px-4 py-4 text-center shadow-sm">
+                  <p className="text-[2rem] font-extrabold text-slate-900">
+                    {accuracy}%
+                  </p>
+                  <p className="mt-1 text-sm text-slate-400">Taxa de acerto</p>
+                </div>
+
+                <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-[#eefaf2] px-4 py-4 text-center shadow-sm">
+                  <p className="text-[2rem] font-extrabold text-[#79c6a1]">
+                    {correctAnswers}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-400">Acertos</p>
+                </div>
+
+                <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-[#fff1f1] px-4 py-4 text-center shadow-sm">
+                  <p className="text-[2rem] font-extrabold text-[#ff6b6b]">
+                    {wrongAnswers}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-400">Erros</p>
+                </div>
+
+                <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-[#f6efff] px-4 py-4 text-center shadow-sm md:col-span-2">
+                  <p className="text-[2rem] font-extrabold text-[#9b5cf6]">
+                    {totalTime}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-400">Tempo total</p>
+                </div>
               </div>
 
-              <div className="rounded-[1.4rem] bg-[#eefaf2] px-4 py-5">
-                <p className="text-[2rem] font-extrabold text-[#79c6a1]">
-                  {correctAnswers}
-                </p>
-                <p className="mt-1 text-sm text-slate-400">Acertos</p>
-              </div>
-
-              <div className="rounded-[1.4rem] bg-[#fff1f1] px-4 py-5">
-                <p className="text-[2rem] font-extrabold text-[#ff6b6b]">
-                  {wrongAnswers}
-                </p>
-                <p className="mt-1 text-sm text-slate-400">Erros</p>
-              </div>
-
-              <div className="col-span-2 rounded-[1.4rem] bg-[#f6efff] px-4 py-5">
-                <p className="text-[2rem] font-extrabold text-[#9b5cf6]">
-                  {totalTime}
-                </p>
-                <p className="mt-1 text-sm text-slate-400">Tempo total</p>
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-col gap-4">
-              <button
-                type="button"
-                onClick={() => navigate(`/atividades/${conteudo}/${nivel}/fase/${phaseId}`)}
-                className="rounded-[1.3rem] bg-[#4a8fd3] px-6 py-4 text-xl font-bold text-white shadow-md transition hover:brightness-105"
-              >
-                ↻ Jogar novamente
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate(`/atividades/${conteudo}/${nivel}`)}
-                className="rounded-[1.3rem] border border-slate-200 bg-white px-6 py-4 text-xl font-bold text-slate-800 shadow-sm transition hover:bg-slate-50"
-              >
-                🗺 Voltar ao mapa de fases
-              </button>
-
-              {result.next_phase_number && result.next_phase_unlocked && (
+              <div className="mt-7 flex flex-col gap-3">
                 <button
                   type="button"
                   onClick={() =>
-                    navigate(`/atividades/${conteudo}/${nivel}/fase/${result.next_phase_number}`)
+                    navigate(`/atividades/${conteudo}/${nivel}/fase/${phaseId}`)
                   }
-                  className="rounded-[1.3rem] bg-[#79c6a1] px-6 py-4 text-xl font-bold text-white shadow-md transition hover:brightness-105"
+                  className="rounded-[1.2rem] bg-[#4a8fd3] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105"
                 >
-                  ➜ Ir para próxima fase
+                  ↻ Jogar novamente
                 </button>
-              )}
+
+                <button
+                  type="button"
+                  onClick={() => navigate(`/atividades/${conteudo}/${nivel}`)}
+                  className="rounded-[1.2rem] border border-slate-200 bg-white px-6 py-3.5 text-base font-bold text-slate-800 shadow-sm transition hover:bg-slate-50"
+                >
+                  🗺 Voltar ao mapa de fases
+                </button>
+
+                {result.next_phase_number && result.next_phase_unlocked && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(
+                        `/atividades/${conteudo}/${nivel}/fase/${result.next_phase_number}`
+                      )
+                    }
+                    className="rounded-[1.2rem] bg-[#79c6a1] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105"
+                  >
+                    ➜ Ir para próxima fase
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

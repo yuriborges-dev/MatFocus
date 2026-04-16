@@ -4,6 +4,7 @@ import AppLayout from "../layouts/AppLayout"
 import SuccessModal from "../components/SuccessModal"
 import { api } from "../services/api"
 import { useAuth } from "../contexts/AuthContext"
+import { ArrowLeft } from "lucide-react"
 
 type Phase = {
   id: number
@@ -169,10 +170,8 @@ function ExercisePage() {
 
   const handleResume = () => {
     if (pauseStartedAt) {
-      const pausedDuration =
-        Math.floor((Date.now() - pauseStartedAt) / 1000)
-
-      setTotalPausedSeconds(prev => prev + pausedDuration)
+      const pausedDuration = Math.floor((Date.now() - pauseStartedAt) / 1000)
+      setTotalPausedSeconds((prev) => prev + pausedDuration)
     }
 
     setPauseStartedAt(null)
@@ -284,20 +283,20 @@ function ExercisePage() {
       />
 
       {isPaused && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-[2px]">
           <div className="w-full max-w-md rounded-[2rem] bg-white p-8 shadow-xl">
-            <h2 className="text-2xl font-bold text-slate-800">
+            <h2 className="text-3xl font-extrabold text-slate-800">
               Atividade pausada
             </h2>
-            <p className="mt-2 text-slate-500">
+            <p className="mt-3 text-lg text-slate-500">
               Você pode retomar de onde parou ou sair da sessão.
             </p>
 
-            <div className="mt-6 flex flex-col gap-3">
+            <div className="mt-7 flex flex-col gap-3">
               <button
                 type="button"
                 onClick={handleResume}
-                className="rounded-2xl bg-[#4a8fd3] px-6 py-3 text-lg font-semibold text-white"
+                className="rounded-[1.3rem] bg-[#4a8fd3] px-6 py-4 text-xl font-bold text-white transition hover:brightness-105"
               >
                 Retomar
               </button>
@@ -305,7 +304,7 @@ function ExercisePage() {
               <button
                 type="button"
                 onClick={handleExitSession}
-                className="rounded-2xl border border-slate-300 px-6 py-3 text-lg font-semibold text-slate-600"
+                className="rounded-[1.3rem] border border-slate-300 bg-white px-6 py-4 text-xl font-bold text-slate-600 transition hover:bg-slate-50"
               >
                 Sair da sessão
               </button>
@@ -315,38 +314,40 @@ function ExercisePage() {
       )}
 
       {loading && (
-        <div className="mx-auto mt-8 w-full max-w-4xl rounded-[1.8rem] bg-white px-7 py-8 text-slate-500 shadow-sm">
+        <div className="mx-auto mt-8 w-full max-w-5xl rounded-[1.8rem] bg-white px-8 py-8 text-lg font-semibold text-slate-500 shadow-sm">
           Carregando atividade...
         </div>
       )}
 
       {error && (
-        <div className="mx-auto mt-8 w-full max-w-4xl rounded-[1.8rem] border border-red-200 bg-red-50 px-7 py-8 text-red-700 shadow-sm">
+        <div className="mx-auto mt-8 w-full max-w-5xl rounded-[1.8rem] border border-red-200 bg-red-50 px-8 py-8 text-lg font-semibold text-red-700 shadow-sm">
           {error}
         </div>
       )}
 
       {!loading && !error && phaseData && currentQuestion && (
-        <div className="mx-auto w-full max-w-4xl">
+        <div className="mx-auto w-full max-w-5xl">
           <div className="flex items-start justify-between gap-6">
             <div className="flex items-start gap-4">
               <button
                 type="button"
                 onClick={() => navigate(`/atividades/${conteudo}/${nivel}`)}
-                className="mt-1 text-2xl text-slate-600 transition hover:text-slate-800"
+                className="mt-1 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-800"
               >
-                ←
+                <ArrowLeft className="h-6 w-6" />
               </button>
 
               <div>
-                <h1 className="text-[2.3rem] font-extrabold text-slate-900">
+                <h1 className="text-[3rem] font-extrabold leading-none text-slate-900">
                   {phaseData.content_name}
                 </h1>
-                <p className="text-[1.1rem] text-slate-400">
+
+                <p className="mt-3 text-[1.25rem] text-slate-400">
                   {phaseData.level_title} • Fase {phaseData.phase_number} •
                   Questão {questionIndex + 1} de {totalQuestions}
                 </p>
-                <p className="mt-2 text-[1rem] font-semibold text-[#4a8fd3]">
+
+                <p className="mt-4 text-[1.15rem] font-bold text-[#4a8fd3]">
                   Tempo: {formatTimer(elapsedSeconds)}
                 </p>
               </div>
@@ -355,71 +356,75 @@ function ExercisePage() {
             <button
               type="button"
               onClick={handlePause}
-              className="flex h-10 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50"
+              className="flex h-14 w-16 items-center justify-center rounded-[1.3rem] border border-slate-200 bg-white text-xl font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
               title="Pausar atividade"
             >
               ⏸
             </button>
           </div>
 
-          <div className="mt-7">
-            <div className="h-3 w-full rounded-full bg-slate-100">
+          <div className="mt-9">
+            <div className="h-4 w-full rounded-full bg-slate-100">
               <div
-                className="h-3 rounded-full bg-[#4a8fd3] transition-all"
+                className="h-4 rounded-full bg-[#4a8fd3] transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
 
-          <div className="mt-7 rounded-[2rem] bg-white px-8 py-10 text-center shadow-sm">
-            <h2 className="text-[2.1rem] font-bold text-slate-900">
+          <div className="mt-10 rounded-[2.2rem] bg-white px-10 py-14 text-center shadow-sm">
+            <h2 className="text-[3rem] font-extrabold leading-snug text-slate-900">
               {currentQuestion.statement}
             </h2>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-8">
             <input
               type="text"
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               placeholder="Digite sua resposta"
-              className="w-full rounded-[1.5rem] border border-slate-200 bg-white px-6 py-6 text-center text-xl font-semibold text-slate-700 outline-none transition focus:border-[#4a8fd3]"
+              className="w-full rounded-[1.8rem] border border-slate-200 bg-white px-8 py-7 text-center text-[2rem] font-semibold text-slate-700 outline-none transition focus:border-[#4a8fd3] focus:ring-4 focus:ring-blue-100"
             />
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-[250px_1fr]">
+          <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-[290px_1fr]">
             <button
               type="button"
               onClick={handleShowTip}
-              className="rounded-[1.3rem] border border-yellow-400 bg-white px-6 py-4 text-xl font-bold text-yellow-600 transition hover:bg-yellow-50"
+              className="flex items-center justify-center gap-3 rounded-[1.5rem] border border-yellow-400 bg-white px-6 py-5 text-2xl font-bold text-yellow-600 transition hover:bg-yellow-50"
             >
-              💡 Dica
+              <span className="text-[1.8rem]">💡</span>
+              Dica
             </button>
 
             <button
               type="button"
               onClick={handleSubmitAnswer}
-              className="rounded-[1.3rem] bg-[#8fb7df] px-6 py-4 text-xl font-bold text-white transition hover:brightness-105"
+              className="flex items-center justify-center gap-3 rounded-[1.5rem] bg-[#8fb7df] px-6 py-5 text-2xl font-bold text-white transition hover:brightness-105"
             >
-              ✈ Enviar
+              <span className="text-[1.6rem]">✈</span>
+              Enviar
             </button>
           </div>
 
           {showTip && (
-            <div className="mt-5 rounded-[1.5rem] border border-yellow-200 bg-yellow-50 px-6 py-4 text-yellow-700 shadow-sm">
-              <p className="text-lg font-semibold">Dica</p>
-              <p className="mt-1 text-base">{currentQuestion.tip}</p>
+            <div className="mt-6 rounded-[1.6rem] border border-yellow-200 bg-yellow-50 px-7 py-5 text-yellow-700 shadow-sm">
+              <p className="text-xl font-bold">Dica</p>
+              <p className="mt-2 text-lg leading-relaxed">
+                {currentQuestion.tip}
+              </p>
             </div>
           )}
 
           {feedback && (
             <div
-              className={`mt-5 rounded-[1.5rem] border px-6 py-4 shadow-sm ${feedbackClasses[feedbackType]}`}
+              className={`mt-6 rounded-[1.6rem] border px-7 py-5 shadow-sm ${feedbackClasses[feedbackType]}`}
             >
-              <p className="text-lg font-semibold">{feedback}</p>
+              <p className="text-xl font-bold">{feedback}</p>
 
               {feedbackType === "error" && (
-                <p className="mt-2 text-sm opacity-80">
+                <p className="mt-2 text-base opacity-80">
                   Leia a questão com calma e tente novamente.
                 </p>
               )}

@@ -279,7 +279,7 @@ function LevelPathPage() {
           <button
             type="button"
             onClick={() => navigate(`/atividades/${conteudo}`)}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/85 text-slate-500 shadow-sm transition hover:bg-white hover:text-slate-800"
+            className="mt-1 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-800"
             aria-label="Voltar para dificuldades"
           >
             <ArrowLeft className="h-6 w-6" />
