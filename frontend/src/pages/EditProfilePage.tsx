@@ -1,10 +1,12 @@
-import { ArrowLeft, Eye, EyeOff, Save } from "lucide-react"
-import { useMemo, useState } from "react"
+import { ArrowLeft, Eye, EyeOff, Save, Trash2, Upload } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import { useAuth } from "../contexts/AuthContext"
+import { updateMe } from "../services/auth"
+import defaultProfile from "../assets/default_profile.jpg"
 
-type SexOption = "M" | "F" | "O"
+type SexOption = "M" | "F"
 type GradeOption = "3" | "4" | "5" | "6"
 
 function getGradeLabel(value: string) {
@@ -17,6 +19,7 @@ function getGradeLabel(value: string) {
 
 function EditProfilePage() {
   const navigate = useNavigate()
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
   const { student, updateStudentData } = useAuth()
 
   const initialData = useMemo(
@@ -34,9 +37,23 @@ function EditProfilePage() {
   )
 
   const [formData, setFormData] = useState(initialData)
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(
+    student?.profile_photo || null
+  )
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null | undefined>(
+    undefined
+  )
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showSuccessToast, setShowSuccessToast] = useState(false)
+  const [isToastLeaving, setIsToastLeaving] = useState(false)
+
+  useEffect(() => {
+    setFormData(initialData)
+    setProfilePhotoPreview(student?.profile_photo || null)
+    setProfilePhotoFile(undefined)
+  }, [initialData, student?.profile_photo])
 
   const isChangingPassword = formData.senha.trim().length > 0
 
@@ -52,6 +69,49 @@ function EditProfilePage() {
         ? { confirmarSenha: "" }
         : {}),
     }))
+  }
+
+  function handleSelectPhoto() {
+    fileInputRef.current?.click()
+  }
+
+  function handlePhotoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+
+    if (!file) return
+
+    if (!file.type.startsWith("image/")) {
+      alert("Selecione um arquivo de imagem válido.")
+      return
+    }
+
+    setProfilePhotoFile(file)
+
+    const previewUrl = URL.createObjectURL(file)
+    setProfilePhotoPreview(previewUrl)
+  }
+
+  function handleRemovePhoto() {
+    setProfilePhotoPreview(null)
+    setProfilePhotoFile(null)
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
+  function triggerSuccessToast() {
+    setShowSuccessToast(true)
+    setIsToastLeaving(false)
+
+    setTimeout(() => {
+      setIsToastLeaving(true)
+    }, 2200)
+
+    setTimeout(() => {
+      setShowSuccessToast(false)
+      setIsToastLeaving(false)
+    }, 2800)
   }
 
   async function handleSave() {
@@ -78,17 +138,26 @@ function EditProfilePage() {
     setIsSaving(true)
 
     try {
-      updateStudentData({
+      const updatedStudent = await updateMe({
         full_name: formData.nome.trim(),
         username: formData.usuario.trim(),
         age: Number(formData.idade),
-        school_grade: formData.serie,
-        sex: formData.genero,
+        school_grade: formData.serie as GradeOption,
+        sex: formData.genero as SexOption,
         guardian_name: formData.responsavel.trim(),
+        ...(isChangingPassword ? { password: formData.senha } : {}),
+        ...(profilePhotoFile !== undefined
+          ? { profile_photo: profilePhotoFile }
+          : {}),
       })
 
-      alert("Perfil salvo com sucesso!")
-      navigate("/perfil")
+      updateStudentData(updatedStudent)
+
+      triggerSuccessToast()
+
+      setTimeout(() => {
+        navigate("/perfil")
+      }, 2800)
     } catch (error) {
       console.error(error)
       alert("Não foi possível salvar as alterações.")
@@ -99,6 +168,18 @@ function EditProfilePage() {
 
   return (
     <AppLayout showProfileCard={false}>
+      {showSuccessToast && (
+        <div
+          className={`fixed right-6 top-6 z-50 rounded-2xl bg-green-500 px-5 py-4 text-white shadow-lg transition-all duration-500 ${
+            isToastLeaving
+              ? "translate-y-2 opacity-0"
+              : "translate-y-0 opacity-100"
+          }`}
+        >
+          <p className="text-sm font-semibold">Alterações salvas com sucesso!</p>
+        </div>
+      )}
+
       <div className="mx-auto max-w-6xl">
         <header className="mb-6">
           <button
@@ -118,11 +199,43 @@ function EditProfilePage() {
         </header>
 
         <section className="overflow-hidden rounded-[2rem] bg-white shadow-md">
-          <div className="relative h-[320px] w-full bg-gradient-to-r from-[#4a90d9] to-[#67ace8]">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex h-40 w-40 items-center justify-center rounded-full bg-white/20 text-6xl shadow-sm backdrop-blur-sm">
-                👦🏽
+          <div className="relative h-[360px] w-full bg-gradient-to-r from-[#4a90d9] to-[#67ace8]">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+              <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-full bg-white/20 shadow-sm backdrop-blur-sm">
+                <img
+                  src={profilePhotoPreview || defaultProfile}
+                  alt="Foto de perfil"
+                  className="h-full w-full object-cover"
+                />
               </div>
+
+              <div className="flex flex-wrap justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleSelectPhoto}
+                  className="flex items-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                >
+                  <Upload className="h-4 w-4" />
+                  Alterar foto
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  className="flex items-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-red-500 shadow-sm transition hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Remover foto
+                </button>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="hidden"
+              />
             </div>
           </div>
 

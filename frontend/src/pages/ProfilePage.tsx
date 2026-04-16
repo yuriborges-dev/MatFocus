@@ -2,6 +2,7 @@ import { ArrowLeft, Info, LogOut, Pencil, Settings } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import { useAuth } from "../contexts/AuthContext"
+import defaultProfile from "../assets/default_profile.jpg"
 
 function getSexLabel(value?: string) {
   if (value === "M") return "Masculino"
@@ -58,8 +59,12 @@ function ProfilePage() {
         <section className="overflow-hidden rounded-[2rem] bg-white shadow-md">
           <div className="relative h-[320px] w-full bg-gradient-to-r from-[#4a90d9] to-[#67ace8]">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex h-40 w-40 items-center justify-center rounded-full bg-white/20 text-6xl shadow-sm backdrop-blur-sm">
-                👦🏽
+              <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-full bg-white/20 shadow-sm backdrop-blur-sm">
+                <img
+                  src={student?.profile_photo || defaultProfile}
+                  alt="Foto de perfil"
+                  className="h-full w-full object-cover"
+                />
               </div>
             </div>
           </div>

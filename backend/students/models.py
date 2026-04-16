@@ -6,7 +6,6 @@ class Student(models.Model):
     SEX_CHOICES = [
         ('M', 'Masculino'),
         ('F', 'Feminino'),
-        ('O', 'Outro'),
     ]
 
     GRADE_CHOICES = [
@@ -23,6 +22,11 @@ class Student(models.Model):
     school_grade = models.CharField(max_length=2, choices=GRADE_CHOICES)
     guardian_name = models.CharField(max_length=150)
     created_at = models.DateTimeField(auto_now_add=True)
+    profile_photo = models.ImageField(
+        upload_to="profile_photos/",
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return self.full_name

@@ -5,8 +5,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .serializers import (
+    RegisterSerializer,
+    StudentMeSerializer,
+    LoginSerializer,
+    StudentUpdateSerializer,
+)
+
 from students.models import Student
-from .serializers import RegisterSerializer, StudentMeSerializer, LoginSerializer
 
 
 def get_tokens_for_user(user):
@@ -86,4 +92,24 @@ class MeView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        return Response(StudentMeSerializer(student).data)
+        return Response(StudentMeSerializer(student, context={"request": request}).data)
+
+    def patch(self, request):
+        try:
+            student = request.user.student
+        except Student.DoesNotExist:
+            return Response(
+                {"detail": "Aluno não encontrado."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = StudentUpdateSerializer(
+            student,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        student = serializer.save()
+
+        return Response(StudentMeSerializer(student, context={"request": request}).data)

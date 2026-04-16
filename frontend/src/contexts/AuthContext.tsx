@@ -8,8 +8,6 @@ import {
   type Student,
 } from "../services/auth"
 
-type UpdateStudentPayload = Partial<Student>
-
 type AuthContextType = {
   student: Student | null
   isAuthenticated: boolean
@@ -17,7 +15,7 @@ type AuthContextType = {
   loginUser: (payload: LoginPayload) => Promise<void>
   registerUser: (payload: RegisterPayload) => Promise<void>
   logoutUser: () => void
-  updateStudentData: (payload: UpdateStudentPayload) => void
+  updateStudentData: (student: Student) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -72,18 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStudent(data.student)
   }
 
-  function updateStudentData(payload: UpdateStudentPayload) {
-    setStudent((prev) => {
-      if (!prev) return prev
-
-      const updatedStudent = {
-        ...prev,
-        ...payload,
-      }
-
-      localStorage.setItem("matfocus_student", JSON.stringify(updatedStudent))
-      return updatedStudent
-    })
+  function updateStudentData(updatedStudent: Student) {
+    setStudent(updatedStudent)
+    localStorage.setItem("matfocus_student", JSON.stringify(updatedStudent))
   }
 
   function logoutUser() {
