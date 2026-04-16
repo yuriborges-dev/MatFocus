@@ -483,15 +483,23 @@ class ProgressSummaryView(APIView):
             if total_answers > 0 else 0
         )
 
-        activities = StudentPhaseSession.objects.filter(
+        finished_sessions = StudentPhaseSession.objects.filter(
             student=student,
             is_finished=True
         )
 
         if start_date:
-            activities = activities.filter(started_at__gte=start_date)
+            finished_sessions = finished_sessions.filter(started_at__gte=start_date)
 
-        total_activities = activities.count()
+        completed_phase_progress = StudentPhaseProgress.objects.filter(
+            student=student,
+            completed=True
+        )
+
+        if start_date:
+            completed_phase_progress = completed_phase_progress.filter(updated_at__gte=start_date)
+
+        total_activities = completed_phase_progress.count()
 
         contents = Content.objects.all()
         content_progress = []
@@ -516,10 +524,10 @@ class ProgressSummaryView(APIView):
                 "progress": progress_percent
             })
 
-        history_sessions = StudentPhaseSession.objects.filter(
-            student=student,
-            is_finished=True
-        ).select_related("phase__content", "phase__level")[:5]
+        history_sessions = finished_sessions.select_related(
+            "phase__content",
+            "phase__level"
+        )[:5]
 
         history = []
 
@@ -544,7 +552,8 @@ class ProgressSummaryView(APIView):
             "content_progress": content_progress,
             "history": history
         })
-    
+
+
 class DashboardSummaryView(APIView):
     permission_classes = [IsAuthenticated]
     CONTENT_ORDER = ["adicao", "subtracao", "multiplicacao", "divisao", "problemas"]
@@ -570,12 +579,15 @@ class DashboardSummaryView(APIView):
             if total_answers > 0 else 0
         )
 
-        activities = StudentPhaseSession.objects.filter(
+        finished_sessions = StudentPhaseSession.objects.filter(
             student=student,
             is_finished=True
         )
 
-        total_activities = activities.count()
+        total_activities = StudentPhaseProgress.objects.filter(
+            student=student,
+            completed=True
+        ).count()
 
         points = StudentPhaseProgress.objects.filter(
             student=student
@@ -608,7 +620,7 @@ class DashboardSummaryView(APIView):
                 "progress": percent
             })
 
-        recent_sessions = activities[:3]
+        recent_sessions = finished_sessions[:3]
         recent_activities = []
 
         for session in recent_sessions:
