@@ -116,17 +116,17 @@ function DifficultyPage() {
         <button
           type="button"
           onClick={() => navigate("/atividades")}
-          className="mt-1 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-800"
+        className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
           aria-label="Voltar para conteúdos"
         >
           <ArrowLeft className="h-6 w-6" />
         </button>
 
-        <h1 className="text-[2.5rem] font-extrabold text-slate-900">
+        <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-[2.5rem]">
           {formatContentTitle(conteudo)}
         </h1>
 
-        <p className="mt-1 text-[1.1rem] text-slate-400">
+        <p className="mt-1 text-sm text-slate-400 sm:text-base lg:text-[1.1rem]">
           Escolha o nível de dificuldade
         </p>
       </div>

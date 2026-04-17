@@ -94,10 +94,11 @@ function ActivitiesPage() {
   return (
     <AppLayout>
       <div>
-        <h1 className="text-[2.5rem] font-extrabold text-slate-900">
+        <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-[2.5rem]">
           Escolha o conteúdo
         </h1>
-        <p className="mt-1 text-[1.1rem] text-slate-400">
+
+        <p className="mt-1 text-sm text-slate-400 sm:text-base lg:text-[1.1rem]">
           O que vamos praticar hoje?
         </p>
       </div>

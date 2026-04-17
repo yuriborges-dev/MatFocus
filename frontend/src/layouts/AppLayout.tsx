@@ -1,14 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom"
-import {
-  BarChart3,
-  BookOpen,
-  Home,
-  LogOut,
-  Settings,
-  Star,
-} from "lucide-react"
+import { BarChart3, BookOpen, Home, Menu, Star, X } from "lucide-react"
 import logoMatFocus from "../assets/logo - matfocus.png"
 import UserProfileCard from "../components/UserProfileCard"
+import { useState } from "react"
 
 type AppLayoutProps = {
   children: React.ReactNode
@@ -20,6 +14,7 @@ function AppLayout({
   showProfileCard = true,
 }: AppLayoutProps) {
   const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const navItemClass = ({ isActive }: { isActive: boolean }) =>
     `flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium transition ${
@@ -28,14 +23,33 @@ function AppLayout({
         : "text-slate-500 hover:bg-slate-50"
     }`
 
-  const secondaryItemClass =
-    "flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-left text-[18px] font-medium text-slate-400 transition hover:bg-slate-50"
-
   const iconClass = "h-5 w-5 shrink-0"
 
   return (
     <div className="min-h-screen bg-[#f7f8fb]">
-      <aside className="fixed left-0 top-0 flex h-screen w-[285px] flex-col border-r border-slate-200 bg-white px-8 py-6">
+      {/* Overlay mobile */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/30 lg:hidden"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed left-0 top-0 z-50 flex h-screen w-[260px] flex-col border-r border-slate-200 bg-white px-8 py-6 transition-transform duration-300
+        ${menuOpen ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0`}
+      >
+        {/* botão fechar mobile */}
+        <button
+          className="mb-6 self-end lg:hidden"
+          onClick={() => setMenuOpen(false)}
+        >
+          <X size={22} />
+        </button>
+
+        {/* logo */}
         <button className="mb-8" onClick={() => navigate("/dashboard")}>
           <img
             src={logoMatFocus}
@@ -46,37 +60,68 @@ function AppLayout({
 
         <nav className="flex flex-1 flex-col justify-between overflow-y-auto">
           <div className="space-y-3">
-            <NavLink to="/dashboard" className={navItemClass}>
+            <NavLink
+              to="/dashboard"
+              className={navItemClass}
+              onClick={() => setMenuOpen(false)}
+            >
               <Home className={iconClass} />
-              <span>Início</span>
+              Início
             </NavLink>
 
-            <NavLink to="/atividades" className={navItemClass}>
+            <NavLink
+              to="/atividades"
+              className={navItemClass}
+              onClick={() => setMenuOpen(false)}
+            >
               <BookOpen className={iconClass} />
-              <span>Atividades</span>
+              Atividades
             </NavLink>
 
-            <NavLink to="/progresso" className={navItemClass}>
+            <NavLink
+              to="/progresso"
+              className={navItemClass}
+              onClick={() => setMenuOpen(false)}
+            >
               <BarChart3 className={iconClass} />
-              <span>Progresso</span>
+              Progresso
             </NavLink>
 
-            <NavLink to="/avatar" className={navItemClass}>
+            <NavLink
+              to="/avatar"
+              className={navItemClass}
+              onClick={() => setMenuOpen(false)}
+            >
               <Star className={iconClass} />
-              <span>Avatar</span>
+              Avatar
             </NavLink>
           </div>
         </nav>
       </aside>
 
-      <div className="ml-[285px] flex min-h-screen flex-1 flex-col">
-        {showProfileCard && (
-          <header className="flex justify-end px-9 pb-2 pt-7">
-            <UserProfileCard />
-          </header>
-        )}
+      {/* Conteúdo */}
+      <div className="flex min-h-screen flex-col lg:ml-[260px]">
+        {/* Header */}
+        <header className="flex items-center justify-between gap-3 bg-white px-4 py-4 shadow-sm lg:bg-transparent lg:px-9 lg:pt-7 lg:shadow-none">
+          <button
+            className="shrink-0 lg:hidden"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Abrir menu"
+          >
+            <Menu size={24} />
+          </button>
 
-        <main className="flex-1 px-9 pb-8 pt-2">{children}</main>
+          {showProfileCard && (
+            <div className="ml-auto max-w-[220px] sm:max-w-none">
+              <UserProfileCard />
+            </div>
+          )}
+        </header>
+
+        {/* Conteúdo principal */}
+        <main className="flex-1 px-5 pb-8 pt-4 lg:px-9">
+          {children}
+        </main>
       </div>
     </div>
   )

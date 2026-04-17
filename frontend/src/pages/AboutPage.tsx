@@ -10,45 +10,45 @@ import AppLayout from "../layouts/AppLayout"
 function AboutPage() {
   const navigate = useNavigate()
 
-  const iconStyle = "h-9 w-9 shrink-0 text-[#3b82d0]"
+  const iconStyle =
+    "h-8 w-8 shrink-0 text-[#3b82d0] sm:h-9 sm:w-9"
 
   return (
     <AppLayout showProfileCard={false}>
       <div className="mx-auto max-w-4xl">
-        <header className="mb-8">
+        <header className="mb-6 sm:mb-8">
           <button
+            type="button"
             onClick={() => navigate(-1)}
-            className="mb-4 inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold text-slate-500 transition hover:bg-white hover:text-slate-700"
+            className="mb-3 inline-flex items-center gap-2 rounded-2xl px-2 py-2 text-sm font-semibold text-slate-500 transition hover:bg-white hover:text-slate-700 sm:mb-4 sm:px-3"
           >
             <ArrowLeft className="h-6 w-6" />
           </button>
 
-          <h1 className="text-4xl font-extrabold text-slate-900">
+          <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
             Sobre o MatFocus
           </h1>
 
-          <p className="mt-2 text-lg text-slate-400">
+          <p className="mt-1 text-sm text-slate-400 sm:mt-2 sm:text-base lg:text-lg">
             Informações institucionais do projeto
           </p>
         </header>
 
-        <section className="space-y-6">
-
-          {/* Desenvolvedor */}
-          <div className="rounded-[1.75rem] bg-white p-7 shadow-md">
+        <section className="space-y-5 sm:space-y-6">
+          <div className="rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7">
             <div className="flex items-start gap-4">
               <GraduationCap className={iconStyle} />
 
               <div>
-                <h2 className="text-2xl font-bold text-slate-800">
+                <h2 className="text-xl font-bold text-slate-800 sm:text-2xl">
                   Desenvolvedor
                 </h2>
 
-                <p className="mt-2 text-slate-600 leading-relaxed">
+                <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
                   O sistema <i><strong>MatFocus</strong></i> foi desenvolvido por
                   <strong> Yuri Lima Borges</strong>, estudante do curso de
-                  Tecnologia em Análise e Desenvolvimento de Sistemas e orientado por 
-                  <strong> Paula Patricia Oliveira da Silva</strong> professora do
+                  Tecnologia em Análise e Desenvolvimento de Sistemas e orientado por
+                  <strong> Paula Patricia Oliveira da Silva</strong>, professora do
                   Instituto Federal de Educação, Ciência e Tecnologia Baiano –
                   Campus Guanambi, como parte do Trabalho de Conclusão de Curso
                   (TCC). O projeto foi concebido com o objetivo de contribuir
@@ -59,17 +59,16 @@ function AboutPage() {
             </div>
           </div>
 
-          {/* Objetivo */}
-          <div className="rounded-[1.75rem] bg-white p-7 shadow-md">
+          <div className="rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7">
             <div className="flex items-start gap-4">
               <BookOpen className={iconStyle} />
 
               <div>
-                <h2 className="text-2xl font-bold text-slate-800">
+                <h2 className="text-xl font-bold text-slate-800 sm:text-2xl">
                   Objetivo do sistema
                 </h2>
 
-                <p className="mt-2 text-slate-600 leading-relaxed">
+                <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
                   O <i>MatFocus</i> tem como objetivo auxiliar estudantes do ensino
                   fundamental no processo de aprendizagem da matemática por meio
                   de atividades estruturadas em níveis progressivos de
@@ -84,17 +83,16 @@ function AboutPage() {
             </div>
           </div>
 
-          {/* Tecnologias */}
-          <div className="rounded-[1.75rem] bg-white p-7 shadow-md">
+          <div className="rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7">
             <div className="flex items-start gap-4">
               <Code2 className={iconStyle} />
 
               <div>
-                <h2 className="text-2xl font-bold text-slate-800">
+                <h2 className="text-xl font-bold text-slate-800 sm:text-2xl">
                   Tecnologias utilizadas
                 </h2>
 
-                <p className="mt-2 text-slate-600 leading-relaxed">
+                <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
                   O sistema foi desenvolvido utilizando tecnologias modernas
                   voltadas à construção de aplicações <i>web</i>. No <i>frontend</i> foram
                   utilizados React com TypeScript e TailwindCSS para construção
@@ -108,7 +106,6 @@ function AboutPage() {
               </div>
             </div>
           </div>
-
         </section>
       </div>
     </AppLayout>

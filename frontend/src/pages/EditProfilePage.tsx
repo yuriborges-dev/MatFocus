@@ -170,7 +170,7 @@ function EditProfilePage() {
     <AppLayout showProfileCard={false}>
       {showSuccessToast && (
         <div
-          className={`fixed right-6 top-6 z-50 rounded-2xl bg-green-500 px-5 py-4 text-white shadow-lg transition-all duration-500 ${
+          className={`fixed right-4 top-4 z-50 rounded-2xl bg-green-500 px-4 py-3 text-white shadow-lg transition-all duration-500 sm:right-6 sm:top-6 sm:px-5 sm:py-4 ${
             isToastLeaving
               ? "translate-y-2 opacity-0"
               : "translate-y-0 opacity-100"
@@ -180,28 +180,28 @@ function EditProfilePage() {
         </div>
       )}
 
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-6">
+      <div className="mx-auto max-w-5xl">
+        <header className="mb-5 sm:mb-6">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="mb-4 inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold text-slate-500 transition hover:bg-white hover:text-slate-700"
+            className="mb-3 inline-flex items-center gap-2 rounded-2xl px-2 py-2 text-sm font-semibold text-slate-500 transition hover:bg-white hover:text-slate-700 sm:px-3"
           >
             <ArrowLeft className="h-6 w-6" />
           </button>
 
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
             Editar Perfil
           </h1>
-          <p className="mt-2 text-lg text-slate-400">
+          <p className="mt-1 text-sm text-slate-400 sm:mt-2 sm:text-base lg:text-lg">
             Atualize suas informações
           </p>
         </header>
 
-        <section className="overflow-hidden rounded-[2rem] bg-white shadow-md">
-          <div className="relative h-[360px] w-full bg-gradient-to-r from-[#4a90d9] to-[#67ace8]">
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-              <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-full bg-white/20 shadow-sm backdrop-blur-sm">
+        <section className="overflow-hidden rounded-[1.8rem] bg-white shadow-md sm:rounded-[2rem]">
+          <div className="relative h-[250px] w-full bg-gradient-to-r from-[#4a90d9] to-[#67ace8] sm:h-[290px] lg:h-[320px]">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-4">
+              <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-white/20 shadow-sm backdrop-blur-sm sm:h-36 sm:w-36 lg:h-40 lg:w-40">
                 <img
                   src={profilePhotoPreview || defaultProfile}
                   alt="Foto de perfil"
@@ -239,21 +239,21 @@ function EditProfilePage() {
             </div>
           </div>
 
-          <div className="px-7 py-8 md:px-8">
-            <div className="mb-8">
-              <h2 className="text-3xl font-extrabold text-slate-900">
+          <div className="px-5 py-6 sm:px-7 sm:py-7 md:px-8">
+            <div className="mb-6 sm:mb-7">
+              <h2 className="break-words text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">
                 {formData.nome || "Aluno"}
               </h2>
-              <p className="mt-1 text-lg text-slate-400">
+              <p className="mt-1 text-base text-slate-400 sm:text-lg">
                 {getGradeLabel(formData.serie)} •{" "}
                 {formData.idade ? `${formData.idade} anos` : "-"}
               </p>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-7 sm:space-y-8">
               <section>
                 <div className="mb-4">
-                  <h3 className="text-2xl font-bold text-slate-800">
+                  <h3 className="text-xl font-bold text-slate-800 sm:text-2xl">
                     Informações gerais
                   </h3>
                   <p className="mt-1 text-sm text-slate-400">
@@ -262,7 +262,7 @@ function EditProfilePage() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-3xl bg-slate-50 px-5 py-4">
+                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
                     <label
                       htmlFor="nome"
                       className="mb-2 block text-sm text-slate-400"
@@ -275,11 +275,11 @@ function EditProfilePage() {
                       type="text"
                       value={formData.nome}
                       onChange={handleChange}
-                      className="w-full border-none bg-transparent text-2xl font-semibold text-slate-800 outline-none"
+                      className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
                     />
                   </div>
 
-                  <div className="rounded-3xl bg-slate-50 px-5 py-4">
+                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
                     <label
                       htmlFor="idade"
                       className="mb-2 block text-sm text-slate-400"
@@ -293,11 +293,11 @@ function EditProfilePage() {
                       min={1}
                       value={formData.idade}
                       onChange={handleChange}
-                      className="w-full border-none bg-transparent text-2xl font-semibold text-slate-800 outline-none"
+                      className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
                     />
                   </div>
 
-                  <div className="rounded-3xl bg-slate-50 px-5 py-4">
+                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
                     <label
                       htmlFor="serie"
                       className="mb-2 block text-sm text-slate-400"
@@ -309,7 +309,7 @@ function EditProfilePage() {
                       name="serie"
                       value={formData.serie}
                       onChange={handleChange}
-                      className="w-full bg-transparent text-2xl font-semibold text-slate-800 outline-none"
+                      className="w-full bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
                     >
                       <option value="3">3º ano</option>
                       <option value="4">4º ano</option>
@@ -318,7 +318,7 @@ function EditProfilePage() {
                     </select>
                   </div>
 
-                  <div className="rounded-3xl bg-slate-50 px-5 py-4">
+                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
                     <label
                       htmlFor="genero"
                       className="mb-2 block text-sm text-slate-400"
@@ -330,7 +330,7 @@ function EditProfilePage() {
                       name="genero"
                       value={formData.genero}
                       onChange={handleChange}
-                      className="w-full bg-transparent text-2xl font-semibold text-slate-800 outline-none"
+                      className="w-full bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
                     >
                       <option value="M">Masculino</option>
                       <option value="F">Feminino</option>
@@ -338,7 +338,7 @@ function EditProfilePage() {
                     </select>
                   </div>
 
-                  <div className="rounded-3xl bg-slate-50 px-5 py-4 md:col-span-2">
+                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4 md:col-span-2">
                     <label
                       htmlFor="responsavel"
                       className="mb-2 block text-sm text-slate-400"
@@ -351,7 +351,7 @@ function EditProfilePage() {
                       type="text"
                       value={formData.responsavel}
                       onChange={handleChange}
-                      className="w-full border-none bg-transparent text-2xl font-semibold text-slate-800 outline-none"
+                      className="w-full border-none bg-transparent text-xl font-semibold leading-snug text-slate-800 outline-none sm:text-2xl"
                     />
                   </div>
                 </div>
@@ -359,7 +359,7 @@ function EditProfilePage() {
 
               <section>
                 <div className="mb-4">
-                  <h3 className="text-2xl font-bold text-slate-800">
+                  <h3 className="text-xl font-bold text-slate-800 sm:text-2xl">
                     Dados de acesso
                   </h3>
                   <p className="mt-1 text-sm text-slate-400">
@@ -368,7 +368,7 @@ function EditProfilePage() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-3xl bg-slate-50 px-5 py-4">
+                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
                     <label
                       htmlFor="usuario"
                       className="mb-2 block text-sm text-slate-400"
@@ -381,11 +381,11 @@ function EditProfilePage() {
                       type="text"
                       value={formData.usuario}
                       onChange={handleChange}
-                      className="w-full border-none bg-transparent text-2xl font-semibold text-slate-800 outline-none"
+                      className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
                     />
                   </div>
 
-                  <div className="rounded-3xl bg-slate-50 px-5 py-4">
+                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
                     <label
                       htmlFor="senha"
                       className="mb-2 block text-sm text-slate-400"
@@ -401,7 +401,7 @@ function EditProfilePage() {
                         value={formData.senha}
                         onChange={handleChange}
                         placeholder="Digite uma nova senha"
-                        className="w-full border-none bg-transparent text-2xl font-semibold text-slate-800 outline-none placeholder:text-slate-300"
+                        className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none placeholder:text-slate-300 sm:text-2xl"
                       />
 
                       <button
@@ -422,7 +422,7 @@ function EditProfilePage() {
                   </div>
 
                   {isChangingPassword && (
-                    <div className="rounded-3xl bg-slate-50 px-5 py-4 md:col-span-2">
+                    <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4 md:col-span-2">
                       <label
                         htmlFor="confirmarSenha"
                         className="mb-2 block text-sm text-slate-400"
@@ -438,7 +438,7 @@ function EditProfilePage() {
                           value={formData.confirmarSenha}
                           onChange={handleChange}
                           placeholder="Confirme a nova senha"
-                          className="w-full border-none bg-transparent text-2xl font-semibold text-slate-800 outline-none placeholder:text-slate-300"
+                          className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none placeholder:text-slate-300 sm:text-2xl"
                         />
 
                         <button
@@ -466,11 +466,11 @@ function EditProfilePage() {
               </section>
             </div>
 
-            <div className="mt-8 flex gap-4">
+            <div className="mt-7 flex flex-col gap-4 sm:mt-8 sm:flex-row">
               <button
                 type="button"
                 onClick={() => navigate("/perfil")}
-                className="flex w-full items-center justify-center gap-2 rounded-[1.4rem] border border-slate-200 bg-white px-6 py-5 text-lg font-semibold text-slate-600 transition hover:bg-slate-50"
+                className="flex w-full items-center justify-center gap-2 rounded-[1.4rem] border border-slate-200 bg-white px-6 py-4 text-base font-semibold text-slate-600 transition hover:bg-slate-50 sm:py-5 sm:text-lg"
               >
                 Cancelar
               </button>
@@ -479,7 +479,7 @@ function EditProfilePage() {
                 type="button"
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex w-full items-center justify-center gap-3 rounded-[1.4rem] bg-[#4a90d9] px-6 py-5 text-lg font-bold text-white shadow-sm transition hover:bg-[#3f84cc] disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-3 rounded-[1.4rem] bg-[#4a90d9] px-6 py-4 text-base font-bold text-white shadow-sm transition hover:bg-[#3f84cc] disabled:cursor-not-allowed disabled:opacity-70 sm:py-5 sm:text-lg"
               >
                 <Save className="h-5 w-5" />
                 {isSaving ? "Salvando..." : "Salvar alterações"}
