@@ -9,6 +9,19 @@ import defaultProfile from "../assets/default_profile.jpg"
 type SexOption = "M" | "F"
 type GradeOption = "3" | "4" | "5" | "6"
 
+type FormData = {
+  nome: string
+  idade: string
+  serie: GradeOption
+  genero: SexOption
+  responsavel: string
+  usuario: string
+  senha: string
+  confirmarSenha: string
+}
+
+type FormErrors = Partial<Record<keyof FormData, string>>
+
 function getGradeLabel(value: string) {
   if (value === "3") return "3º ano"
   if (value === "4") return "4º ano"
@@ -17,12 +30,37 @@ function getGradeLabel(value: string) {
   return "-"
 }
 
+function traduzirErroSenha(message: string) {
+  const lower = message.toLowerCase()
+
+  if (lower.includes("too short") || lower.includes("muito curta")) {
+    return "A senha deve ter pelo menos 8 caracteres."
+  }
+
+  if (
+    lower.includes("entirely numeric") ||
+    lower.includes("totalmente numérica")
+  ) {
+    return "A senha não pode conter apenas números."
+  }
+
+  if (lower.includes("too common") || lower.includes("muito comum")) {
+    return "Escolha uma senha menos comum."
+  }
+
+  if (lower.includes("too similar") || lower.includes("muito parecida")) {
+    return "A senha está muito parecida com os dados do aluno."
+  }
+
+  return "Senha inválida. Escolha uma senha mais segura."
+}
+
 function EditProfilePage() {
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const { student, updateStudentData } = useAuth()
 
-  const initialData = useMemo(
+  const initialData = useMemo<FormData>(
     () => ({
       nome: student?.full_name || "",
       idade: student?.age ? String(student.age) : "",
@@ -36,26 +74,66 @@ function EditProfilePage() {
     [student]
   )
 
-  const [formData, setFormData] = useState(initialData)
+  const [formData, setFormData] = useState<FormData>(initialData)
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(
     student?.profile_photo || null
   )
-  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null | undefined>(
-    undefined
-  )
+  const [profilePhotoFile, setProfilePhotoFile] = useState<
+    File | null | undefined
+  >(undefined)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showSuccessToast, setShowSuccessToast] = useState(false)
   const [isToastLeaving, setIsToastLeaving] = useState(false)
+  const [error, setError] = useState("")
+  const [fieldErrors, setFieldErrors] = useState<FormErrors>({})
 
   useEffect(() => {
     setFormData(initialData)
     setProfilePhotoPreview(student?.profile_photo || null)
     setProfilePhotoFile(undefined)
+    setFieldErrors({})
+    setError("")
   }, [initialData, student?.profile_photo])
 
   const isChangingPassword = formData.senha.trim().length > 0
+
+  function validateForm(data: FormData) {
+    const errors: FormErrors = {}
+
+    if (!data.nome.trim()) {
+      errors.nome = "Preencha o nome."
+    }
+
+    if (!data.usuario.trim()) {
+      errors.usuario = "Preencha o nome de usuário."
+    }
+
+    if (!data.idade.trim()) {
+      errors.idade = "Preencha a idade."
+    } else if (Number(data.idade) <= 0) {
+      errors.idade = "Informe uma idade válida."
+    }
+
+    if (!data.responsavel.trim()) {
+      errors.responsavel = "Preencha o nome do responsável."
+    }
+
+    if (isChangingPassword) {
+      if (data.senha.length < 8) {
+        errors.senha = "A senha deve ter pelo menos 8 caracteres."
+      }
+
+      if (!data.confirmarSenha.trim()) {
+        errors.confirmarSenha = "Confirme a nova senha."
+      } else if (data.senha !== data.confirmarSenha) {
+        errors.confirmarSenha = "As senhas não coincidem."
+      }
+    }
+
+    return errors
+  }
 
   function handleChange(
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -65,10 +143,23 @@ function EditProfilePage() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "senha" && value.trim() === ""
-        ? { confirmarSenha: "" }
-        : {}),
+      ...(name === "senha" && value.trim() === "" ? { confirmarSenha: "" } : {}),
     }))
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }))
+
+    if (name === "senha") {
+      setFieldErrors((prev) => ({
+        ...prev,
+        senha: "",
+        confirmarSenha: "",
+      }))
+    }
+
+    setError("")
   }
 
   function handleSelectPhoto() {
@@ -81,7 +172,7 @@ function EditProfilePage() {
     if (!file) return
 
     if (!file.type.startsWith("image/")) {
-      alert("Selecione um arquivo de imagem válido.")
+      setError("Selecione um arquivo de imagem válido.")
       return
     }
 
@@ -89,6 +180,7 @@ function EditProfilePage() {
 
     const previewUrl = URL.createObjectURL(file)
     setProfilePhotoPreview(previewUrl)
+    setError("")
   }
 
   function handleRemovePhoto() {
@@ -114,28 +206,26 @@ function EditProfilePage() {
     }, 2800)
   }
 
+  function getFieldCardClass(fieldName: keyof FormData) {
+    const hasError = Boolean(fieldErrors[fieldName])
+
+    return `rounded-[1.8rem] px-5 py-4 ${
+      hasError ? "border border-red-300 bg-red-50" : "bg-slate-50"
+    }`
+  }
+
   async function handleSave() {
-    if (!formData.nome.trim()) {
-      alert("Preencha o nome.")
-      return
-    }
+    const validationErrors = validateForm(formData)
 
-    if (!formData.usuario.trim()) {
-      alert("Preencha o nome de usuário.")
-      return
-    }
-
-    if (!formData.idade.trim()) {
-      alert("Preencha a idade.")
-      return
-    }
-
-    if (isChangingPassword && formData.senha !== formData.confirmarSenha) {
-      alert("As senhas não coincidem.")
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors)
+      setError("")
       return
     }
 
     setIsSaving(true)
+    setError("")
+    setFieldErrors({})
 
     try {
       const updatedStudent = await updateMe({
@@ -158,9 +248,53 @@ function EditProfilePage() {
       setTimeout(() => {
         navigate("/perfil")
       }, 2800)
-    } catch (error) {
-      console.error(error)
-      alert("Não foi possível salvar as alterações.")
+    } catch (err: any) {
+      console.error(err)
+
+      const data = err?.response?.data
+
+      if (typeof data?.full_name?.[0] === "string") {
+        setFieldErrors((prev) => ({
+          ...prev,
+          nome: "Verifique o nome informado.",
+        }))
+      }
+
+      if (typeof data?.age?.[0] === "string") {
+        setFieldErrors((prev) => ({
+          ...prev,
+          idade: "Verifique a idade informada.",
+        }))
+      }
+
+      if (typeof data?.guardian_name?.[0] === "string") {
+        setFieldErrors((prev) => ({
+          ...prev,
+          responsavel: "Verifique o nome do responsável.",
+        }))
+      }
+
+      if (typeof data?.username?.[0] === "string") {
+        setFieldErrors((prev) => ({
+          ...prev,
+          usuario: "Este nome de usuário já está em uso.",
+        }))
+      }
+
+      if (typeof data?.password?.[0] === "string") {
+        setFieldErrors((prev) => ({
+          ...prev,
+          senha: traduzirErroSenha(data.password[0]),
+        }))
+      }
+
+      if (typeof data?.detail === "string") {
+        setError(data.detail)
+      } else if (typeof data?.non_field_errors?.[0] === "string") {
+        setError("Não foi possível salvar as alterações. Verifique os dados.")
+      } else {
+        setError("Não foi possível salvar as alterações.")
+      }
     } finally {
       setIsSaving(false)
     }
@@ -262,7 +396,7 @@ function EditProfilePage() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
+                  <div className={getFieldCardClass("nome")}>
                     <label
                       htmlFor="nome"
                       className="mb-2 block text-sm text-slate-400"
@@ -277,9 +411,14 @@ function EditProfilePage() {
                       onChange={handleChange}
                       className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
                     />
+                    {fieldErrors.nome && (
+                      <p className="mt-2 text-sm font-medium text-red-500">
+                        {fieldErrors.nome}
+                      </p>
+                    )}
                   </div>
 
-                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
+                  <div className={getFieldCardClass("idade")}>
                     <label
                       htmlFor="idade"
                       className="mb-2 block text-sm text-slate-400"
@@ -295,6 +434,11 @@ function EditProfilePage() {
                       onChange={handleChange}
                       className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
                     />
+                    {fieldErrors.idade && (
+                      <p className="mt-2 text-sm font-medium text-red-500">
+                        {fieldErrors.idade}
+                      </p>
+                    )}
                   </div>
 
                   <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
@@ -334,11 +478,10 @@ function EditProfilePage() {
                     >
                       <option value="M">Masculino</option>
                       <option value="F">Feminino</option>
-                      <option value="O">Outro</option>
                     </select>
                   </div>
 
-                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4 md:col-span-2">
+                  <div className={`${getFieldCardClass("responsavel")} md:col-span-2`}>
                     <label
                       htmlFor="responsavel"
                       className="mb-2 block text-sm text-slate-400"
@@ -353,6 +496,11 @@ function EditProfilePage() {
                       onChange={handleChange}
                       className="w-full border-none bg-transparent text-xl font-semibold leading-snug text-slate-800 outline-none sm:text-2xl"
                     />
+                    {fieldErrors.responsavel && (
+                      <p className="mt-2 text-sm font-medium text-red-500">
+                        {fieldErrors.responsavel}
+                      </p>
+                    )}
                   </div>
                 </div>
               </section>
@@ -368,7 +516,7 @@ function EditProfilePage() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
+                  <div className={getFieldCardClass("usuario")}>
                     <label
                       htmlFor="usuario"
                       className="mb-2 block text-sm text-slate-400"
@@ -383,46 +531,67 @@ function EditProfilePage() {
                       onChange={handleChange}
                       className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
                     />
+                    {fieldErrors.usuario && (
+                      <p className="mt-2 text-sm font-medium text-red-500">
+                        {fieldErrors.usuario}
+                      </p>
+                    )}
                   </div>
 
-                  <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4">
-                    <label
-                      htmlFor="senha"
-                      className="mb-2 block text-sm text-slate-400"
-                    >
-                      Nova senha
-                    </label>
-
-                    <div className="flex items-center gap-3">
-                      <input
-                        id="senha"
-                        name="senha"
-                        type={showPassword ? "text" : "password"}
-                        value={formData.senha}
-                        onChange={handleChange}
-                        placeholder="Digite uma nova senha"
-                        className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none placeholder:text-slate-300 sm:text-2xl"
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        className="text-slate-400 transition hover:text-slate-600"
-                        aria-label={
-                          showPassword ? "Ocultar senha" : "Mostrar senha"
-                        }
+                  <div>
+                    <div className={getFieldCardClass("senha")}>
+                      <label
+                        htmlFor="senha"
+                        className="mb-2 block text-sm text-slate-400"
                       >
-                        {showPassword ? (
-                          <EyeOff className="h-5 w-5" />
-                        ) : (
-                          <Eye className="h-5 w-5" />
-                        )}
-                      </button>
+                        Nova senha
+                      </label>
+
+                      <div className="flex items-center gap-3">
+                        <input
+                          id="senha"
+                          name="senha"
+                          type={showPassword ? "text" : "password"}
+                          value={formData.senha}
+                          onChange={handleChange}
+                          placeholder="Digite uma nova senha"
+                          className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none placeholder:text-slate-300 sm:text-2xl"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          className="text-slate-400 transition hover:text-slate-600"
+                          aria-label={
+                            showPassword ? "Ocultar senha" : "Mostrar senha"
+                          }
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
                     </div>
+
+                    {fieldErrors.senha ? (
+                      <p className="mt-2 px-2 text-sm font-medium text-red-500">
+                        {fieldErrors.senha}
+                      </p>
+                    ) : (
+                      <p className="mt-2 px-2 text-sm text-slate-400">
+                        A senha deve ter pelo menos 8 caracteres e não pode conter apenas números.
+                      </p>
+                    )}
                   </div>
 
                   {isChangingPassword && (
-                    <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4 md:col-span-2">
+                    <div
+                      className={`${getFieldCardClass(
+                        "confirmarSenha"
+                      )} md:col-span-2`}
+                    >
                       <label
                         htmlFor="confirmarSenha"
                         className="mb-2 block text-sm text-slate-400"
@@ -460,11 +629,23 @@ function EditProfilePage() {
                           )}
                         </button>
                       </div>
+
+                      {fieldErrors.confirmarSenha && (
+                        <p className="mt-2 text-sm font-medium text-red-500">
+                          {fieldErrors.confirmarSenha}
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
               </section>
             </div>
+
+            {error && (
+              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                {error}
+              </div>
+            )}
 
             <div className="mt-7 flex flex-col gap-4 sm:mt-8 sm:flex-row">
               <button
