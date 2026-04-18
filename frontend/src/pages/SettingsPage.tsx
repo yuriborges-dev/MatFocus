@@ -1,16 +1,16 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Bell,
   RotateCcw,
   Save,
   Sparkles,
   Volume2,
-  ArrowLeft,
+  X,
 } from "lucide-react"
 import AppLayout from "../layouts/AppLayout"
 import { useNavigate } from "react-router-dom"
-
-type IntensityLevel = "baixo" | "medio" | "alto"
+import { useAuth } from "../contexts/AuthContext"
+import { updateMe, type IntensityLevel } from "../services/auth"
 
 function LevelSelector({
   value,
@@ -50,16 +50,32 @@ function LevelSelector({
 }
 
 function SettingsPage() {
-  const [soundLevel, setSoundLevel] = useState<IntensityLevel>("medio")
-  const [animationLevel, setAnimationLevel] = useState<IntensityLevel>("medio")
-  const [breakSuggestionsEnabled, setBreakSuggestionsEnabled] = useState(false)
-  const [breakInterval, setBreakInterval] = useState(20)
   const navigate = useNavigate()
+  const { student, updateStudentData } = useAuth()
+
+  const [soundLevel, setSoundLevel] = useState<IntensityLevel>("medio")
+  const [animationLevel, setAnimationLevel] =
+    useState<IntensityLevel>("medio")
+  const [breakSuggestionsEnabled, setBreakSuggestionsEnabled] =
+    useState(true)
+  const [breakInterval, setBreakInterval] = useState(20)
+  const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    if (!student) return
+
+    setSoundLevel(student.sound_level || "medio")
+    setAnimationLevel(student.animation_level || "medio")
+    setBreakSuggestionsEnabled(
+      student.break_suggestions_enabled ?? true
+    )
+    setBreakInterval(student.break_interval_minutes ?? 20)
+  }, [student])
 
   function handleResetDefaults() {
     setSoundLevel("medio")
     setAnimationLevel("medio")
-    setBreakSuggestionsEnabled(false)
+    setBreakSuggestionsEnabled(true)
     setBreakInterval(20)
   }
 
@@ -74,27 +90,38 @@ function SettingsPage() {
     setBreakInterval(numericValue)
   }
 
-  function handleSave() {
-    console.log({
-      soundLevel,
-      animationLevel,
-      breakSuggestionsEnabled,
-      breakInterval,
-    })
+  async function handleSave() {
+    setIsSaving(true)
+
+    try {
+      const updatedStudent = await updateMe({
+        sound_level: soundLevel,
+        animation_level: animationLevel,
+        break_suggestions_enabled: breakSuggestionsEnabled,
+        break_interval_minutes: breakInterval,
+      })
+
+      updateStudentData(updatedStudent)
+
+      navigate("/perfil", {
+        state: { settingsSaved: true },
+      })
+    } catch (error) {
+      console.error(error)
+      alert("Não foi possível salvar as configurações.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  function handleCancel() {
+    navigate("/perfil")
   }
 
   return (
     <AppLayout>
       <div className="mx-auto max-w-4xl">
         <header className="mb-6 sm:mb-8">
-          <button
-            type="button"
-            onClick={() => navigate("/perfil")}
-            className="mb-3 inline-flex items-center gap-2 rounded-2xl px-2 py-2 text-sm font-semibold text-slate-500 transition hover:bg-white hover:text-slate-700 sm:mb-4 sm:px-3"
-          >
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-
           <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
             Configurações
           </h1>
@@ -106,12 +133,12 @@ function SettingsPage() {
         <section className="space-y-5 sm:space-y-6">
           <div className="rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7">
             <div className="mb-5 flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#eaf3ff] text-[#3b82d0] sm:h-12 sm:w-12">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eaf3ff] text-[#3b82d0]">
                 <Volume2 className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold leading-tight text-slate-800 sm:text-[1.9rem]">
+                <h2 className="text-2xl font-bold text-slate-800">
                   Sons
                 </h2>
                 <p className="text-sm text-slate-400 sm:text-base">
@@ -125,12 +152,12 @@ function SettingsPage() {
 
           <div className="rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7">
             <div className="mb-5 flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#f4ecff] text-[#a855f7] sm:h-12 sm:w-12">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f4ecff] text-[#a855f7]">
                 <Sparkles className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold leading-tight text-slate-800 sm:text-[1.9rem]">
+                <h2 className="text-2xl font-bold text-slate-800">
                   Animações
                 </h2>
                 <p className="text-sm text-slate-400 sm:text-base">
@@ -147,13 +174,13 @@ function SettingsPage() {
 
           <div className="rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7">
             <div className="flex items-start justify-between gap-4">
-              <div className="flex min-w-0 items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#e9f9ef] text-[#67c18c] sm:h-12 sm:w-12">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e9f9ef] text-[#67c18c]">
                   <Bell className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
 
-                <div className="min-w-0">
-                  <h2 className="text-2xl font-bold leading-tight text-slate-800 sm:text-[1.9rem]">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-800">
                     Sugerir pausas
                   </h2>
                   <p className="text-sm text-slate-400 sm:text-base">
@@ -167,8 +194,10 @@ function SettingsPage() {
                 onClick={() =>
                   setBreakSuggestionsEnabled((current) => !current)
                 }
-                className={`relative mt-1 h-8 w-14 shrink-0 rounded-full transition ${
-                  breakSuggestionsEnabled ? "bg-slate-900" : "bg-slate-200"
+                className={`relative mt-1 h-8 w-14 rounded-full transition ${
+                  breakSuggestionsEnabled
+                    ? "bg-slate-900"
+                    : "bg-slate-200"
                 }`}
                 aria-pressed={breakSuggestionsEnabled}
               >
@@ -181,8 +210,8 @@ function SettingsPage() {
             </div>
 
             {breakSuggestionsEnabled && (
-              <div className="mt-5 border-t border-slate-200 pt-5 sm:mt-6 sm:pt-6">
-                <div className="flex flex-wrap items-center gap-3 text-base text-slate-600 sm:gap-4 sm:text-[1.05rem]">
+              <div className="mt-5 border-t border-slate-200 pt-5">
+                <div className="flex flex-wrap items-center gap-3 text-base text-slate-600">
                   <span className="font-medium text-slate-700">
                     Sugerir pausa a cada
                   </span>
@@ -191,7 +220,9 @@ function SettingsPage() {
                     type="number"
                     min={1}
                     value={breakInterval}
-                    onChange={(e) => handleBreakIntervalChange(e.target.value)}
+                    onChange={(e) =>
+                      handleBreakIntervalChange(e.target.value)
+                    }
                     className="h-12 w-20 rounded-2xl border border-slate-200 bg-white px-3 text-center text-lg font-bold text-slate-900 outline-none transition focus:border-[#3b82d0] sm:h-14 sm:w-24 sm:px-4 sm:text-xl"
                   />
 
@@ -202,11 +233,20 @@ function SettingsPage() {
           </div>
         </section>
 
-        <div className="mt-6 grid gap-4 sm:mt-8 md:grid-cols-2">
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="flex items-center justify-center gap-3 rounded-[1.4rem] border border-red-200 bg-white px-6 py-5 text-lg font-bold text-red-500 shadow-sm transition hover:bg-red-50"
+          >
+            <X className="h-5 w-5" />
+            Cancelar
+          </button>
+
           <button
             type="button"
             onClick={handleResetDefaults}
-            className="flex items-center justify-center gap-3 rounded-[1.4rem] border border-slate-200 bg-white px-6 py-4 text-lg font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 sm:py-5 sm:text-xl"
+            className="flex items-center justify-center gap-3 rounded-[1.4rem] border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-600 shadow-sm transition hover:bg-slate-50"
           >
             <RotateCcw className="h-5 w-5" />
             Restaurar padrão
@@ -215,10 +255,11 @@ function SettingsPage() {
           <button
             type="button"
             onClick={handleSave}
-            className="flex items-center justify-center gap-3 rounded-[1.4rem] bg-[#4a90d9] px-6 py-4 text-lg font-bold text-white shadow-sm transition hover:bg-[#3f84cc] sm:py-5 sm:text-xl"
+            disabled={isSaving}
+            className="flex items-center justify-center gap-3 rounded-[1.4rem] bg-[#4a90d9] px-6 py-5 text-lg font-bold text-white shadow-sm transition hover:bg-[#3f84cc] disabled:cursor-not-allowed disabled:opacity-70"
           >
             <Save className="h-5 w-5" />
-            Salvar
+            {isSaving ? "Salvando..." : "Salvar"}
           </button>
         </div>
       </div>

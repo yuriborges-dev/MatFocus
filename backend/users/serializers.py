@@ -59,6 +59,10 @@ class StudentMeSerializer(serializers.ModelSerializer):
             "school_grade",
             "guardian_name",
             "profile_photo",
+            "sound_level",
+            "animation_level",
+            "break_suggestions_enabled",
+            "break_interval_minutes",
         ]
 
     def get_profile_photo(self, obj):
@@ -90,6 +94,10 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
             "guardian_name",
             "password",
             "profile_photo",
+            "sound_level",
+            "animation_level",
+            "break_suggestions_enabled",
+            "break_interval_minutes",
         ]
 
     def validate_username(self, value):

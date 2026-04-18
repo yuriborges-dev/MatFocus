@@ -124,7 +124,7 @@ function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-[2.7rem]">
-            {greeting}, {studentName}! 👋
+            {greeting}, {studentName}! 
           </h1>
           <p className="mt-1 max-w-xl text-base text-slate-400 sm:text-[1.1rem]">
             Você já avançou bastante hoje. Continue assim!

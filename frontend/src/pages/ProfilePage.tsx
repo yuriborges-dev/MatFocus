@@ -1,5 +1,6 @@
 import { ArrowLeft, Info, LogOut, Pencil, Settings } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import { useAuth } from "../contexts/AuthContext"
 import defaultProfile from "../assets/default_profile.jpg"
@@ -7,7 +8,6 @@ import defaultProfile from "../assets/default_profile.jpg"
 function getSexLabel(value?: string) {
   if (value === "M") return "Masculino"
   if (value === "F") return "Feminino"
-  if (value === "O") return "Outro"
   return "-"
 }
 
@@ -21,7 +21,11 @@ function getGradeLabel(value?: string) {
 
 function ProfilePage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { student, logoutUser } = useAuth()
+
+  const [showSettingsToast, setShowSettingsToast] = useState(false)
+  const [isToastLeaving, setIsToastLeaving] = useState(false)
 
   const fullName = student?.full_name || "Aluno"
   const username = student?.username || "-"
@@ -30,6 +34,29 @@ function ProfilePage() {
   const sexLabel = getSexLabel(student?.sex)
   const guardianName = student?.guardian_name || "-"
 
+  useEffect(() => {
+    if (!location.state?.settingsSaved) return
+
+    setShowSettingsToast(true)
+    setIsToastLeaving(false)
+
+    const leaveTimeout = setTimeout(() => {
+      setIsToastLeaving(true)
+    }, 1800)
+
+    const hideTimeout = setTimeout(() => {
+      setShowSettingsToast(false)
+      setIsToastLeaving(false)
+    }, 2400)
+
+    window.history.replaceState({}, document.title)
+
+    return () => {
+      clearTimeout(leaveTimeout)
+      clearTimeout(hideTimeout)
+    }
+  }, [location.state])
+
   function handleLogout() {
     logoutUser()
     navigate("/")
@@ -37,6 +64,20 @@ function ProfilePage() {
 
   return (
     <AppLayout>
+      {showSettingsToast && (
+        <div
+          className={`fixed right-6 top-6 z-50 rounded-2xl bg-green-500 px-5 py-4 text-white shadow-lg transition-all duration-500 ${
+            isToastLeaving
+              ? "translate-y-2 opacity-0"
+              : "translate-y-0 opacity-100"
+          }`}
+        >
+          <p className="text-sm font-semibold">
+            Configurações salvas com sucesso!
+          </p>
+        </div>
+      )}
+
       <div className="mx-auto max-w-5xl">
         <header className="mb-5 sm:mb-6">
           <button

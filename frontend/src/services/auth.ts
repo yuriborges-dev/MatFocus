@@ -1,5 +1,7 @@
 import { api } from "./api"
 
+export type IntensityLevel = "baixo" | "medio" | "alto"
+
 export type Student = {
   id: number
   username: string
@@ -9,6 +11,10 @@ export type Student = {
   school_grade: string
   guardian_name: string
   profile_photo?: string | null
+  sound_level?: IntensityLevel
+  animation_level?: IntensityLevel
+  break_suggestions_enabled?: boolean
+  break_interval_minutes?: number
 }
 
 export type AuthResponse = {
@@ -42,6 +48,10 @@ export type UpdateMePayload = {
   guardian_name?: string
   password?: string
   profile_photo?: File | null
+  sound_level?: IntensityLevel
+  animation_level?: IntensityLevel
+  break_suggestions_enabled?: boolean
+  break_interval_minutes?: number
 }
 
 export async function register(payload: RegisterPayload) {
@@ -88,6 +98,28 @@ export async function updateMe(payload: UpdateMePayload) {
 
   if (payload.password !== undefined) {
     formData.append("password", payload.password)
+  }
+
+  if (payload.sound_level !== undefined) {
+    formData.append("sound_level", payload.sound_level)
+  }
+
+  if (payload.animation_level !== undefined) {
+    formData.append("animation_level", payload.animation_level)
+  }
+
+  if (payload.break_suggestions_enabled !== undefined) {
+    formData.append(
+      "break_suggestions_enabled",
+      String(payload.break_suggestions_enabled)
+    )
+  }
+
+  if (payload.break_interval_minutes !== undefined) {
+    formData.append(
+      "break_interval_minutes",
+      String(payload.break_interval_minutes)
+    )
   }
 
   if (payload.profile_photo instanceof File) {
