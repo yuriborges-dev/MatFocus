@@ -516,23 +516,29 @@ function EditProfilePage() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className={getFieldCardClass("usuario")}>
-                    <label
-                      htmlFor="usuario"
-                      className="mb-2 block text-sm text-slate-400"
-                    >
-                      Nome de usuário
-                    </label>
-                    <input
-                      id="usuario"
-                      name="usuario"
-                      type="text"
-                      value={formData.usuario}
-                      onChange={handleChange}
-                      className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
-                    />
+                  <div>
+                    <div className={getFieldCardClass("usuario")}>
+                      <label
+                        htmlFor="usuario"
+                        className="mb-2 block text-sm text-slate-400"
+                      >
+                        Nome de usuário
+                      </label>
+
+                      <div className="flex min-h-[34px] items-center gap-3">
+                        <input
+                          id="usuario"
+                          name="usuario"
+                          type="text"
+                          value={formData.usuario}
+                          onChange={handleChange}
+                          className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
+                        />
+                      </div>
+                    </div>
+
                     {fieldErrors.usuario && (
-                      <p className="mt-2 text-sm font-medium text-red-500">
+                      <p className="mt-2 px-2 text-sm font-medium text-red-500">
                         {fieldErrors.usuario}
                       </p>
                     )}
