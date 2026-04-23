@@ -62,6 +62,14 @@ class QuestionListView(generics.ListAPIView):
 
         return queryset.order_by('order')
 
+def get_phase_completion_points(phase_number: int) -> int:
+    if 1 <= phase_number <= 5:
+        return 30
+    if 6 <= phase_number <= 10:
+        return 40
+    if 11 <= phase_number <= 15:
+        return 50
+    return 60
 
 class SubmitAnswerView(APIView):
     permission_classes = [IsAuthenticated]
@@ -116,12 +124,6 @@ class SubmitAnswerView(APIView):
             is_correct=True
         ).exists()
 
-        already_correct_in_phase = StudentAnswer.objects.filter(
-            student=student,
-            question=question,
-            is_correct=True
-        ).exists()
-
         StudentAnswer.objects.create(
             student=student,
             question=question,
@@ -135,17 +137,14 @@ class SubmitAnswerView(APIView):
             phase=question.phase
         )
 
+        phase_was_already_completed = phase_progress.completed
+
         earned_points = 0
         counted_as_new_correct = False
 
         if correct and not already_correct_in_session:
             session.correct_answers += 1
             counted_as_new_correct = True
-
-            if not already_correct_in_phase:
-                phase_progress.score += 10
-                earned_points = 10
-
         elif not correct:
             session.wrong_answers += 1
 
@@ -169,8 +168,17 @@ class SubmitAnswerView(APIView):
 
             phase_completed_now = True
 
-            if not phase_progress.completed:
+            if not phase_was_already_completed:
                 phase_progress.completed = True
+
+                earned_points = get_phase_completion_points(question.phase.phase_number)
+                phase_progress.score += earned_points
+                session.points_earned = earned_points
+            else:
+                session.points_earned = 0
+
+        phase_progress.correct_answers = session.correct_answers
+        phase_progress.wrong_answers = session.wrong_answers
 
         phase_progress.save()
         session.save()
@@ -192,5 +200,5 @@ class SubmitAnswerView(APIView):
             'wrong_answers': session.wrong_answers,
             'already_correct_before': already_correct_in_session,
             'counted_as_new_correct': counted_as_new_correct,
-            'earned_points': earned_points,
+            'earned_points': session.points_earned if session.is_finished else 0,
         }, status=status.HTTP_200_OK)

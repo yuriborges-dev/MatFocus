@@ -206,6 +206,7 @@ class PhaseResultView(APIView):
             'level_title': phase.level.title,
             'completed': phase_progress.completed,
             'score': phase_progress.score,
+            'points_earned': session.points_earned if session else 0,
             'correct_answers': session_correct_answers,
             'wrong_answers': session_wrong_answers,
             'total_questions': total_questions,
@@ -260,9 +261,30 @@ class StartPhaseSessionView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        session = StudentPhaseSession.objects.create(
+        session = StudentPhaseSession.objects.filter(
             student=student,
-            phase=phase
+            phase=phase,
+            is_finished=False
+        ).order_by('-started_at').first()
+
+        if not session:
+            session = StudentPhaseSession.objects.create(
+                student=student,
+                phase=phase
+            )
+        elif session.paused_at:
+            paused_duration = int((timezone.now() - session.paused_at).total_seconds())
+            session.total_paused_seconds += max(0, paused_duration)
+            session.paused_at = None
+            session.save(update_fields=['total_paused_seconds', 'paused_at'])
+
+        answered_correctly_question_ids = list(
+            StudentAnswer.objects.filter(
+                student=student,
+                session=session,
+                question__phase=phase,
+                is_correct=True
+            ).values_list('question_id', flat=True).distinct()
         )
 
         data = {
@@ -274,10 +296,102 @@ class StartPhaseSessionView(APIView):
             'is_finished': session.is_finished,
             'started_at': session.started_at,
             'finished_at': session.finished_at,
+            'total_paused_seconds': session.total_paused_seconds,
+            'paused_at': session.paused_at,
+            'answered_correctly_question_ids': answered_correctly_question_ids,
         }
 
         serializer = PhaseSessionSerializer(data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class PausePhaseSessionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, phase_id):
+        try:
+            student = request.user.student
+        except Student.DoesNotExist:
+            return Response(
+                {'detail': 'Aluno não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        session_id = request.data.get('session_id')
+
+        if not session_id:
+            return Response(
+                {'detail': 'session_id é obrigatório.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            session = StudentPhaseSession.objects.get(
+                pk=session_id,
+                student=student,
+                phase_id=phase_id,
+                is_finished=False
+            )
+        except StudentPhaseSession.DoesNotExist:
+            return Response(
+                {'detail': 'Sessão não encontrada.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not session.paused_at:
+            session.paused_at = timezone.now()
+            session.save(update_fields=['paused_at'])
+
+        return Response({
+            'session_id': session.id,
+            'paused_at': session.paused_at,
+            'total_paused_seconds': session.total_paused_seconds,
+        }, status=status.HTTP_200_OK)
+
+
+class ResumePhaseSessionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, phase_id):
+        try:
+            student = request.user.student
+        except Student.DoesNotExist:
+            return Response(
+                {'detail': 'Aluno não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        session_id = request.data.get('session_id')
+
+        if not session_id:
+            return Response(
+                {'detail': 'session_id é obrigatório.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            session = StudentPhaseSession.objects.get(
+                pk=session_id,
+                student=student,
+                phase_id=phase_id,
+                is_finished=False
+            )
+        except StudentPhaseSession.DoesNotExist:
+            return Response(
+                {'detail': 'Sessão não encontrada.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if session.paused_at:
+            paused_duration = int((timezone.now() - session.paused_at).total_seconds())
+            session.total_paused_seconds += max(0, paused_duration)
+            session.paused_at = None
+            session.save(update_fields=['total_paused_seconds', 'paused_at'])
+
+        return Response({
+            'session_id': session.id,
+            'paused_at': session.paused_at,
+            'total_paused_seconds': session.total_paused_seconds,
+        }, status=status.HTTP_200_OK)
 
 
 class PhaseMapStatusView(APIView):
@@ -468,7 +582,7 @@ class ProgressSummaryView(APIView):
         else:
             start_date = None
 
-        answers = StudentAnswer.objects.filter(student=student)
+        answers = StudentAnswer.objects.filter(student=student, session__is_finished=True, session__points_earned__gt=0)
 
         if start_date:
             answers = answers.filter(answered_at__gte=start_date)
@@ -524,7 +638,9 @@ class ProgressSummaryView(APIView):
                 "progress": progress_percent
             })
 
-        history_sessions = finished_sessions.select_related(
+        history_sessions = finished_sessions.filter(
+            points_earned__gt=0
+        ).select_related(
             "phase__content",
             "phase__level"
         )[:5]
@@ -541,7 +657,8 @@ class ProgressSummaryView(APIView):
                 "seconds": (
                     int((session.finished_at - session.started_at).total_seconds())
                     if session.finished_at else 0
-                )
+                ),
+                "points": session.points_earned,
             })
 
         return Response({
@@ -567,7 +684,7 @@ class DashboardSummaryView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        answers = StudentAnswer.objects.filter(student=student)
+        answers = StudentAnswer.objects.filter(student=student, session__is_finished=True, session__points_earned__gt=0)
 
         correct_answers = answers.filter(is_correct=True).count()
         wrong_answers = answers.filter(is_correct=False).count()
@@ -620,16 +737,22 @@ class DashboardSummaryView(APIView):
                 "progress": percent
             })
 
-        recent_sessions = finished_sessions[:3]
+        recent_sessions = finished_sessions.filter(
+            points_earned__gt=0
+        ).select_related(
+            "phase__content",
+            "phase__level"
+        )[:3]
+
         recent_activities = []
 
         for session in recent_sessions:
             total = session.correct_answers + session.wrong_answers
 
             recent_activities.append({
-                "title": session.phase.content.name,
-                "detail": f"{session.phase.level.title} • {session.correct_answers}/{total} acertos",
-                "points": f"+{session.correct_answers * 10} pts"
+                "title": f"{session.phase.content.name} - {session.phase.level.title}",
+                "detail": f"{session.correct_answers}/{total} acertos",
+                "points": f"+{session.points_earned} pts"
             })
 
         return Response({

@@ -37,6 +37,7 @@ type PhaseResult = {
   level_title: string
   completed: boolean
   score: number
+  points_earned: number
   correct_answers: number
   wrong_answers: number
   total_questions: number
@@ -87,8 +88,6 @@ function ActivityResultPage() {
 
     if (!student?.id) return
 
-    const currentStudentId = student.id
-
     async function loadResult() {
       try {
         setLoading(true)
@@ -96,7 +95,6 @@ function ActivityResultPage() {
 
         const data = await getPhaseResult(
           Number(phaseId),
-          currentStudentId,
           sessionId || undefined
         )
 
@@ -110,7 +108,7 @@ function ActivityResultPage() {
     }
 
     loadResult()
-  }, [phaseId, sessionId, student?.id])
+    }, [phaseId, sessionId, student?.id])
 
   const contentTitle =
     result?.content_title || contentTitles[conteudo || ""] || "Conteúdo"
@@ -119,6 +117,7 @@ function ActivityResultPage() {
     result?.level_title || levelLabels[nivel || ""] || "Nível"
 
   const totalScore = result?.score ?? 0
+  const earnedPoints = result?.points_earned ?? 0
   const correctAnswers = result?.correct_answers ?? 0
   const wrongAnswers = result?.wrong_answers ?? 0
   const accuracy = result?.accuracy ?? 0
@@ -186,16 +185,16 @@ function ActivityResultPage() {
               <div className="mt-7 grid gap-3 md:grid-cols-2">
                 <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-slate-50 px-4 py-4 text-center shadow-sm">
                   <p className="text-[2rem] font-extrabold text-slate-900">
-                    {totalScore}
+                    {earnedPoints}
                   </p>
-                  <p className="mt-1 text-sm text-slate-400">Pontuação total</p>
+                  <p className="mt-1 text-sm text-slate-400">Pontos ganhos</p>
                 </div>
 
                 <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-slate-50 px-4 py-4 text-center shadow-sm">
                   <p className="text-[2rem] font-extrabold text-slate-900">
-                    {accuracy}%
+                    {totalScore}
                   </p>
-                  <p className="mt-1 text-sm text-slate-400">Taxa de acerto</p>
+                  <p className="mt-1 text-sm text-slate-400">Pontuação acumulada</p>
                 </div>
 
                 <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-[#eefaf2] px-4 py-4 text-center shadow-sm">
@@ -212,7 +211,14 @@ function ActivityResultPage() {
                   <p className="mt-1 text-sm text-slate-400">Erros</p>
                 </div>
 
-                <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-[#f6efff] px-4 py-4 text-center shadow-sm md:col-span-2">
+                <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-slate-50 px-4 py-4 text-center shadow-sm">
+                  <p className="text-[2rem] font-extrabold text-slate-900">
+                    {accuracy}%
+                  </p>
+                  <p className="mt-1 text-sm text-slate-400">Taxa de acerto</p>
+                </div>
+
+                <div className="flex min-h-[96px] flex-col items-center justify-center rounded-[1.3rem] bg-[#f6efff] px-4 py-4 text-center shadow-sm">
                   <p className="text-[2rem] font-extrabold text-[#9b5cf6]">
                     {totalTime}
                   </p>

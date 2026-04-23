@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PhaseProgressDetailView, PhaseResultView, StartPhaseSessionView, PhaseMapStatusView, LevelProgressSummaryView, ProgressSummaryView, DashboardSummaryView, ProgressReportView, ProgressReportPdfView
+from .views import PhaseProgressDetailView, PhaseResultView, StartPhaseSessionView, PhaseMapStatusView, LevelProgressSummaryView, ProgressSummaryView, DashboardSummaryView, ProgressReportView, ProgressReportPdfView, PausePhaseSessionView, ResumePhaseSessionView
 
 urlpatterns = [
     path('phases/<int:phase_id>/', PhaseProgressDetailView.as_view(), name='phase-progress-detail'),
@@ -11,4 +11,6 @@ urlpatterns = [
     path("dashboard/", DashboardSummaryView.as_view(), name="dashboard-summary"),
     path("report/", ProgressReportView.as_view(), name="progress-report"),
     path("report/pdf/", ProgressReportPdfView.as_view(), name="progress-report-pdf"),
+    path('phases/<int:phase_id>/pause-session/', PausePhaseSessionView.as_view(), name='pause-phase-session'),
+    path('phases/<int:phase_id>/resume-session/', ResumePhaseSessionView.as_view(), name='resume-phase-session'),
 ]

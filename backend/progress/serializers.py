@@ -25,6 +25,7 @@ class PhaseResultSerializer(serializers.Serializer):
     level_title = serializers.CharField()
     completed = serializers.BooleanField()
     score = serializers.IntegerField()
+    points_earned = serializers.IntegerField()
     correct_answers = serializers.IntegerField()
     wrong_answers = serializers.IntegerField()
     total_questions = serializers.IntegerField()
@@ -44,6 +45,12 @@ class PhaseSessionSerializer(serializers.Serializer):
     is_finished = serializers.BooleanField()
     started_at = serializers.DateTimeField()
     finished_at = serializers.DateTimeField(allow_null=True)
+    total_paused_seconds = serializers.IntegerField(required=False)
+    paused_at = serializers.DateTimeField(allow_null=True, required=False)
+    answered_correctly_question_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False
+    )
 
 
 class PhaseMapItemSerializer(serializers.Serializer):

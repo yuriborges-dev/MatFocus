@@ -173,7 +173,7 @@ function ProgressPage() {
     return (summary?.history ?? []).map((activity) => ({
       title: activity.title,
       details: `${activity.correct}/${activity.total} acertos • ${formatSeconds(activity.seconds)}`,
-      points: `+${activity.correct * 10} pts`,
+      points: `+${activity.points} pts`,
     }))
   }, [summary])
 

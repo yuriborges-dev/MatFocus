@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import SuccessModal from "../components/SuccessModal"
@@ -23,6 +23,20 @@ type Question = {
   statement: string
   tip: string
   order: number
+}
+
+type StartSessionResponse = {
+  session_id: number
+  student_id: number
+  phase_id: number
+  correct_answers: number
+  wrong_answers: number
+  is_finished: boolean
+  started_at: string
+  finished_at: string | null
+  total_paused_seconds?: number
+  paused_at?: string | null
+  answered_correctly_question_ids?: number[]
 }
 
 const successMessages = [
@@ -62,6 +76,8 @@ function ExercisePage() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [pauseStartedAt, setPauseStartedAt] = useState<number | null>(null)
   const [totalPausedSeconds, setTotalPausedSeconds] = useState(0)
+  const [persistedPausedSeconds, setPersistedPausedSeconds] = useState(0)
+  const [sessionFinished, setSessionFinished] = useState(false)
 
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answer, setAnswer] = useState("")
@@ -75,7 +91,23 @@ function ExercisePage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
 
+  const sessionIdRef = useRef<number | null>(null)
+  const phaseIdRef = useRef<number | null>(null)
+  const sessionFinishedRef = useRef(false)
+
   const { student } = useAuth()
+
+  useEffect(() => {
+    sessionIdRef.current = sessionId
+  }, [sessionId])
+
+  useEffect(() => {
+    phaseIdRef.current = phaseData?.id ?? null
+  }, [phaseData])
+
+  useEffect(() => {
+    sessionFinishedRef.current = sessionFinished
+  }, [sessionFinished])
 
   useEffect(() => {
     if (!conteudo || !nivel || !fase) {
@@ -107,19 +139,36 @@ function ExercisePage() {
 
         setPhaseData(currentPhase)
 
-        const sessionResponse = await api.post(
+        const sessionResponse = await api.post<StartSessionResponse>(
           `/progress/phases/${currentPhase.id}/start-session/`,
           {}
         )
 
-        setSessionId(sessionResponse.data.session_id)
-        setSessionStartedAt(sessionResponse.data.started_at)
+        const sessionData = sessionResponse.data
 
-        const questionsResponse = await api.get(
+        setSessionId(sessionData.session_id)
+        setSessionStartedAt(sessionData.started_at)
+        setPersistedPausedSeconds(sessionData.total_paused_seconds || 0)
+        setTotalPausedSeconds(0)
+        setPauseStartedAt(null)
+        setCorrectAnswers(sessionData.correct_answers)
+        setWrongAnswers(sessionData.wrong_answers)
+        setSessionFinished(false)
+
+        const questionsResponse = await api.get<Question[]>(
           `/activities/questions/?phase_id=${currentPhase.id}`
         )
 
-        setQuestions(questionsResponse.data)
+        const fetchedQuestions = questionsResponse.data
+        setQuestions(fetchedQuestions)
+
+        const answeredCorrectlyIds = sessionData.answered_correctly_question_ids || []
+
+        const nextQuestionIndex = fetchedQuestions.findIndex(
+          (question) => !answeredCorrectlyIds.includes(question.id)
+        )
+
+        setQuestionIndex(nextQuestionIndex === -1 ? 0 : nextQuestionIndex)
       } catch (err) {
         console.error(err)
         setError("Não foi possível carregar a atividade.")
@@ -140,7 +189,11 @@ function ExercisePage() {
       const start = new Date(sessionStartedAt).getTime()
       const now = Date.now()
 
-      const elapsed = Math.floor((now - start) / 1000) - totalPausedSeconds
+      const elapsed =
+        Math.floor((now - start) / 1000) -
+        persistedPausedSeconds -
+        totalPausedSeconds
+
       setElapsedSeconds(Math.max(0, elapsed))
     }
 
@@ -148,7 +201,30 @@ function ExercisePage() {
     const interval = setInterval(updateTimer, 1000)
 
     return () => clearInterval(interval)
-  }, [sessionStartedAt, totalPausedSeconds, isPaused])
+  }, [sessionStartedAt, persistedPausedSeconds, totalPausedSeconds, isPaused])
+
+  useEffect(() => {
+    return () => {
+      const currentSessionId = sessionIdRef.current
+      const currentPhaseId = phaseIdRef.current
+      const finished = sessionFinishedRef.current
+      const token = localStorage.getItem("matfocus_access")
+
+      if (!currentSessionId || !currentPhaseId || finished || !token) return
+
+      fetch(`http://127.0.0.1:8000/api/progress/phases/${currentPhaseId}/pause-session/`, {
+        method: "POST",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          session_id: currentSessionId,
+        }),
+      }).catch(() => {})
+    }
+  }, [])
 
   const currentQuestion = useMemo(
     () => questions[questionIndex],
@@ -159,22 +235,51 @@ function ExercisePage() {
   const progressPercent =
     totalQuestions > 0 ? ((questionIndex + 1) / totalQuestions) * 100 : 0
 
-  const handlePause = () => {
-    setPauseStartedAt(Date.now())
-    setIsPaused(true)
+  const handlePause = async () => {
+    if (!sessionId || !phaseData) return
+
+    try {
+      await api.post(`/progress/phases/${phaseData.id}/pause-session/`, {
+        session_id: sessionId,
+      })
+
+      setPauseStartedAt(Date.now())
+      setIsPaused(true)
+    } catch (error) {
+      console.error("Erro ao pausar sessão:", error)
+    }
   }
 
-  const handleResume = () => {
-    if (pauseStartedAt) {
-      const pausedDuration = Math.floor((Date.now() - pauseStartedAt) / 1000)
-      setTotalPausedSeconds((prev) => prev + pausedDuration)
+  const handleResume = async () => {
+    if (!sessionId || !phaseData) return
+
+    try {
+      const response = await api.post(
+        `/progress/phases/${phaseData.id}/resume-session/`,
+        {
+          session_id: sessionId,
+        }
+      )
+
+      setPersistedPausedSeconds(response.data.total_paused_seconds || 0)
+      setPauseStartedAt(null)
+      setIsPaused(false)
+    } catch (error) {
+      console.error("Erro ao retomar sessão:", error)
+    }
+  }
+
+  const handleExitSession = async () => {
+    if (sessionId && phaseData) {
+      try {
+        await api.post(`/progress/phases/${phaseData.id}/pause-session/`, {
+          session_id: sessionId,
+        })
+      } catch (error) {
+        console.error("Erro ao pausar sessão ao sair:", error)
+      }
     }
 
-    setPauseStartedAt(null)
-    setIsPaused(false)
-  }
-
-  const handleExitSession = () => {
     navigate(`/atividades/${conteudo}/${nivel}`)
   }
 
@@ -226,6 +331,11 @@ function ExercisePage() {
         setFeedbackType("")
         setScore(data.score)
         setCorrectAnswers(data.correct_answers)
+
+        if (data.session_finished) {
+          setSessionFinished(true)
+        }
+
         return
       }
 
