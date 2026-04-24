@@ -582,28 +582,35 @@ class ProgressSummaryView(APIView):
         else:
             start_date = None
 
-        answers = StudentAnswer.objects.filter(student=student, session__is_finished=True, session__points_earned__gt=0)
+        finished_sessions = StudentPhaseSession.objects.filter(
+            student=student,
+            is_finished=True,
+            points_earned__gt=0
+        ).select_related(
+            "phase__content",
+            "phase__level"
+        )
 
         if start_date:
-            answers = answers.filter(answered_at__gte=start_date)
+            finished_sessions = finished_sessions.filter(finished_at__gte=start_date)
 
-        correct_answers = answers.filter(is_correct=True).count()
-        wrong_answers = answers.filter(is_correct=False).count()
+        latest_session_by_phase = {}
+
+        for session in finished_sessions.order_by("phase_id", "-finished_at", "-started_at"):
+            if session.phase_id not in latest_session_by_phase:
+                latest_session_by_phase[session.phase_id] = session
+
+        valid_sessions = list(latest_session_by_phase.values())
+
+        correct_answers = sum(session.correct_answers for session in valid_sessions)
+        wrong_answers = sum(session.wrong_answers for session in valid_sessions)
 
         total_answers = correct_answers + wrong_answers
 
         accuracy = (
             round((correct_answers / total_answers) * 100)
-            if total_answers > 0 else 0
+            if total_answers else 0
         )
-
-        finished_sessions = StudentPhaseSession.objects.filter(
-            student=student,
-            is_finished=True
-        )
-
-        if start_date:
-            finished_sessions = finished_sessions.filter(started_at__gte=start_date)
 
         completed_phase_progress = StudentPhaseProgress.objects.filter(
             student=student,
@@ -611,7 +618,9 @@ class ProgressSummaryView(APIView):
         )
 
         if start_date:
-            completed_phase_progress = completed_phase_progress.filter(updated_at__gte=start_date)
+            completed_phase_progress = completed_phase_progress.filter(
+                updated_at__gte=start_date
+            )
 
         total_activities = completed_phase_progress.count()
 
@@ -630,7 +639,7 @@ class ProgressSummaryView(APIView):
 
             progress_percent = (
                 round((completed / total_phases) * 100)
-                if total_phases > 0 else 0
+                if total_phases else 0
             )
 
             content_progress.append({
@@ -638,11 +647,10 @@ class ProgressSummaryView(APIView):
                 "progress": progress_percent
             })
 
-        history_sessions = finished_sessions.filter(
-            points_earned__gt=0
-        ).select_related(
-            "phase__content",
-            "phase__level"
+        history_sessions = sorted(
+            valid_sessions,
+            key=lambda session: session.finished_at or session.started_at,
+            reverse=True
         )[:5]
 
         history = []
@@ -650,15 +658,22 @@ class ProgressSummaryView(APIView):
         for session in history_sessions:
             total = session.correct_answers + session.wrong_answers
 
+            seconds = (
+                int((session.finished_at - session.started_at).total_seconds())
+                - session.total_paused_seconds
+                if session.finished_at else 0
+            )
+
             history.append({
-                "title": f"{session.phase.content.name} - {session.phase.level.title}",
+                "title": f"{session.phase.content.name} - {session.phase.level.title} - Fase {session.phase.phase_number}",
+                "content": session.phase.content.name,
+                "level": session.phase.level.title,
+                "phase_number": session.phase.phase_number,
                 "correct": session.correct_answers,
                 "total": total,
-                "seconds": (
-                    int((session.finished_at - session.started_at).total_seconds())
-                    if session.finished_at else 0
-                ),
+                "seconds": max(0, seconds),
                 "points": session.points_earned,
+                "finished_at": session.finished_at,
             })
 
         return Response({
@@ -684,21 +699,31 @@ class DashboardSummaryView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        answers = StudentAnswer.objects.filter(student=student, session__is_finished=True, session__points_earned__gt=0)
+        finished_sessions = StudentPhaseSession.objects.filter(
+            student=student,
+            is_finished=True,
+            points_earned__gt=0
+        ).select_related(
+            "phase__content",
+            "phase__level"
+        )
 
-        correct_answers = answers.filter(is_correct=True).count()
-        wrong_answers = answers.filter(is_correct=False).count()
+        latest_session_by_phase = {}
+
+        for session in finished_sessions.order_by("phase_id", "-finished_at", "-started_at"):
+            if session.phase_id not in latest_session_by_phase:
+                latest_session_by_phase[session.phase_id] = session
+
+        valid_sessions = list(latest_session_by_phase.values())
+
+        correct_answers = sum(session.correct_answers for session in valid_sessions)
+        wrong_answers = sum(session.wrong_answers for session in valid_sessions)
 
         total_answers = correct_answers + wrong_answers
 
         accuracy = (
             round((correct_answers / total_answers) * 100)
-            if total_answers > 0 else 0
-        )
-
-        finished_sessions = StudentPhaseSession.objects.filter(
-            student=student,
-            is_finished=True
+            if total_answers else 0
         )
 
         total_activities = StudentPhaseProgress.objects.filter(
@@ -737,11 +762,10 @@ class DashboardSummaryView(APIView):
                 "progress": percent
             })
 
-        recent_sessions = finished_sessions.filter(
-            points_earned__gt=0
-        ).select_related(
-            "phase__content",
-            "phase__level"
+        recent_sessions = sorted(
+            valid_sessions,
+            key=lambda session: session.finished_at or session.started_at,
+            reverse=True
         )[:3]
 
         recent_activities = []
@@ -749,10 +773,17 @@ class DashboardSummaryView(APIView):
         for session in recent_sessions:
             total = session.correct_answers + session.wrong_answers
 
+            seconds = (
+                int((session.finished_at - session.started_at).total_seconds())
+                - session.total_paused_seconds
+                if session.finished_at else 0
+            )
+
             recent_activities.append({
-                "title": f"{session.phase.content.name} - {session.phase.level.title}",
-                "detail": f"{session.correct_answers}/{total} acertos",
-                "points": f"+{session.points_earned} pts"
+                "title": f"{session.phase.content.name} - {session.phase.level.title} - Fase {session.phase.phase_number}",
+                "detail": f"{session.correct_answers}/{total} acertos • {max(0, seconds)}s",
+                "points": f"+{session.points_earned} pts",
+                "finished_at": session.finished_at,
             })
 
         return Response({

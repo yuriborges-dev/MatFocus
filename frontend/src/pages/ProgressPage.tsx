@@ -76,6 +76,20 @@ function formatSeconds(seconds: number) {
   return `${minutes}min ${remainingSeconds}s`
 }
 
+function formatDateTime(value: string | null) {
+  if (!value) return "Data não informada"
+
+  const date = new Date(value)
+
+  return date.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
 function ProgressPage() {
   const [period, setPeriod] = useState<ProgressPeriod>("all")
   const [summary, setSummary] = useState<ProgressSummaryResponse | null>(null)
@@ -173,6 +187,7 @@ function ProgressPage() {
     return (summary?.history ?? []).map((activity) => ({
       title: activity.title,
       details: `${activity.correct}/${activity.total} acertos • ${formatSeconds(activity.seconds)}`,
+      date: `Realizada em ${formatDateTime(activity.finished_at)}`,
       points: `+${activity.points} pts`,
     }))
   }, [summary])
@@ -346,6 +361,9 @@ function ProgressPage() {
                         </p>
                         <p className="mt-1 text-[0.94rem] text-slate-400 sm:text-[1rem]">
                           {activity.details}
+                        </p>
+                        <p className="mt-1 text-[0.85rem] text-slate-400 sm:text-[0.92rem]">
+                          {activity.date}
                         </p>
                       </div>
 

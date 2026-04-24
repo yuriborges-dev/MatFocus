@@ -26,10 +26,14 @@ export type ProgressSummaryResponse = {
   }[]
   history: {
     title: string
+    content: string
+    level: string
+    phase_number: number
     correct: number
     total: number
     seconds: number
     points: number
+    finished_at: string | null
   }[]
 }
 
@@ -68,6 +72,7 @@ export type DashboardSummaryResponse = {
     title: string
     detail: string
     points: string
+    finished_at: string | null
   }[]
 }
 

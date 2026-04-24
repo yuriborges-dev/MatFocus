@@ -119,6 +119,20 @@ function DashboardPage() {
     )
   }
 
+  function formatDateTime(value: string | null) {
+    if (!value) return ""
+
+    const date = new Date(value)
+
+    return date.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
   return (
     <AppLayout>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -302,38 +316,45 @@ function DashboardPage() {
         </div>
       </div>
 
-      <div className="mt-6 rounded-[2rem] bg-white px-5 py-6 shadow-sm sm:px-7 sm:py-8">
-        <h3 className="text-[1.1rem] font-bold text-slate-800 sm:text-[1.2rem]">
+      <div className="mt-6 rounded-[1.6rem] bg-white px-4 py-6 shadow-sm sm:rounded-[2rem] sm:px-6 sm:py-7 lg:px-7 lg:py-8">
+        <h3 className="text-[1.05rem] font-bold text-slate-800 sm:text-[1.15rem] lg:text-[1.2rem]">
           Atividades recentes
         </h3>
 
-        <div className="mt-5 space-y-4">
-          {recentActivities.length > 0 ? (
-            recentActivities.slice(0, 3).map((activity, index) => (
+        {recentActivities.length > 0 ? (
+          <div className="mt-6 space-y-4">
+            {recentActivities.slice(0, 3).map((activity, index) => (
               <div
-                key={index}
-                className="flex flex-col gap-2 rounded-[1.2rem] bg-slate-50 px-4 py-4 sm:px-5 md:flex-row md:items-center md:justify-between"
+                key={`${activity.title}-${index}`}
+                className="flex flex-col gap-3 rounded-[1.25rem] bg-slate-50 px-4 py-4 sm:rounded-[1.4rem] sm:px-5 md:flex-row md:items-center md:justify-between"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-slate-800">
+                  <p className="text-[1rem] font-bold leading-snug text-slate-800 sm:text-[1.05rem] lg:text-[1.1rem]">
                     {activity.title}
                   </p>
-                  <p className="mt-1 text-sm text-slate-400 sm:text-[0.95rem]">
+
+                  <p className="mt-1 text-[0.94rem] text-slate-400 sm:text-[1rem]">
                     {activity.detail}
+                  </p>
+
+                  <p className="mt-1 text-[0.85rem] text-slate-400 sm:text-[0.92rem]">
+                    Realizada em {formatDateTime(activity.finished_at)}
                   </p>
                 </div>
 
-                <span className="shrink-0 font-bold text-[#3f86d1]">
+                <span className="shrink-0 text-[1.05rem] font-bold text-[#79c6a1] sm:text-[1.15rem] lg:text-[1.2rem]">
                   {activity.points}
                 </span>
               </div>
-            ))
-          ) : (
-            <div className="rounded-[1.2rem] bg-slate-50 px-5 py-8 text-center text-slate-400">
+            ))}
+          </div>
+        ) : (
+          <div className="flex min-h-[160px] items-center justify-center px-4 text-center sm:min-h-[180px]">
+            <p className="text-[1rem] text-slate-400 sm:text-[1.1rem]">
               Nenhuma atividade recente encontrada.
-            </div>
-          )}
-        </div>
+            </p>
+          </div>
+        )}
       </div>
     </AppLayout>
   )
