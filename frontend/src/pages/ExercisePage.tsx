@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import SuccessModal from "../components/SuccessModal"
+import FeedbackModal from "../components/FeedbackModal"
 import { api } from "../services/api"
 import { useAuth } from "../contexts/AuthContext"
 import { ArrowLeft } from "lucide-react"
@@ -81,15 +82,34 @@ function ExercisePage() {
 
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answer, setAnswer] = useState("")
-  const [feedback, setFeedback] = useState("")
-  const [feedbackType, setFeedbackType] = useState<"error" | "warning" | "">("")
-  const [showTip, setShowTip] = useState(false)
+  const [feedbackModal, setFeedbackModal] = useState({
+    isOpen: false,
+    type: "tip" as "tip" | "error" | "warning",
+    title: "",
+    message: "",
+    description: "",
+  })
   const [isPaused, setIsPaused] = useState(false)
   const [score, setScore] = useState(0)
   const [correctAnswers, setCorrectAnswers] = useState(0)
   const [wrongAnswers, setWrongAnswers] = useState(0)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
+
+  function openFeedbackModal(
+    type: "tip" | "error" | "warning",
+    title: string,
+    message: string,
+    description = ""
+  ) {
+    setFeedbackModal({
+      isOpen: true,
+      type,
+      title,
+      message,
+      description,
+    })
+  }
 
   const sessionIdRef = useRef<number | null>(null)
   const phaseIdRef = useRef<number | null>(null)
@@ -284,29 +304,46 @@ function ExercisePage() {
   }
 
   const handleShowTip = () => {
-    setShowTip(true)
-    setFeedback("")
-    setFeedbackType("")
+    if (!currentQuestion?.tip) return
+
+    openFeedbackModal(
+      "tip",
+      "Dica",
+      currentQuestion.tip,
+      "Use essa dica para pensar com calma."
+    )
   }
 
   const handleSubmitAnswer = async () => {
     if (!answer.trim()) {
-      setFeedback("Digite uma resposta antes de enviar.")
-      setFeedbackType("warning")
+      openFeedbackModal(
+        "warning",
+        "Atenção",
+        "Digite uma resposta antes de enviar.",
+        "Depois clique em enviar."
+      )
       return
     }
 
     if (!currentQuestion || !phaseData) return
 
     if (!sessionId) {
-      setFeedback("Sessão da atividade não iniciada.")
-      setFeedbackType("error")
+      openFeedbackModal(
+        "error",
+        "Ops!",
+        "Sessão da atividade não iniciada.",
+        "Volte e tente iniciar a fase novamente."
+      )
       return
     }
 
     if (!student?.id) {
-      setFeedback("Aluno não autenticado.")
-      setFeedbackType("error")
+      openFeedbackModal(
+        "error",
+        "Ops!",
+        "Aluno não autenticado.",
+        "Entre novamente na sua conta."
+      )
       return
     }
 
@@ -327,8 +364,12 @@ function ExercisePage() {
 
         setSuccessMessage(randomMessage)
         setShowSuccessModal(true)
-        setFeedback("")
-        setFeedbackType("")
+
+        setFeedbackModal((prev) => ({
+          ...prev,
+          isOpen: false,
+        }))
+
         setScore(data.score)
         setCorrectAnswers(data.correct_answers)
 
@@ -342,25 +383,36 @@ function ExercisePage() {
       const randomErrorMessage =
         errorMessages[Math.floor(Math.random() * errorMessages.length)]
 
-      setFeedback(randomErrorMessage)
-      setFeedbackType("error")
+      openFeedbackModal(
+        "error",
+        randomErrorMessage,
+        "Leia a questão com calma e tente novamente."
+      )
+
       setWrongAnswers(data.wrong_answers)
     } catch (error) {
       console.error("Erro ao enviar resposta:", error)
-      setFeedback("Erro ao validar resposta.")
-      setFeedbackType("error")
+
+      openFeedbackModal(
+        "error",
+        "Ops!",
+        "Erro ao validar resposta.",
+        "Tente novamente em alguns instantes."
+      )
     }
   }
 
   const handleNextQuestion = () => {
     setShowSuccessModal(false)
 
+    setFeedbackModal((prev) => ({
+      ...prev,
+      isOpen: false,
+    }))
+
     if (questionIndex < totalQuestions - 1) {
       setQuestionIndex((prev) => prev + 1)
       setAnswer("")
-      setFeedback("")
-      setFeedbackType("")
-      setShowTip(false)
       return
     }
 
@@ -371,18 +423,26 @@ function ExercisePage() {
     )
   }
 
-  const feedbackClasses = {
-    error: "border-red-200 bg-red-50 text-red-700",
-    warning: "border-yellow-200 bg-yellow-50 text-yellow-700",
-    "": "",
-  }
-
   return (
     <AppLayout>
       <SuccessModal
         isOpen={showSuccessModal}
         message={successMessage}
         onContinue={handleNextQuestion}
+      />
+
+      <FeedbackModal
+        isOpen={feedbackModal.isOpen}
+        type={feedbackModal.type}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
+        description={feedbackModal.description}
+        onClose={() =>
+          setFeedbackModal((prev) => ({
+            ...prev,
+            isOpen: false,
+          }))
+        }
       />
 
       {isPaused && (
@@ -510,29 +570,6 @@ function ExercisePage() {
               Enviar
             </button>
           </div>
-
-          {showTip && (
-            <div className="mt-5 rounded-[1.6rem] border border-yellow-200 bg-yellow-50 px-5 py-5 text-yellow-700 shadow-sm sm:mt-6 sm:px-6">
-              <p className="text-xl font-bold sm:text-2xl">Dica</p>
-              <p className="mt-2 text-sm leading-relaxed sm:text-base">
-                {currentQuestion.tip}
-              </p>
-            </div>
-          )}
-
-          {feedback && (
-            <div
-              className={`mt-5 rounded-[1.6rem] border px-5 py-5 shadow-sm sm:mt-6 sm:px-6 ${feedbackClasses[feedbackType]}`}
-            >
-              <p className="text-xl font-bold sm:text-2xl">{feedback}</p>
-
-              {feedbackType === "error" && (
-                <p className="mt-2 text-sm leading-relaxed opacity-80 sm:text-base">
-                  Leia a questão com calma e tente novamente.
-                </p>
-              )}
-            </div>
-          )}
         </div>
       )}
     </AppLayout>
