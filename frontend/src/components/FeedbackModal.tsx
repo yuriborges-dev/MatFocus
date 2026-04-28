@@ -1,4 +1,6 @@
 import { AlertCircle, Lightbulb } from "lucide-react"
+import { useAuth } from "../contexts/AuthContext"
+import { getAnimationLevel, getModalAnimation } from "../utils/animation.ts"
 
 type FeedbackType = "tip" | "error" | "warning"
 
@@ -19,6 +21,9 @@ function FeedbackModal({
   description,
   onClose,
 }: FeedbackModalProps) {
+  const { student } = useAuth()
+  const animationLevel = getAnimationLevel(student?.animation_level)
+
   if (!isOpen) return null
 
   const styles = {
@@ -49,7 +54,11 @@ function FeedbackModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 px-4 backdrop-blur-[3px]">
-      <div className="w-full max-w-md rounded-[2rem] bg-white p-8 text-center shadow-[0_24px_60px_rgba(15,23,42,0.18)]">
+      <div
+        className={`w-full max-w-md rounded-[2rem] bg-white p-8 text-center shadow-[0_24px_60px_rgba(15,23,42,0.18)] ${getModalAnimation(
+          animationLevel
+        )}`}
+      >
         <div className="mb-6 flex justify-center">
           <div
             className={`flex h-24 w-24 items-center justify-center rounded-full ${current.bg} ${current.text} ring-4 ${current.ring}`}
@@ -62,14 +71,10 @@ function FeedbackModal({
           {title}
         </h2>
 
-        <p className="mt-3 text-lg font-medium text-slate-600">
-          {message}
-        </p>
+        <p className="mt-3 text-lg font-medium text-slate-600">{message}</p>
 
         {description && (
-          <p className="mt-2 text-base text-slate-400">
-            {description}
-          </p>
+          <p className="mt-2 text-base text-slate-400">{description}</p>
         )}
 
         <button

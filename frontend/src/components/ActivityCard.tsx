@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
+import { getAnimationLevel, getCardAnimation } from "../utils/animation.ts"
 
 type ActivityCardProps = {
   title: string
@@ -20,11 +22,16 @@ function ActivityCard({
   path,
 }: ActivityCardProps) {
   const navigate = useNavigate()
+  const { student } = useAuth()
+
+  const animationLevel = getAnimationLevel(student?.animation_level)
 
   return (
     <button
       onClick={() => navigate(path)}
-      className={`flex w-full items-center justify-between rounded-[2rem] border-2 ${borderColor} bg-white px-8 py-7 text-left transition hover:-translate-y-0.5 hover:shadow-md`}
+      className={`flex w-full items-center justify-between rounded-[2rem] border-2 ${borderColor} bg-white px-8 py-7 text-left ${getCardAnimation(
+        animationLevel
+      )}`}
     >
       <div className="flex items-center gap-6">
         <div

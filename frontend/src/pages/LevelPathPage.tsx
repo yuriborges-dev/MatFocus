@@ -5,6 +5,11 @@ import AppLayout from "../layouts/AppLayout"
 import PhaseNode from "../components/PhaseNode"
 import { api } from "../services/api"
 import { useAuth } from "../contexts/AuthContext"
+import {
+  getAnimationLevel,
+  getPageAnimation,
+  getCardAnimation,
+} from "../utils/animation.ts"
 
 type PhaseMapItem = {
   phase_id: number
@@ -47,6 +52,7 @@ function LevelPathPage() {
   const navigate = useNavigate()
   const { conteudo, nivel } = useParams()
   const { student } = useAuth()
+  const animationLevel = getAnimationLevel(student?.animation_level)
 
   const [phases, setPhases] = useState<PhaseMapItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -244,7 +250,7 @@ function LevelPathPage() {
   return (
     <AppLayout>
       <div
-        className={`relative overflow-hidden bg-gradient-to-b ${currentBackground.wrapper}
+        className={`relative overflow-hidden bg-gradient-to-b ${currentBackground.wrapper} ${getPageAnimation(animationLevel)}
         -mx-5 px-5 py-6
         sm:-mx-9 sm:px-9
         lg:mx-0 lg:rounded-[2rem] lg:px-6 lg:py-6
@@ -321,7 +327,7 @@ function LevelPathPage() {
 
         {!loading && !error && phases.length > 0 && (
           <>
-            <div className="relative z-10 mt-8 rounded-[1.5rem] bg-white/80 px-5 py-4 shadow-sm backdrop-blur-sm">
+            <div className={`relative z-10 mt-8 rounded-[1.5rem] bg-white/80 px-5 py-4 shadow-sm backdrop-blur-sm ${getCardAnimation(animationLevel)}`}>
               <div className="flex justify-between gap-4 text-sm font-semibold text-slate-600 sm:text-[1rem]">
                 <span>
                   {completedPhases} de {totalPhases} fases concluídas
