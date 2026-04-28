@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { ArrowLeft } from "lucide-react"
+import BackButton from "../components/BackButton.tsx"
 import { useNavigate, useParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import PhaseNode from "../components/PhaseNode"
@@ -296,12 +296,7 @@ function LevelPathPage() {
 
         <div className="relative z-10">
           <div className="mb-3">
-            <button
-              onClick={() => navigate(`/atividades/${conteudo}`)}
-              className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-sm"
-            >
-              <ArrowLeft />
-            </button>
+            <BackButton fallbackPath={`/atividades/${conteudo}`} />
           </div>
 
           <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-[2.5rem]">

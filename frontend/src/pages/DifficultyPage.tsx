@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react"
-import { ArrowLeft, Lock } from "lucide-react"
+import { Lock } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import AppLayout from "../layouts/AppLayout"
+import BackButton from "../components/BackButton"
 import {
   getDifficultyOptionsWithProgress,
   type DifficultyOptionWithProgress,
 } from "../services/activities"
+import {
+  getAnimationLevel,
+  getPageAnimation,
+  getCardAnimation,
+} from "../utils/animation.ts"
 
 const levelStyles: Record<
   string,
@@ -78,6 +84,7 @@ function DifficultyPage() {
   const [error, setError] = useState("")
 
   const { student } = useAuth()
+  const animationLevel = getAnimationLevel(student?.animation_level)
 
   useEffect(() => {
     if (!conteudo) {
@@ -112,15 +119,8 @@ function DifficultyPage() {
 
   return (
     <AppLayout>
-      <div>
-        <button
-          type="button"
-          onClick={() => navigate("/atividades")}
-        className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
-          aria-label="Voltar para conteúdos"
-        >
-          <ArrowLeft className="h-6 w-6" />
-        </button>
+      <div className={getPageAnimation(animationLevel)}>
+        <BackButton fallbackPath="/atividades" />
 
         <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-[2.5rem]">
           {formatContentTitle(conteudo)}
@@ -167,10 +167,10 @@ function DifficultyPage() {
                   if (isLocked) return
                   navigate(`/atividades/${conteudo}/${level.code}`)
                 }}
-                className={`relative min-h-[168px] overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white px-6 py-6 text-left shadow-sm transition ${
+                className={`relative min-h-[168px] overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white px-6 py-6 text-left shadow-sm ${
                   isLocked
                     ? "cursor-not-allowed opacity-70"
-                    : "hover:-translate-y-0.5 hover:shadow-md"
+                    : getCardAnimation(animationLevel)
                 }`}
               >
                 <div className={`absolute left-0 top-0 h-3 w-full ${styles.accent}`} />

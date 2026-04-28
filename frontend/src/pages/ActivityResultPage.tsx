@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import { getPhaseResult } from "../services/progress"
 import { useAuth } from "../contexts/AuthContext"
+import { getAnimationLevel, getPageAnimation } from "../utils/animation"
 
 const contentTitles: Record<string, string> = {
   adicao: "Adição",
@@ -78,6 +79,7 @@ function ActivityResultPage() {
   const [error, setError] = useState("")
 
   const { student } = useAuth()
+  const animationLevel = getAnimationLevel(student?.animation_level)
 
   useEffect(() => {
     if (!phaseId || isNaN(Number(phaseId))) {
@@ -141,16 +143,18 @@ function ActivityResultPage() {
   if (error || !result) {
     return (
       <AppLayout>
-        <div className="mx-auto mt-8 w-full max-w-2xl rounded-[1.8rem] border border-red-200 bg-red-50 px-6 py-6 text-base font-semibold text-red-700 shadow-sm">
-          <p>{error || "Não foi possível carregar o resultado."}</p>
+        <div className={getPageAnimation(animationLevel)}>
+          <div className="mx-auto mt-8 w-full max-w-2xl rounded-[1.8rem] border border-red-200 bg-red-50 px-6 py-6 text-base font-semibold text-red-700 shadow-sm">
+            <p>{error || "Não foi possível carregar o resultado."}</p>
 
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="mt-5 rounded-[1rem] bg-[#4a8fd3] px-5 py-3 text-sm font-bold text-white transition hover:brightness-105"
-          >
-            Voltar
-          </button>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="mt-5 rounded-[1rem] bg-[#4a8fd3] px-5 py-3 text-sm font-bold text-white transition hover:brightness-105"
+            >
+              Voltar
+            </button>
+          </div>
         </div>
       </AppLayout>
     )

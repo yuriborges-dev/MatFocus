@@ -1,14 +1,12 @@
 import {
-  ArrowLeft,
   BookOpen,
   GraduationCap,
   Code2,
 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
+import BackButton from "../components/BackButton"
 
 function AboutPage() {
-  const navigate = useNavigate()
 
   const iconStyle =
     "h-8 w-8 shrink-0 text-[#3b82d0] sm:h-9 sm:w-9"
@@ -17,13 +15,7 @@ function AboutPage() {
     <AppLayout showProfileCard={false}>
       <div className="mx-auto max-w-4xl">
         <header className="mb-6 sm:mb-8">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="mb-3 inline-flex items-center gap-2 rounded-2xl px-2 py-2 text-sm font-semibold text-slate-500 transition hover:bg-white hover:text-slate-700 sm:mb-4 sm:px-3"
-          >
-            <ArrowLeft className="h-6 w-6" />
-          </button>
+          <BackButton />
 
           <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
             Sobre o MatFocus

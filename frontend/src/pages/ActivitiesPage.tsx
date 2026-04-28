@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react"
 import AppLayout from "../layouts/AppLayout"
 import ActivityCard from "../components/ActivityCard"
 import { api } from "../services/api"
+import { useAuth } from "../contexts/AuthContext"
+import { getAnimationLevel, getPageAnimation } from "../utils/animation.ts"
 
 type Content = {
   id: number
@@ -60,6 +62,9 @@ const contentOrder = [
 ]
 
 function ActivitiesPage() {
+  const { student } = useAuth()
+  const animationLevel = getAnimationLevel(student?.animation_level)
+
   const [contents, setContents] = useState<Content[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -93,53 +98,55 @@ function ActivitiesPage() {
 
   return (
     <AppLayout>
-      <div>
-        <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-[2.5rem]">
-          Escolha o conteúdo
-        </h1>
+      <div className={getPageAnimation(animationLevel)}>
+        <div>
+          <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-[2.5rem]">
+            Escolha o conteúdo
+          </h1>
 
-        <p className="mt-1 text-sm text-slate-400 sm:text-base lg:text-[1.1rem]">
-          O que vamos praticar hoje?
-        </p>
+          <p className="mt-1 text-sm text-slate-400 sm:text-base lg:text-[1.1rem]">
+            O que vamos praticar hoje?
+          </p>
+        </div>
+
+        {loading && (
+          <div className="mt-8 rounded-[1.8rem] bg-white px-7 py-8 text-slate-500 shadow-sm">
+            Carregando conteúdos...
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-8 rounded-[1.8rem] border border-red-200 bg-red-50 px-7 py-8 text-red-700 shadow-sm">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && (
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            {orderedContents.map((content) => {
+              const style = cardStyles[content.slug] || {
+                icon: "•",
+                borderColor: "border-slate-300",
+                bgColor: "bg-slate-100",
+                textColor: "text-slate-500",
+              }
+
+              return (
+                <ActivityCard
+                  key={content.id}
+                  title={content.name}
+                  description={content.description || "Conteúdo matemático"}
+                  icon={style.icon}
+                  borderColor={style.borderColor}
+                  bgColor={style.bgColor}
+                  textColor={style.textColor}
+                  path={`/atividades/${content.slug}`}
+                />
+              )
+            })}
+          </div>
+        )}
       </div>
-
-      {loading && (
-        <div className="mt-8 rounded-[1.8rem] bg-white px-7 py-8 text-slate-500 shadow-sm">
-          Carregando conteúdos...
-        </div>
-      )}
-
-      {error && (
-        <div className="mt-8 rounded-[1.8rem] border border-red-200 bg-red-50 px-7 py-8 text-red-700 shadow-sm">
-          {error}
-        </div>
-      )}
-
-      {!loading && !error && (
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          {orderedContents.map((content) => {
-            const style = cardStyles[content.slug] || {
-              icon: "•",
-              borderColor: "border-slate-300",
-              bgColor: "bg-slate-100",
-              textColor: "text-slate-500",
-            }
-
-            return (
-              <ActivityCard
-                key={content.id}
-                title={content.name}
-                description={content.description || "Conteúdo matemático"}
-                icon={style.icon}
-                borderColor={style.borderColor}
-                bgColor={style.bgColor}
-                textColor={style.textColor}
-                path={`/atividades/${content.slug}`}
-              />
-            )
-          })}
-        </div>
-      )}
     </AppLayout>
   )
 }

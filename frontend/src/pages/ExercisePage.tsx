@@ -5,7 +5,8 @@ import SuccessModal from "../components/SuccessModal"
 import FeedbackModal from "../components/FeedbackModal"
 import { api } from "../services/api"
 import { useAuth } from "../contexts/AuthContext"
-import { ArrowLeft } from "lucide-react"
+import BackButton from "../components/BackButton"
+import { getAnimationLevel, getPageAnimation } from "../utils/animation"
 
 type Phase = {
   id: number
@@ -116,6 +117,7 @@ function ExercisePage() {
   const sessionFinishedRef = useRef(false)
 
   const { student } = useAuth()
+  const animationLevel = getAnimationLevel(student?.animation_level)
 
   useEffect(() => {
     sessionIdRef.current = sessionId
@@ -425,153 +427,149 @@ function ExercisePage() {
 
   return (
     <AppLayout>
-      <SuccessModal
-        isOpen={showSuccessModal}
-        message={successMessage}
-        onContinue={handleNextQuestion}
-      />
+      <div className={getPageAnimation(animationLevel)}>
+        <SuccessModal
+          isOpen={showSuccessModal}
+          message={successMessage}
+          onContinue={handleNextQuestion}
+        />
 
-      <FeedbackModal
-        isOpen={feedbackModal.isOpen}
-        type={feedbackModal.type}
-        title={feedbackModal.title}
-        message={feedbackModal.message}
-        description={feedbackModal.description}
-        onClose={() =>
-          setFeedbackModal((prev) => ({
-            ...prev,
-            isOpen: false,
-          }))
-        }
-      />
+        <FeedbackModal
+          isOpen={feedbackModal.isOpen}
+          type={feedbackModal.type}
+          title={feedbackModal.title}
+          message={feedbackModal.message}
+          description={feedbackModal.description}
+          onClose={() =>
+            setFeedbackModal((prev) => ({
+              ...prev,
+              isOpen: false,
+            }))
+          }
+        />
 
-      {isPaused && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-md rounded-[2rem] bg-white p-6 shadow-xl sm:p-8">
-            <h2 className="text-2xl font-extrabold text-slate-800 sm:text-3xl">
-              Atividade pausada
-            </h2>
-            <p className="mt-3 text-base text-slate-500 sm:text-lg">
-              Você pode retomar de onde parou ou sair da sessão.
-            </p>
+        {isPaused && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-[2px]">
+            <div className="w-full max-w-md rounded-[2rem] bg-white p-6 shadow-xl sm:p-8">
+              <h2 className="text-2xl font-extrabold text-slate-800 sm:text-3xl">
+                Atividade pausada
+              </h2>
+              <p className="mt-3 text-base text-slate-500 sm:text-lg">
+                Você pode retomar de onde parou ou sair da sessão.
+              </p>
 
-            <div className="mt-6 flex flex-col gap-3 sm:mt-7">
-              <button
-                type="button"
-                onClick={handleResume}
-                className="rounded-[1.3rem] bg-[#4a8fd3] px-6 py-4 text-lg font-bold text-white transition hover:brightness-105 sm:text-xl"
-              >
-                Retomar
-              </button>
+              <div className="mt-6 flex flex-col gap-3 sm:mt-7">
+                <button
+                  type="button"
+                  onClick={handleResume}
+                  className="rounded-[1.3rem] bg-[#4a8fd3] px-6 py-4 text-lg font-bold text-white transition hover:brightness-105 sm:text-xl"
+                >
+                  Retomar
+                </button>
 
-              <button
-                type="button"
-                onClick={handleExitSession}
-                className="rounded-[1.3rem] border border-slate-300 bg-white px-6 py-4 text-lg font-bold text-slate-600 transition hover:bg-slate-50 sm:text-xl"
-              >
-                Sair da sessão
-              </button>
+                <button
+                  type="button"
+                  onClick={handleExitSession}
+                  className="rounded-[1.3rem] border border-slate-300 bg-white px-6 py-4 text-lg font-bold text-slate-600 transition hover:bg-slate-50 sm:text-xl"
+                >
+                  Sair da sessão
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {loading && (
-        <div className="mx-auto mt-5 w-full max-w-5xl rounded-[1.8rem] bg-white px-5 py-6 text-base font-semibold text-slate-500 shadow-sm sm:mt-8 sm:px-8 sm:py-8 sm:text-lg">
-          Carregando atividade...
-        </div>
-      )}
+        {loading && (
+          <div className="mx-auto mt-5 w-full max-w-5xl rounded-[1.8rem] bg-white px-5 py-6 text-base font-semibold text-slate-500 shadow-sm sm:mt-8 sm:px-8 sm:py-8 sm:text-lg">
+            Carregando atividade...
+          </div>
+        )}
 
-      {error && (
-        <div className="mx-auto mt-5 w-full max-w-5xl rounded-[1.8rem] border border-red-200 bg-red-50 px-5 py-6 text-base font-semibold text-red-700 shadow-sm sm:mt-8 sm:px-8 sm:py-8 sm:text-lg">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="mx-auto mt-5 w-full max-w-5xl rounded-[1.8rem] border border-red-200 bg-red-50 px-5 py-6 text-base font-semibold text-red-700 shadow-sm sm:mt-8 sm:px-8 sm:py-8 sm:text-lg">
+            {error}
+          </div>
+        )}
 
-      {!loading && !error && phaseData && currentQuestion && (
-        <div className="mx-auto w-full max-w-5xl">
-          <div className="flex items-start justify-between gap-4 sm:gap-6">
-            <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+        {!loading && !error && phaseData && currentQuestion && (
+          <div className="mx-auto w-full max-w-5xl">
+            <div className="flex items-start justify-between gap-4 sm:gap-6">
+              <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+                <BackButton fallbackPath={`/atividades/${conteudo}/${nivel}`} />
+
+                <div className="min-w-0">
+                  <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-[2.5rem]">
+                    {phaseData.content_name}
+                  </h1>
+
+                  <p className="mt-2 text-sm text-slate-400 sm:mt-3 sm:text-base lg:text-[1.1rem]">
+                    {phaseData.level_title} • Fase {phaseData.phase_number} •
+                    Questão {questionIndex + 1} de {totalQuestions}
+                  </p>
+
+                  <p className="mt-3 text-base font-bold text-[#4a8fd3] sm:mt-4 sm:text-lg lg:text-[1.15rem]">
+                    Tempo: {formatTimer(elapsedSeconds)}
+                  </p>
+                </div>
+              </div>
+
               <button
                 type="button"
-                onClick={() => navigate(`/atividades/${conteudo}/${nivel}`)}
-                className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-800 sm:h-12 sm:w-12"
+                onClick={handlePause}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-base font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 sm:h-12 sm:w-14 sm:text-xl"
+                title="Pausar atividade"
               >
-                <ArrowLeft className="h-6 w-6" />
+                ⏸
               </button>
+            </div>
 
-              <div className="min-w-0">
-                <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-[2.5rem]">
-                  {phaseData.content_name}
-                </h1>
-
-                <p className="mt-2 text-sm text-slate-400 sm:mt-3 sm:text-base lg:text-[1.1rem]">
-                  {phaseData.level_title} • Fase {phaseData.phase_number} •
-                  Questão {questionIndex + 1} de {totalQuestions}
-                </p>
-
-                <p className="mt-3 text-base font-bold text-[#4a8fd3] sm:mt-4 sm:text-lg lg:text-[1.15rem]">
-                  Tempo: {formatTimer(elapsedSeconds)}
-                </p>
+            <div className="mt-5 sm:mt-7">
+              <div className="h-4 w-full rounded-full bg-slate-100">
+                <div
+                  className="h-4 rounded-full bg-[#4a8fd3] transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handlePause}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-base font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 sm:h-12 sm:w-14 sm:text-xl"
-              title="Pausar atividade"
-            >
-              ⏸
-            </button>
-          </div>
+            <div className="mt-6 rounded-[2rem] bg-white px-5 py-6 text-center shadow-sm sm:mt-8 sm:min-h-[240px] sm:px-7 sm:py-8 lg:px-10 lg:py-14">
+              <h2 className="text-center text-[2.4rem] font-extrabold leading-tight text-slate-900 sm:text-[3.4rem] lg:text-[4.2rem]">
+                {currentQuestion.statement}
+              </h2>
+            </div>
 
-          <div className="mt-5 sm:mt-7">
-            <div className="h-4 w-full rounded-full bg-slate-100">
-              <div
-                className="h-4 rounded-full bg-[#4a8fd3] transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
+            <div className="mt-5 sm:mt-7">
+              <input
+                type="text"
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                placeholder="Digite sua resposta"
+                className="h-20 w-full rounded-[1.8rem] border border-slate-200 bg-white px-6 text-center text-2xl font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4a8fd3] focus:ring-4 focus:ring-blue-100 sm:h-24 sm:px-8 sm:text-3xl"
               />
             </div>
-          </div>
 
-          <div className="mt-6 rounded-[2rem] bg-white px-5 py-6 text-center shadow-sm sm:mt-8 sm:min-h-[240px] sm:px-7 sm:py-8 lg:px-10 lg:py-14">
-            <h2 className="text-center text-[2.4rem] font-extrabold leading-tight text-slate-900 sm:text-[3.4rem] lg:text-[4.2rem]">
-              {currentQuestion.statement}
-            </h2>
-          </div>
+            <div className="mt-5 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-5 md:grid-cols-[250px_1fr] lg:md:grid-cols-[290px_1fr]">
+              <button
+                type="button"
+                onClick={handleShowTip}
+                className="flex h-20 items-center justify-center gap-3 rounded-[1.5rem] border border-yellow-400 bg-white px-6 text-xl font-bold text-yellow-600 transition hover:bg-yellow-50 sm:h-24 sm:text-2xl"
+              >
+                <span className="text-[1.5rem] sm:text-[1.8rem]">💡</span>
+                Dica
+              </button>
 
-          <div className="mt-5 sm:mt-7">
-            <input
-              type="text"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Digite sua resposta"
-              className="h-20 w-full rounded-[1.8rem] border border-slate-200 bg-white px-6 text-center text-2xl font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4a8fd3] focus:ring-4 focus:ring-blue-100 sm:h-24 sm:px-8 sm:text-3xl"
-            />
+              <button
+                type="button"
+                onClick={handleSubmitAnswer}
+                className="flex h-20 items-center justify-center gap-3 rounded-[1.5rem] bg-[#8fb7df] px-6 text-xl font-bold text-white transition hover:brightness-105 sm:h-24 sm:text-2xl"
+              >
+                <span className="text-[1.4rem] sm:text-[1.6rem]">✈</span>
+                Enviar
+              </button>
+            </div>
           </div>
-
-          <div className="mt-5 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-5 md:grid-cols-[250px_1fr] lg:md:grid-cols-[290px_1fr]">
-            <button
-              type="button"
-              onClick={handleShowTip}
-              className="flex h-20 items-center justify-center gap-3 rounded-[1.5rem] border border-yellow-400 bg-white px-6 text-xl font-bold text-yellow-600 transition hover:bg-yellow-50 sm:h-24 sm:text-2xl"
-            >
-              <span className="text-[1.5rem] sm:text-[1.8rem]">💡</span>
-              Dica
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSubmitAnswer}
-              className="flex h-20 items-center justify-center gap-3 rounded-[1.5rem] bg-[#8fb7df] px-6 text-xl font-bold text-white transition hover:brightness-105 sm:h-24 sm:text-2xl"
-            >
-              <span className="text-[1.4rem] sm:text-[1.6rem]">✈</span>
-              Enviar
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </AppLayout>
   )
 }

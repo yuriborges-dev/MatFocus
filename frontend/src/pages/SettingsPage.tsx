@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react"
-import {
-  Bell,
-  RotateCcw,
-  Save,
-  Sparkles,
-  Volume2,
-  X,
-} from "lucide-react"
+import { Bell, RotateCcw, Save, Sparkles, Volume2, X } from "lucide-react"
 import AppLayout from "../layouts/AppLayout"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
+import { getAnimationLevel, getPageAnimation } from "../utils/animation"
 import { updateMe, type IntensityLevel } from "../services/auth"
 
 function LevelSelector({
@@ -52,6 +46,7 @@ function LevelSelector({
 function SettingsPage() {
   const navigate = useNavigate()
   const { student, updateStudentData } = useAuth()
+  const pageAnimationLevel = getAnimationLevel(student?.animation_level)
 
   const [soundLevel, setSoundLevel] = useState<IntensityLevel>("medio")
   const [animationLevel, setAnimationLevel] =
@@ -120,7 +115,7 @@ function SettingsPage() {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-4xl">
+      <div className={`mx-auto max-w-4xl ${getPageAnimation(pageAnimationLevel)}`}>
         <header className="mb-6 sm:mb-8">
           <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
             Configurações
