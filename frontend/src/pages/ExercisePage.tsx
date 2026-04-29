@@ -6,7 +6,7 @@ import FeedbackModal from "../components/FeedbackModal"
 import { api } from "../services/api"
 import { useAuth } from "../contexts/AuthContext"
 import BackButton from "../components/BackButton"
-import { getAnimationLevel, getPageAnimation } from "../utils/animation"
+import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
 
 type Phase = {
   id: number
@@ -532,7 +532,12 @@ function ExercisePage() {
               </div>
             </div>
 
-            <div className="mt-6 rounded-[2rem] bg-white px-5 py-6 text-center shadow-sm sm:mt-8 sm:min-h-[240px] sm:px-7 sm:py-8 lg:px-10 lg:py-14">
+            <div
+              key={questionIndex}
+              className={`mt-6 rounded-[2rem] bg-white px-5 py-6 text-center shadow-sm sm:mt-8 sm:min-h-[240px] sm:px-7 sm:py-8 lg:px-10 lg:py-14 ${getPageAnimation(
+                animationLevel
+              )}`}
+            >
               <h2 className="text-center text-[2.4rem] font-extrabold leading-tight text-slate-900 sm:text-[3.4rem] lg:text-[4.2rem]">
                 {currentQuestion.statement}
               </h2>
@@ -544,7 +549,13 @@ function ExercisePage() {
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 placeholder="Digite sua resposta"
-                className="h-20 w-full rounded-[1.8rem] border border-slate-200 bg-white px-6 text-center text-2xl font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4a8fd3] focus:ring-4 focus:ring-blue-100 sm:h-24 sm:px-8 sm:text-3xl"
+                className={`h-20 w-full rounded-[1.8rem] border border-slate-200 bg-white px-6 text-center text-2xl font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4a8fd3] focus:ring-4 focus:ring-blue-100 sm:h-24 sm:px-8 sm:text-3xl ${
+                  feedbackModal.type === "error" &&
+                  feedbackModal.isOpen &&
+                  animationLevel !== "low"
+                    ? "animate-input-error"
+                    : ""
+                }`}
               />
             </div>
 
@@ -552,7 +563,7 @@ function ExercisePage() {
               <button
                 type="button"
                 onClick={handleShowTip}
-                className="flex h-20 items-center justify-center gap-3 rounded-[1.5rem] border border-yellow-400 bg-white px-6 text-xl font-bold text-yellow-600 transition hover:bg-yellow-50 sm:h-24 sm:text-2xl"
+                className={`flex h-20 items-center justify-center gap-3 rounded-[1.5rem] border border-yellow-400 bg-white px-6 text-xl font-bold text-yellow-600 transition hover:bg-yellow-50 sm:h-24 sm:text-2xl ${getCardAnimation(animationLevel)}`}
               >
                 <span className="text-[1.5rem] sm:text-[1.8rem]">💡</span>
                 Dica
@@ -561,8 +572,8 @@ function ExercisePage() {
               <button
                 type="button"
                 onClick={handleSubmitAnswer}
-                className="flex h-20 items-center justify-center gap-3 rounded-[1.5rem] bg-[#8fb7df] px-6 text-xl font-bold text-white transition hover:brightness-105 sm:h-24 sm:text-2xl"
-              >
+                className={`flex h-20 items-center justify-center gap-3 rounded-[1.5rem] bg-[#8fb7df] px-6 text-xl font-bold text-white transition hover:brightness-105 sm:h-24 sm:text-2xl ${getCardAnimation(animationLevel)}`}
+                >
                 <span className="text-[1.4rem] sm:text-[1.6rem]">✈</span>
                 Enviar
               </button>

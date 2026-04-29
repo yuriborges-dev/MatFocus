@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { BookOpen, BarChart3, Sparkles, Star, Target } from "lucide-react"
 import AppLayout from "../layouts/AppLayout"
 import { useAuth } from "../contexts/AuthContext"
-import { getAnimationLevel, getPageAnimation } from "../utils/animation"
+import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
 import {
   getDashboardSummary,
   type DashboardSummaryResponse,
@@ -165,7 +165,7 @@ function DashboardPage() {
               </div>
 
               <button
-                className="inline-flex w-full items-center justify-center rounded-[1.2rem] bg-white px-6 py-3 text-base font-bold text-[#3b82d0] shadow-md transition hover:scale-[1.02] sm:w-auto sm:px-7 sm:py-4 sm:text-[1.05rem]"
+                className={`inline-flex w-full items-center justify-center rounded-[1.2rem] bg-white px-6 py-3 text-base font-bold text-[#3b82d0] shadow-md transition hover:scale-[1.02] sm:w-auto sm:px-7 sm:py-4 sm:text-[1.05rem]${getCardAnimation(animationLevel)}`}
                 onClick={() => {
                   if (continueAvailable) {
                     navigate(
@@ -244,7 +244,7 @@ function DashboardPage() {
                   selectedContent === content
                     ? "bg-[#3f86d1] text-white"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
+                } ${getCardAnimation(animationLevel)}`}
               >
                 {content}
               </button>
@@ -277,11 +277,12 @@ function DashboardPage() {
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <button
               onClick={() => navigate("/atividades")}
-              className="flex min-h-[110px] flex-col items-center justify-center rounded-[2rem] bg-[#eef4ff] px-6 py-7 text-center shadow-sm transition hover:scale-[1.01] sm:min-h-[130px] sm:py-8"
+              className={`flex min-h-[110px] flex-col items-center justify-center rounded-[2rem] bg-blue-100 px-6 py-7 text-center shadow-sm transition hover:scale-[1.01] hover:bg-blue-200 sm:min-h-[130px] sm:py-8 ${getCardAnimation(animationLevel)}`}
             >
-              <div className="mb-4 text-[#3f86d1]">
+              <div className="mb-4 text-blue-600">
                 <BookOpen className="h-9 w-9" />
               </div>
+
               <h3 className="text-[1.05rem] font-bold text-slate-800 sm:text-[1.1rem]">
                 Atividades
               </h3>
@@ -289,11 +290,12 @@ function DashboardPage() {
 
             <button
               onClick={() => navigate("/progresso")}
-              className="flex min-h-[110px] flex-col items-center justify-center rounded-[2rem] bg-[#eefaf2] px-6 py-7 text-center shadow-sm transition hover:scale-[1.01] sm:min-h-[130px] sm:py-8"
+              className={`flex min-h-[110px] flex-col items-center justify-center rounded-[2rem] bg-emerald-100 px-6 py-7 text-center shadow-sm transition hover:scale-[1.01] hover:bg-emerald-200 sm:min-h-[130px] sm:py-8 ${getCardAnimation(animationLevel)}`}
             >
-              <div className="mb-4 text-[#22b36b]">
+              <div className="mb-4 text-emerald-600">
                 <BarChart3 className="h-9 w-9" />
               </div>
+
               <h3 className="text-[1.05rem] font-bold text-slate-800 sm:text-[1.1rem]">
                 Progresso
               </h3>
@@ -301,11 +303,12 @@ function DashboardPage() {
 
             <button
               onClick={() => navigate("/avatar")}
-              className="flex min-h-[110px] flex-col items-center justify-center rounded-[2rem] bg-[#f7efff] px-6 py-7 text-center shadow-sm transition hover:scale-[1.01] sm:min-h-[130px] sm:py-8 sm:col-span-2 lg:col-span-1"
+              className={`flex min-h-[110px] flex-col items-center justify-center rounded-[2rem] bg-purple-100 px-6 py-7 text-center shadow-sm transition hover:scale-[1.01] hover:bg-purple-200 sm:min-h-[130px] sm:py-8 sm:col-span-2 lg:col-span-1 ${getCardAnimation(animationLevel)}`}
             >
-              <div className="mb-4 text-[#9b5cf6]">
+              <div className="mb-4 text-purple-600">
                 <Sparkles className="h-9 w-9" />
               </div>
+
               <h3 className="text-[1.05rem] font-bold text-slate-800 sm:text-[1.1rem]">
                 Avatar
               </h3>

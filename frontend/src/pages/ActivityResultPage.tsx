@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import AppLayout from "../layouts/AppLayout"
 import { getPhaseResult } from "../services/progress"
 import { useAuth } from "../contexts/AuthContext"
-import { getAnimationLevel, getPageAnimation } from "../utils/animation"
+import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
 
 const contentTitles: Record<string, string> = {
   adicao: "Adição",
@@ -143,18 +143,16 @@ function ActivityResultPage() {
   if (error || !result) {
     return (
       <AppLayout>
-        <div className={getPageAnimation(animationLevel)}>
-          <div className="mx-auto mt-8 w-full max-w-2xl rounded-[1.8rem] border border-red-200 bg-red-50 px-6 py-6 text-base font-semibold text-red-700 shadow-sm">
-            <p>{error || "Não foi possível carregar o resultado."}</p>
+        <div className="mx-auto mt-8 w-full max-w-2xl rounded-[1.8rem] border border-red-200 bg-red-50 px-6 py-6 text-base font-semibold text-red-700 shadow-sm">
+          <p>{error || "Não foi possível carregar o resultado."}</p>
 
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="mt-5 rounded-[1rem] bg-[#4a8fd3] px-5 py-3 text-sm font-bold text-white transition hover:brightness-105"
-            >
-              Voltar
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className={`mt-5 rounded-[1rem] bg-[#4a8fd3] px-5 py-3 text-sm font-bold text-white transition hover:brightness-105${getCardAnimation(animationLevel)}`}
+          >
+            Voltar
+          </button>
         </div>
       </AppLayout>
     )
@@ -162,7 +160,11 @@ function ActivityResultPage() {
 
   return (
     <AppLayout>
-      <div className="flex min-h-[calc(100vh-110px)] items-center justify-center py-4">
+      <div
+        className={`flex min-h-[calc(100vh-110px)] items-center justify-center py-4 ${getPageAnimation(
+          animationLevel
+        )}`}
+      >
         <div className="w-full max-w-[760px]">
           <div className="overflow-hidden rounded-[1.8rem] bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
             <div className="h-2 bg-gradient-to-r from-[#4a8fd3] via-[#6aa8e5] to-[#79c6a1]" />
@@ -236,7 +238,7 @@ function ActivityResultPage() {
                   onClick={() =>
                     navigate(`/atividades/${conteudo}/${nivel}/fase/${phaseId}`)
                   }
-                  className="rounded-[1.2rem] bg-[#4a8fd3] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105"
+                  className={`rounded-[1.2rem] bg-[#4a8fd3] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105${getCardAnimation(animationLevel)}`}
                 >
                   ↻ Jogar novamente
                 </button>
@@ -244,7 +246,7 @@ function ActivityResultPage() {
                 <button
                   type="button"
                   onClick={() => navigate(`/atividades/${conteudo}/${nivel}`)}
-                  className="rounded-[1.2rem] border border-slate-200 bg-white px-6 py-3.5 text-base font-bold text-slate-800 shadow-sm transition hover:bg-slate-50"
+                  className={`rounded-[1.2rem] border border-slate-200 bg-white px-6 py-3.5 text-base font-bold text-slate-800 shadow-sm transition hover:bg-slate-50${getCardAnimation(animationLevel)}`}
                 >
                   🗺 Voltar ao mapa de fases
                 </button>
@@ -257,7 +259,7 @@ function ActivityResultPage() {
                         `/atividades/${conteudo}/${nivel}/fase/${result.next_phase_number}`
                       )
                     }
-                    className="rounded-[1.2rem] bg-[#79c6a1] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105"
+                    className={`rounded-[1.2rem] bg-[#79c6a1] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105${getCardAnimation(animationLevel)}`}
                   >
                     ➜ Ir para próxima fase
                   </button>
