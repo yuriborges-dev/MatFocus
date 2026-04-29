@@ -3,15 +3,17 @@ import { Bell, RotateCcw, Save, Sparkles, Volume2, X } from "lucide-react"
 import AppLayout from "../layouts/AppLayout"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import { getAnimationLevel, getPageAnimation } from "../utils/animation"
+import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
 import { updateMe, type IntensityLevel } from "../services/auth"
 
 function LevelSelector({
   value,
   onChange,
+  animationLevel,
 }: {
   value: IntensityLevel
   onChange: (value: IntensityLevel) => void
+  animationLevel: ReturnType<typeof getAnimationLevel>
 }) {
   const options: { label: string; value: IntensityLevel }[] = [
     { label: "Baixo", value: "baixo" },
@@ -33,7 +35,7 @@ function LevelSelector({
               selected
                 ? "border-[#3b82d0] bg-[#eef4ff] text-[#3b82d0]"
                 : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
-            }`}
+            } ${getCardAnimation(animationLevel)}`}
           >
             {option.label}
           </button>
@@ -126,7 +128,7 @@ function SettingsPage() {
         </header>
 
         <section className="space-y-5 sm:space-y-6">
-          <div className="rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7">
+          <div className={`rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7 ${getCardAnimation(pageAnimationLevel)}`}>
             <div className="mb-5 flex items-start gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eaf3ff] text-[#3b82d0]">
                 <Volume2 className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -142,10 +144,10 @@ function SettingsPage() {
               </div>
             </div>
 
-            <LevelSelector value={soundLevel} onChange={setSoundLevel} />
+            <LevelSelector value={soundLevel} onChange={setSoundLevel} animationLevel={pageAnimationLevel} />
           </div>
 
-          <div className="rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7">
+          <div className={`rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7 ${getCardAnimation(pageAnimationLevel)}`}>
             <div className="mb-5 flex items-start gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f4ecff] text-[#a855f7]">
                 <Sparkles className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -162,12 +164,10 @@ function SettingsPage() {
             </div>
 
             <LevelSelector
-              value={animationLevel}
-              onChange={setAnimationLevel}
-            />
+              value={animationLevel} onChange={setAnimationLevel} animationLevel={pageAnimationLevel}/>
           </div>
 
-          <div className="rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7">
+          <div className={`rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7 ${getCardAnimation(pageAnimationLevel)}`}>
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-4">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e9f9ef] text-[#67c18c]">
@@ -232,8 +232,7 @@ function SettingsPage() {
           <button
             type="button"
             onClick={handleCancel}
-            className="flex items-center justify-center gap-3 rounded-[1.4rem] border border-red-200 bg-white px-6 py-5 text-lg font-bold text-red-500 shadow-sm transition hover:bg-red-50"
-          >
+            className={`flex items-center justify-center gap-3 rounded-[1.4rem] border border-red-200 bg-white px-6 py-5 text-lg font-bold text-red-500 shadow-sm transition hover:bg-red-50 ${getCardAnimation(pageAnimationLevel)}`}>
             <X className="h-5 w-5" />
             Cancelar
           </button>
@@ -241,7 +240,7 @@ function SettingsPage() {
           <button
             type="button"
             onClick={handleResetDefaults}
-            className="flex items-center justify-center gap-3 rounded-[1.4rem] border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-600 shadow-sm transition hover:bg-slate-50"
+            className={`flex items-center justify-center gap-3 rounded-[1.4rem] border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 ${getCardAnimation(pageAnimationLevel)}`}
           >
             <RotateCcw className="h-5 w-5" />
             Restaurar padrão
@@ -251,7 +250,7 @@ function SettingsPage() {
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center justify-center gap-3 rounded-[1.4rem] bg-[#4a90d9] px-6 py-5 text-lg font-bold text-white shadow-sm transition hover:bg-[#3f84cc] disabled:cursor-not-allowed disabled:opacity-70"
+            className={`flex items-center justify-center gap-3 rounded-[1.4rem] bg-[#4a90d9] px-6 py-5 text-lg font-bold text-white shadow-sm transition hover:bg-[#3f84cc] disabled:cursor-not-allowed disabled:opacity-70 ${getCardAnimation(pageAnimationLevel)}`}
           >
             <Save className="h-5 w-5" />
             {isSaving ? "Salvando..." : "Salvar"}

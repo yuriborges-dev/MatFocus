@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import BackButton from "../components/BackButton"
 import AppLayout from "../layouts/AppLayout"
 import { useAuth } from "../contexts/AuthContext"
-import { getAnimationLevel, getPageAnimation } from "../utils/animation"
+import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
 import defaultProfile from "../assets/default_profile.jpg"
 
 function getSexLabel(value?: string) {
@@ -121,8 +121,7 @@ function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => navigate("/perfil/editar")}
-                  className="inline-flex w-fit items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold text-[#3b82f6] transition hover:bg-blue-50 sm:px-4 sm:text-base"
-                >
+                  className={`inline-flex w-fit items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold text-[#3b82f6] transition hover:bg-blue-50 sm:px-4 sm:text-base ${getCardAnimation(animationLevel)}`}>
                   <Pencil size={18} />
                   Editar
                 </button>
@@ -158,8 +157,7 @@ function ProfilePage() {
               <button
                 type="button"
                 onClick={() => navigate("/configuracoes")}
-                className="flex items-center justify-center gap-3 rounded-[1.6rem] border border-slate-200 bg-white px-5 py-5 text-xl font-bold text-slate-700 shadow-md transition hover:bg-slate-50 sm:rounded-[1.75rem] sm:px-6 sm:py-6 sm:text-2xl"
-              >
+                className={`flex items-center justify-center gap-3 rounded-[1.6rem] border border-slate-200 bg-white px-5 py-5 text-xl font-bold text-slate-700 shadow-md transition hover:bg-slate-50 sm:rounded-[1.75rem] sm:px-6 sm:py-6 sm:text-2xl ${getCardAnimation(animationLevel)}`}>
                 <Settings size={22} className="text-slate-400" />
                 Configurações
               </button>
@@ -167,14 +165,13 @@ function ProfilePage() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center justify-center gap-3 rounded-[1.6rem] border border-red-200 bg-white px-5 py-5 text-xl font-bold text-red-500 shadow-md transition hover:bg-red-50 sm:rounded-[1.75rem] sm:px-6 sm:py-6 sm:text-2xl"
-              >
+                className={`flex items-center justify-center gap-3 rounded-[1.6rem] border border-red-200 bg-white px-5 py-5 text-xl font-bold text-red-500 shadow-md transition hover:bg-red-50 sm:rounded-[1.75rem] sm:px-6 sm:py-6 sm:text-2xl ${getCardAnimation(animationLevel)}`}>
                 <LogOut className="h-5 w-5 shrink-0" />
                 Sair
               </button>
             </div>
 
-            <div className="rounded-[1.6rem] bg-white px-5 py-5 shadow-md sm:rounded-[1.75rem] sm:px-6 sm:py-6">
+            <div className={`rounded-[1.6rem] bg-white px-5 py-5 shadow-md sm:rounded-[1.75rem] sm:px-6 sm:py-6 ${getCardAnimation(animationLevel)}`}>
               <button
                 type="button"
                 onClick={() => navigate("/sobre")}
