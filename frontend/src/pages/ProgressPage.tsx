@@ -3,7 +3,7 @@ import AppLayout from "../layouts/AppLayout"
 import ProgressCircle from "../components/ProgressCircle"
 import { CheckCircle2, CircleX, FileText } from "lucide-react"
 import { useAuth } from "../contexts/AuthContext"
-import { getAnimationLevel, getPageAnimation } from "../utils/animation"
+import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
 import {
   getProgressSummary,
   getProgressReport,
@@ -221,7 +221,7 @@ function ProgressPage() {
                       isActive
                         ? "bg-[#4a8fd3] text-white shadow-sm"
                         : "bg-white text-slate-600 shadow-sm hover:bg-slate-50"
-                    }`}
+                    } ${getCardAnimation(animationLevel)}`}
                   >
                     {option.label}
                   </button>
@@ -313,8 +313,7 @@ function ProgressPage() {
                   {contentProgress.map((item) => (
                     <div
                       key={item.content}
-                      className="rounded-[1.4rem] border border-slate-100 bg-white p-4 sm:p-5"
-                    >
+                      className={`rounded-[1.4rem] border border-slate-100 bg-white p-4 sm:p-5 ${getCardAnimation(animationLevel)}`}>
                       <div className="mb-3 flex items-center justify-between gap-3">
                         <span
                           className={`inline-flex rounded-full px-4 py-2 text-[0.95rem] font-bold sm:text-[1rem] ${item.badgeColor} ${item.textColor}`}
@@ -412,7 +411,7 @@ function ProgressPage() {
                         : reportPeriod === "7d"
                           ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
                           : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
-                    }`}
+                    }${!hasProgressData ? "" : getCardAnimation(animationLevel)}`}
                   >
                     7 dias
                   </button>
@@ -427,7 +426,7 @@ function ProgressPage() {
                         : reportPeriod === "14d"
                           ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
                           : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
-                    }`}
+                    }${!hasProgressData ? "" : getCardAnimation(animationLevel)}`}
                   >
                     14 dias
                   </button>
@@ -442,7 +441,7 @@ function ProgressPage() {
                         : reportPeriod === "30d"
                           ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
                           : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
-                    }`}
+                    }${!hasProgressData ? "" : getCardAnimation(animationLevel)}`}
                   >
                     30 dias
                   </button>
@@ -477,7 +476,7 @@ function ProgressPage() {
                         type="button"
                         onClick={handleDownloadPdf}
                         disabled={downloadingPdf}
-                        className="w-full rounded-full bg-[#4a8fd3] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#3b7fc2] disabled:cursor-not-allowed disabled:opacity-70 sm:w-fit"
+                        className={`w-full rounded-full bg-[#4a8fd3] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#3b7fc2] disabled:cursor-not-allowed disabled:opacity-70 sm:w-fit ${getCardAnimation(animationLevel)}`}
                       >
                         {downloadingPdf ? "Baixando PDF..." : "Baixar PDF"}
                       </button>

@@ -260,7 +260,7 @@ function RegisterPage() {
 
   return (
     <AuthLayout>
-      <div className="w-full max-w-6xl lg:flex lg:min-h-[92vh] lg:overflow-hidden lg:rounded-[36px] lg:border lg:border-white/60 lg:bg-white/70 lg:shadow-[0_20px_60px_rgba(59,130,246,0.12)] lg:backdrop-blur-sm">
+      <div className="animate-auth-page w-full max-w-6xl lg:flex lg:min-h-[92vh] lg:overflow-hidden lg:rounded-[36px] lg:border lg:border-white/60 lg:bg-white/70 lg:shadow-[0_20px_60px_rgba(59,130,246,0.12)] lg:backdrop-blur-sm">
         <div className="hidden w-[44%] flex-col justify-between bg-gradient-to-b from-sky-400 via-sky-300 to-emerald-300 p-10 text-white lg:flex">
           <div>
             <img
@@ -280,7 +280,7 @@ function RegisterPage() {
             <img
               src={mascotefoco}
               alt="Mascote do MatFocus com elementos matemáticos"
-              className="w-96 object-contain drop-shadow-[0_12px_30px_rgba(255,255,255,0.35)]"
+              className="animate-mascot-in w-96 object-contain drop-shadow-[0_12px_30px_rgba(255,255,255,0.35)]"
             />
           </div>
         </div>

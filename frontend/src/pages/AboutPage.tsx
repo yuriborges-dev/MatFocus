@@ -5,15 +5,19 @@ import {
 } from "lucide-react"
 import AppLayout from "../layouts/AppLayout"
 import BackButton from "../components/BackButton"
+import { useAuth } from "../contexts/AuthContext"
+import { getAnimationLevel, getPageAnimation } from "../utils/animation"
 
 function AboutPage() {
 
+  const { student } = useAuth()
+  const animationLevel = getAnimationLevel(student?.animation_level)
   const iconStyle =
     "h-8 w-8 shrink-0 text-[#3b82d0] sm:h-9 sm:w-9"
 
   return (
     <AppLayout showProfileCard={false}>
-      <div className="mx-auto max-w-4xl">
+      <div className={`mx-auto max-w-4xl ${getPageAnimation(animationLevel)}`}>
         <header className="mb-6 sm:mb-8">
           <BackButton />
 

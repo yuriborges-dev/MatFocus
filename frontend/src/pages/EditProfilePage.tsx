@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 import BackButton from "../components/BackButton"
 import AppLayout from "../layouts/AppLayout"
 import { useAuth } from "../contexts/AuthContext"
-import { getAnimationLevel, getPageAnimation } from "../utils/animation"
+import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
 import { updateMe } from "../services/auth"
 import defaultProfile from "../assets/default_profile.jpg"
 
@@ -345,8 +345,7 @@ function EditProfilePage() {
                   <button
                     type="button"
                     onClick={handleSelectPhoto}
-                    className="flex items-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-                  >
+                    className={`flex items-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 ${getCardAnimation(animationLevel)}`}>
                     <Upload className="h-4 w-4" />
                     Alterar foto
                   </button>
@@ -354,8 +353,7 @@ function EditProfilePage() {
                   <button
                     type="button"
                     onClick={handleRemovePhoto}
-                    className="flex items-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-red-500 shadow-sm transition hover:bg-red-50"
-                  >
+                    className={`flex items-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-red-500 shadow-sm transition hover:bg-red-50 ${getCardAnimation(animationLevel)}`}>
                     <Trash2 className="h-4 w-4" />
                     Remover foto
                   </button>
@@ -655,8 +653,7 @@ function EditProfilePage() {
                 <button
                   type="button"
                   onClick={() => navigate("/perfil")}
-                  className="flex w-full items-center justify-center gap-2 rounded-[1.4rem] border border-slate-200 bg-white px-6 py-4 text-base font-semibold text-slate-600 transition hover:bg-slate-50 sm:py-5 sm:text-lg"
-                >
+                  className={`flex w-full items-center justify-center gap-2 rounded-[1.4rem] border border-slate-200 bg-white px-6 py-4 text-base font-semibold text-slate-600 transition hover:bg-slate-50 sm:py-5 sm:text-lg ${getCardAnimation(animationLevel)}`}>
                   Cancelar
                 </button>
 
@@ -664,7 +661,7 @@ function EditProfilePage() {
                   type="button"
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="flex w-full items-center justify-center gap-3 rounded-[1.4rem] bg-[#4a90d9] px-6 py-4 text-base font-bold text-white shadow-sm transition hover:bg-[#3f84cc] disabled:cursor-not-allowed disabled:opacity-70 sm:py-5 sm:text-lg"
+                  className={`flex w-full items-center justify-center gap-3 rounded-[1.4rem] bg-[#4a90d9] px-6 py-4 text-base font-bold text-white shadow-sm transition hover:bg-[#3f84cc] disabled:cursor-not-allowed disabled:opacity-70 sm:py-5 sm:text-lg ${getCardAnimation(animationLevel)}`} 
                 >
                   <Save className="h-5 w-5" />
                   {isSaving ? "Salvando..." : "Salvar alterações"}

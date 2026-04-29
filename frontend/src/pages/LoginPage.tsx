@@ -35,7 +35,7 @@ function LoginPage() {
   return (
     <AuthLayout>
       <div className="relative flex min-h-[100dvh] w-full items-center justify-center bg-[#eef8fb] px-4 py-5 sm:px-5 sm:py-6 lg:px-0 lg:py-0">
-        <div className="relative flex w-full max-w-6xl overflow-hidden rounded-none bg-transparent shadow-none lg:h-[92vh] lg:rounded-[32px] lg:border lg:border-white/60 lg:bg-white/70 lg:shadow-[0_20px_60px_rgba(59,130,246,0.12)] lg:backdrop-blur-sm">
+        <div className="animate-auth-page relative flex w-full max-w-6xl overflow-hidden rounded-none bg-transparent shadow-none lg:h-[92vh] lg:rounded-[32px] lg:border lg:border-white/60 lg:bg-white/70 lg:shadow-[0_20px_60px_rgba(59,130,246,0.12)] lg:backdrop-blur-sm">
           <div className="hidden w-[44%] flex-col justify-between bg-gradient-to-b from-sky-400 via-sky-300 to-emerald-300 p-10 text-white lg:flex">
             <div>
               <img
@@ -55,7 +55,7 @@ function LoginPage() {
               <img
                 src={mascotefoco}
                 alt="Mascote do MatFocus com elementos matemáticos"
-                className="w-96 object-contain drop-shadow-[0_12px_30px_rgba(255,255,255,0.35)]"
+                className="animate-mascot-in w-96 object-contain drop-shadow-[0_12px_30px_rgba(255,255,255,0.35)]"
               />
             </div>
           </div>
