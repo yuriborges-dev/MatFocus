@@ -76,6 +76,31 @@ export type DashboardSummaryResponse = {
   }[]
 }
 
+export type LevelProgressItem = {
+  level_id: number
+  level_code: string
+  level_title: string
+  difficulty_order: number
+  total_phases: number
+  completed_phases: number
+  total_score: number
+  unlocked: boolean
+  completed: boolean
+}
+
+export async function getLevelProgress(contentSlug: string) {
+  const response = await api.get<LevelProgressItem[]>(
+    "/progress/level-progress/",
+    {
+      params: {
+        content: contentSlug,
+      },
+    }
+  )
+
+  return response.data
+}
+
 export async function getDashboardSummary() {
   const response = await api.get<DashboardSummaryResponse>(
     "/progress/dashboard/"

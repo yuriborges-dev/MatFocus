@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom"
-import { BarChart3, BookOpen, Home, Menu, Star, X } from "lucide-react"
+import { Award, BarChart3, BookOpen, Home, Menu, X } from "lucide-react"
 import logoMatFocus from "../assets/logo - matfocus.png"
 import UserProfileCard from "../components/UserProfileCard"
 import BreakReminderModal from "../components/BreakReminderModal"
@@ -147,12 +147,12 @@ function AppLayout({ children, showProfileCard = true }: AppLayoutProps) {
             </NavLink>
 
             <NavLink
-              to="/avatar"
+              to="/conquistas"
               className={navItemClass}
               onClick={() => setMenuOpen(false)}
             >
-              <Star className={iconClass} />
-              Avatar
+              <Award className={iconClass} />
+              Conquistas
             </NavLink>
           </div>
         </nav>

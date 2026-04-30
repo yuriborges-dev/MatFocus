@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { BookOpen, BarChart3, Sparkles, Star, Target } from "lucide-react"
+import { Award, BookOpen, BarChart3, Sparkles, Star, Target } from "lucide-react"
 import AppLayout from "../layouts/AppLayout"
 import { useAuth } from "../contexts/AuthContext"
 import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
@@ -302,15 +302,15 @@ function DashboardPage() {
             </button>
 
             <button
-              onClick={() => navigate("/avatar")}
+              onClick={() => navigate("/conquistas")}
               className={`flex min-h-[110px] flex-col items-center justify-center rounded-[2rem] bg-purple-100 px-6 py-7 text-center shadow-sm transition hover:scale-[1.01] hover:bg-purple-200 sm:min-h-[130px] sm:py-8 sm:col-span-2 lg:col-span-1 ${getCardAnimation(animationLevel)}`}
             >
               <div className="mb-4 text-purple-600">
-                <Sparkles className="h-9 w-9" />
+                <Award className="h-9 w-9" />
               </div>
 
               <h3 className="text-[1.05rem] font-bold text-slate-800 sm:text-[1.1rem]">
-                Avatar
+                Conquistas
               </h3>
             </button>
           </div>

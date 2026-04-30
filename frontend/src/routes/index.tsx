@@ -13,6 +13,7 @@ import SettingsPage from "../pages/SettingsPage"
 import AboutPage from "../pages/AboutPage"
 import EditProfilePage from "../pages/EditProfilePage"
 import ProtectedRoute from "../components/ProtectedRoute"
+import AchievementsPage from "../pages/AchievementsPage"
 
 function AppRoutes() {
   return (
@@ -117,7 +118,17 @@ function AppRoutes() {
             <ProtectedRoute>
               <EditProfilePage />
             </ProtectedRoute>
-          } />
+          } 
+        />
+
+        <Route
+          path="/conquistas"
+          element={
+            <ProtectedRoute>
+              <AchievementsPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
