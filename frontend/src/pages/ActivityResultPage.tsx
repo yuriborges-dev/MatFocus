@@ -4,6 +4,7 @@ import AppLayout from "../layouts/AppLayout"
 import { getPhaseResult } from "../services/progress"
 import { useAuth } from "../contexts/AuthContext"
 import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
+import { playLevelUpSound } from "../utils/sound"
 
 const contentTitles: Record<string, string> = {
   adicao: "Adição",
@@ -101,6 +102,10 @@ function ActivityResultPage() {
         )
 
         setResult(data)
+
+        if (data.completed) {
+          playLevelUpSound(student?.sound_level)
+        }
       } catch (err) {
         console.error("Erro ao carregar resultado da fase:", err)
         setError("Não foi possível carregar o resultado da fase.")
@@ -149,7 +154,7 @@ function ActivityResultPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className={`mt-5 rounded-[1rem] bg-[#4a8fd3] px-5 py-3 text-sm font-bold text-white transition hover:brightness-105${getCardAnimation(animationLevel)}`}
+            className={`mt-5 rounded-[1rem] bg-[#4a8fd3] px-5 py-3 text-sm font-bold text-white transition hover:brightness-105 ${getCardAnimation(animationLevel)}`}
           >
             Voltar
           </button>
@@ -238,7 +243,7 @@ function ActivityResultPage() {
                   onClick={() =>
                     navigate(`/atividades/${conteudo}/${nivel}/fase/${phaseId}`)
                   }
-                  className={`rounded-[1.2rem] bg-[#4a8fd3] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105${getCardAnimation(animationLevel)}`}
+                  className={`rounded-[1.2rem] bg-[#4a8fd3] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105 ${getCardAnimation(animationLevel)}`}
                 >
                   ↻ Jogar novamente
                 </button>
@@ -246,7 +251,7 @@ function ActivityResultPage() {
                 <button
                   type="button"
                   onClick={() => navigate(`/atividades/${conteudo}/${nivel}`)}
-                  className={`rounded-[1.2rem] border border-slate-200 bg-white px-6 py-3.5 text-base font-bold text-slate-800 shadow-sm transition hover:bg-slate-50${getCardAnimation(animationLevel)}`}
+                  className={`rounded-[1.2rem] border border-slate-200 bg-white px-6 py-3.5 text-base font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 ${getCardAnimation(animationLevel)}`}
                 >
                   🗺 Voltar ao mapa de fases
                 </button>
@@ -259,7 +264,7 @@ function ActivityResultPage() {
                         `/atividades/${conteudo}/${nivel}/fase/${result.next_phase_number}`
                       )
                     }
-                    className={`rounded-[1.2rem] bg-[#79c6a1] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105${getCardAnimation(animationLevel)}`}
+                    className={`rounded-[1.2rem] bg-[#79c6a1] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105 ${getCardAnimation(animationLevel)}`}
                   >
                     ➜ Ir para próxima fase
                   </button>

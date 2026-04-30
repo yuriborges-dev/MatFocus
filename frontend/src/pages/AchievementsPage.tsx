@@ -10,6 +10,7 @@ import {
 import { getStudentLevel } from "../utils/studentLevel"
 import { useAuth } from "../contexts/AuthContext"
 import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
+import { playUnlockSound } from "../utils/sound"
 
 type Achievement = {
   title: string
@@ -230,6 +231,16 @@ function AchievementsPage() {
       ? Math.round((unlockedCount / achievements.length) * 100)
       : 0
 
+  function handleAchievementFilterChange(
+    value: "all" | "unlocked" | "locked"
+  ) {
+    setAchievementFilter(value)
+
+    if (value === "unlocked" && unlockedCount > 0) {
+      playUnlockSound(student?.sound_level)
+    }
+  }
+
   if (loading) {
     return (
       <AppLayout>
@@ -370,7 +381,7 @@ function AchievementsPage() {
                     key={filter.value}
                     type="button"
                     onClick={() =>
-                        setAchievementFilter(
+                        handleAchievementFilterChange(
                         filter.value as "all" | "unlocked" | "locked"
                         )
                     }

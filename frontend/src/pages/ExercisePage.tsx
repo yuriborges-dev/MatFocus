@@ -7,6 +7,7 @@ import { api } from "../services/api"
 import { useAuth } from "../contexts/AuthContext"
 import BackButton from "../components/BackButton"
 import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
+import { playSuccessSound, playErrorSound, playClickSound } from "../utils/sound"
 
 type Phase = {
   id: number
@@ -118,6 +119,7 @@ function ExercisePage() {
 
   const { student } = useAuth()
   const animationLevel = getAnimationLevel(student?.animation_level)
+
 
   useEffect(() => {
     sessionIdRef.current = sessionId
@@ -361,6 +363,8 @@ function ExercisePage() {
       const data = response.data
 
       if (data.is_correct) {
+        playSuccessSound(student?.sound_level)
+
         const randomMessage =
           successMessages[Math.floor(Math.random() * successMessages.length)]
 
@@ -382,6 +386,8 @@ function ExercisePage() {
         return
       }
 
+      playErrorSound(student?.sound_level)
+
       const randomErrorMessage =
         errorMessages[Math.floor(Math.random() * errorMessages.length)]
 
@@ -394,6 +400,8 @@ function ExercisePage() {
       setWrongAnswers(data.wrong_answers)
     } catch (error) {
       console.error("Erro ao enviar resposta:", error)
+
+      playErrorSound(student?.sound_level)
 
       openFeedbackModal(
         "error",
@@ -562,7 +570,10 @@ function ExercisePage() {
             <div className="mt-5 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-5 md:grid-cols-[250px_1fr] lg:md:grid-cols-[290px_1fr]">
               <button
                 type="button"
-                onClick={handleShowTip}
+                onClick={() => {
+                  playClickSound(student?.sound_level)
+                  handleShowTip()
+                }}
                 className={`flex h-20 items-center justify-center gap-3 rounded-[1.5rem] border border-yellow-400 bg-white px-6 text-xl font-bold text-yellow-600 transition hover:bg-yellow-50 sm:h-24 sm:text-2xl ${getCardAnimation(animationLevel)}`}
               >
                 <span className="text-[1.5rem] sm:text-[1.8rem]">💡</span>
