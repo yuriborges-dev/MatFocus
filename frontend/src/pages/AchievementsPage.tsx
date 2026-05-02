@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Award, BookOpen, CheckCircle2, Lock, Medal, Star, Trophy } from "lucide-react"
 import AppLayout from "../layouts/AppLayout"
 import {
@@ -10,7 +10,7 @@ import {
 import { getStudentLevel } from "../utils/studentLevel"
 import { useAuth } from "../contexts/AuthContext"
 import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
-import { playUnlockSound } from "../utils/sound"
+import { playLevelUpSound, playUnlockSound } from "../utils/sound"
 
 type Achievement = {
   title: string
@@ -89,6 +89,8 @@ function AchievementsPage() {
   const { student } = useAuth()
   const animationLevel = getAnimationLevel(student?.animation_level)
 
+  const previousStudentLevelRef = useRef<number | null>(null)
+
   const [dashboard, setDashboard] = useState<DashboardSummaryResponse | null>(
     null
   )
@@ -148,6 +150,19 @@ function AchievementsPage() {
   const totalActivities = dashboard?.activities ?? 0
   const contentProgress = dashboard?.content_progress ?? []
   const studentLevel = getStudentLevel(totalPoints)
+
+  useEffect(() => {
+    if (loading || !dashboard) return
+
+    const previousLevel = previousStudentLevelRef.current
+    const currentLevel = studentLevel.level
+
+    if (previousLevel !== null && currentLevel > previousLevel) {
+      playLevelUpSound(student?.sound_level)
+    }
+
+    previousStudentLevelRef.current = currentLevel
+  }, [dashboard, loading, studentLevel.level, student?.sound_level])
 
   const achievements = useMemo<Achievement[]>(() => {
     const activityAchievements: Achievement[] = activityGoals.map((goal) => ({

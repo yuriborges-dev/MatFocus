@@ -1,17 +1,11 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import {
-  ChevronDown,
-  Eye,
-  EyeOff,
-  Lock,
-  User,
-  Users,
-} from "lucide-react"
+import { ChevronDown, Eye, EyeOff, Lock, User, Users } from "lucide-react"
 import AuthLayout from "../layouts/AuthLayout"
 import logoMatFocus from "../assets/logo - matfocus.png"
 import mascotefoco from "../assets/mascote - login.png"
 import { useAuth } from "../contexts/AuthContext"
+import { playClickSound, playSuccessSound } from "../utils/sound"
 
 type FormData = {
   full_name: string
@@ -183,6 +177,8 @@ function RegisterPage() {
         password: formData.password,
         confirm_password: formData.confirm_password,
       })
+
+      playSuccessSound("medio")
 
       navigate("/dashboard")
     } catch (err: any) {
@@ -573,7 +569,10 @@ function RegisterPage() {
             <div className="mt-5 text-center">
               <button
                 type="button"
-                onClick={() => navigate("/")}
+                onClick={() => {
+                  playClickSound("medio")
+                  navigate("/")
+                }}
                 className="text-base font-medium text-slate-400 transition hover:text-sky-500"
               >
                 Voltar

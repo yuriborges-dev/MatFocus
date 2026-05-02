@@ -7,6 +7,7 @@ import { useAuth } from "../contexts/AuthContext"
 import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
 import { updateMe } from "../services/auth"
 import defaultProfile from "../assets/default_profile.jpg"
+import { playClickSound, playSuccessSound } from "../utils/sound"
 
 type SexOption = "M" | "F"
 type GradeOption = "3" | "4" | "5" | "6"
@@ -166,6 +167,7 @@ function EditProfilePage() {
   }
 
   function handleSelectPhoto() {
+    playClickSound(student?.sound_level)
     fileInputRef.current?.click()
   }
 
@@ -187,6 +189,8 @@ function EditProfilePage() {
   }
 
   function handleRemovePhoto() {
+    playClickSound(student?.sound_level)
+
     setProfilePhotoPreview(null)
     setProfilePhotoFile(null)
 
@@ -245,6 +249,8 @@ function EditProfilePage() {
       })
 
       updateStudentData(updatedStudent)
+
+      playSuccessSound(student?.sound_level)
 
       triggerSuccessToast()
 
@@ -652,7 +658,10 @@ function EditProfilePage() {
               <div className="mt-7 flex flex-col gap-4 sm:mt-8 sm:flex-row">
                 <button
                   type="button"
-                  onClick={() => navigate("/perfil")}
+                  onClick={() => {
+                    playClickSound(student?.sound_level)
+                    navigate("/perfil")
+                  }}
                   className={`flex w-full items-center justify-center gap-2 rounded-[1.4rem] border border-slate-200 bg-white px-6 py-4 text-base font-semibold text-slate-600 transition hover:bg-slate-50 sm:py-5 sm:text-lg ${getCardAnimation(animationLevel)}`}>
                   Cancelar
                 </button>

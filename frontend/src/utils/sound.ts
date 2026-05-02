@@ -10,6 +10,10 @@ const sounds = {
   levelup: new Audio("/sounds/levelup.wav"),
 }
 
+Object.values(sounds).forEach((sound) => {
+  sound.preload = "auto"
+})
+
 function normalizeSoundLevel(level?: SoundLevel) {
   if (level === "baixo" || level === "low") return "low"
   if (level === "alto" || level === "high") return "high"
@@ -17,10 +21,12 @@ function normalizeSoundLevel(level?: SoundLevel) {
 }
 
 function play(audio: HTMLAudioElement, volume: number) {
-  audio.pause()
-  audio.currentTime = 0
-  audio.volume = volume
-  audio.play().catch(() => {})
+  const sound = audio.cloneNode(true) as HTMLAudioElement
+
+  sound.volume = volume
+  sound.currentTime = 0
+
+  sound.play().catch(() => {})
 }
 
 export function playSuccessSound(level?: SoundLevel) {

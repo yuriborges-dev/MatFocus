@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
 import { updateMe, type IntensityLevel } from "../services/auth"
+import { playClickSound, playSuccessSound } from "../utils/sound"
 
 function LevelSelector({
   value,
@@ -14,7 +15,9 @@ function LevelSelector({
   value: IntensityLevel
   onChange: (value: IntensityLevel) => void
   animationLevel: ReturnType<typeof getAnimationLevel>
+  soundLevel?: IntensityLevel
 }) {
+
   const options: { label: string; value: IntensityLevel }[] = [
     { label: "Baixo", value: "baixo" },
     { label: "Médio", value: "medio" },
@@ -30,7 +33,7 @@ function LevelSelector({
           <button
             key={option.value}
             type="button"
-            onClick={() => onChange(option.value)}
+            onClick={() => {onChange(option.value) }}
             className={`rounded-2xl border px-3 py-3 text-base font-semibold transition sm:px-4 sm:text-lg ${
               selected
                 ? "border-[#3b82d0] bg-[#eef4ff] text-[#3b82d0]"
@@ -70,6 +73,7 @@ function SettingsPage() {
   }, [student])
 
   function handleResetDefaults() {
+    playClickSound(soundLevel)
     setSoundLevel("medio")
     setAnimationLevel("medio")
     setBreakSuggestionsEnabled(true)
@@ -100,6 +104,8 @@ function SettingsPage() {
 
       updateStudentData(updatedStudent)
 
+      playSuccessSound(soundLevel)
+
       navigate("/perfil", {
         state: { settingsSaved: true },
       })
@@ -112,6 +118,7 @@ function SettingsPage() {
   }
 
   function handleCancel() {
+    playClickSound(soundLevel)
     navigate("/perfil")
   }
 
@@ -164,7 +171,7 @@ function SettingsPage() {
             </div>
 
             <LevelSelector
-              value={animationLevel} onChange={setAnimationLevel} animationLevel={pageAnimationLevel}/>
+              value={animationLevel} onChange={setAnimationLevel} animationLevel={pageAnimationLevel} />
           </div>
 
           <div className={`rounded-[1.6rem] bg-white p-5 shadow-md sm:rounded-[1.75rem] sm:p-7 ${getCardAnimation(pageAnimationLevel)}`}>
@@ -186,9 +193,10 @@ function SettingsPage() {
 
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  playClickSound(soundLevel)
                   setBreakSuggestionsEnabled((current) => !current)
-                }
+                }}
                 className={`relative mt-1 h-8 w-14 rounded-full transition ${
                   breakSuggestionsEnabled
                     ? "bg-slate-900"

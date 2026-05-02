@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { getAnimationLevel, getCardAnimation } from "../utils/animation.ts"
+import { playClickSound } from "../utils/sound"
+import type { IntensityLevel } from "../services/auth"
 
 type ActivityCardProps = {
   title: string
@@ -10,6 +12,7 @@ type ActivityCardProps = {
   bgColor: string
   textColor: string
   path: string
+  soundLevel?: IntensityLevel
 }
 
 function ActivityCard({
@@ -20,6 +23,7 @@ function ActivityCard({
   bgColor,
   textColor,
   path,
+  soundLevel,
 }: ActivityCardProps) {
   const navigate = useNavigate()
   const { student } = useAuth()
@@ -28,7 +32,10 @@ function ActivityCard({
 
   return (
     <button
-      onClick={() => navigate(path)}
+      onClick={() => {
+        playClickSound(soundLevel)
+        navigate(path)
+      }}
       className={`flex w-full items-center justify-between rounded-[2rem] border-2 ${borderColor} bg-white px-8 py-7 text-left ${getCardAnimation(
         animationLevel
       )}`}

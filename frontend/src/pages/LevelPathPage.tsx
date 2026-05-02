@@ -5,11 +5,8 @@ import AppLayout from "../layouts/AppLayout"
 import PhaseNode from "../components/PhaseNode"
 import { api } from "../services/api"
 import { useAuth } from "../contexts/AuthContext"
-import {
-  getAnimationLevel,
-  getPageAnimation,
-  getCardAnimation,
-} from "../utils/animation.ts"
+import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation.ts"
+import { playClickSound } from "../utils/sound"
 
 type PhaseMapItem = {
   phase_id: number
@@ -244,6 +241,7 @@ function LevelPathPage() {
   const handlePhaseClick = (phase: PhaseMapItem) => {
     if (phase.phase_id !== currentPhaseId && !phase.is_completed) return
 
+    playClickSound(student?.sound_level)
     navigate(`/atividades/${conteudo}/${nivel}/fase/${phase.phase_number}`)
   }
 

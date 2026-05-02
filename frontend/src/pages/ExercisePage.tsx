@@ -469,7 +469,10 @@ function ExercisePage() {
               <div className="mt-6 flex flex-col gap-3 sm:mt-7">
                 <button
                   type="button"
-                  onClick={handleResume}
+                  onClick={() => {
+                    playClickSound(student?.sound_level)
+                    handleResume()
+                  }}
                   className="rounded-[1.3rem] bg-[#4a8fd3] px-6 py-4 text-lg font-bold text-white transition hover:brightness-105 sm:text-xl"
                 >
                   Retomar
@@ -477,7 +480,10 @@ function ExercisePage() {
 
                 <button
                   type="button"
-                  onClick={handleExitSession}
+                  onClick={() => {
+                    playClickSound(student?.sound_level)
+                    handleExitSession()
+                  }}
                   className="rounded-[1.3rem] border border-slate-300 bg-white px-6 py-4 text-lg font-bold text-slate-600 transition hover:bg-slate-50 sm:text-xl"
                 >
                   Sair da sessão
@@ -523,7 +529,10 @@ function ExercisePage() {
 
               <button
                 type="button"
-                onClick={handlePause}
+                onClick={() => {
+                  playClickSound(student?.sound_level)
+                  handlePause()
+                }}
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-base font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 sm:h-12 sm:w-14 sm:text-xl"
                 title="Pausar atividade"
               >

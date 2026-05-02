@@ -8,11 +8,8 @@ import {
   getDifficultyOptionsWithProgress,
   type DifficultyOptionWithProgress,
 } from "../services/activities"
-import {
-  getAnimationLevel,
-  getPageAnimation,
-  getCardAnimation,
-} from "../utils/animation.ts"
+import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation.ts"
+import { playClickSound } from "../utils/sound"
 
 const levelStyles: Record<
   string,
@@ -165,6 +162,8 @@ function DifficultyPage() {
                 disabled={isLocked}
                 onClick={() => {
                   if (isLocked) return
+
+                  playClickSound(student?.sound_level)
                   navigate(`/atividades/${conteudo}/${level.code}`)
                 }}
                 className={`relative min-h-[168px] overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white px-6 py-6 text-left shadow-sm ${

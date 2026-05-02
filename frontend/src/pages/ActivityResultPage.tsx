@@ -4,7 +4,7 @@ import AppLayout from "../layouts/AppLayout"
 import { getPhaseResult } from "../services/progress"
 import { useAuth } from "../contexts/AuthContext"
 import { getAnimationLevel, getPageAnimation, getCardAnimation } from "../utils/animation"
-import { playLevelUpSound } from "../utils/sound"
+import { playLevelUpSound, playClickSound } from "../utils/sound"
 
 const contentTitles: Record<string, string> = {
   adicao: "Adição",
@@ -153,7 +153,10 @@ function ActivityResultPage() {
 
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              playClickSound(student?.sound_level)
+              navigate(-1)
+            }}
             className={`mt-5 rounded-[1rem] bg-[#4a8fd3] px-5 py-3 text-sm font-bold text-white transition hover:brightness-105 ${getCardAnimation(animationLevel)}`}
           >
             Voltar
@@ -240,9 +243,10 @@ function ActivityResultPage() {
               <div className="mt-7 flex flex-col gap-3">
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
+                    playClickSound(student?.sound_level)
                     navigate(`/atividades/${conteudo}/${nivel}/fase/${phaseId}`)
-                  }
+                  }}
                   className={`rounded-[1.2rem] bg-[#4a8fd3] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105 ${getCardAnimation(animationLevel)}`}
                 >
                   ↻ Jogar novamente
@@ -250,7 +254,10 @@ function ActivityResultPage() {
 
                 <button
                   type="button"
-                  onClick={() => navigate(`/atividades/${conteudo}/${nivel}`)}
+                  onClick={() => {
+                    playClickSound(student?.sound_level)
+                    navigate(`/atividades/${conteudo}/${nivel}`)
+                  }}
                   className={`rounded-[1.2rem] border border-slate-200 bg-white px-6 py-3.5 text-base font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 ${getCardAnimation(animationLevel)}`}
                 >
                   🗺 Voltar ao mapa de fases
@@ -259,11 +266,12 @@ function ActivityResultPage() {
                 {result.next_phase_number && result.next_phase_unlocked && (
                   <button
                     type="button"
-                    onClick={() =>
+                    onClick={() => {
+                      playClickSound(student?.sound_level)
                       navigate(
                         `/atividades/${conteudo}/${nivel}/fase/${result.next_phase_number}`
                       )
-                    }
+                    }}
                     className={`rounded-[1.2rem] bg-[#79c6a1] px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:brightness-105 ${getCardAnimation(animationLevel)}`}
                   >
                     ➜ Ir para próxima fase

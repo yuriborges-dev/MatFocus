@@ -141,6 +141,7 @@ function ActivitiesPage() {
                   bgColor={style.bgColor}
                   textColor={style.textColor}
                   path={`/atividades/${content.slug}`}
+                  soundLevel={student?.sound_level}
                 />
               )
             })}
