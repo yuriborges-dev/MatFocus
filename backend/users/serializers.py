@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from students.models import Student
-from django.contrib.auth.models import User
 
 class RegisterSerializer(serializers.Serializer):
     full_name = serializers.CharField(max_length=150)
@@ -12,6 +11,7 @@ class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(write_only=True, min_length=6)
     confirm_password = serializers.CharField(write_only=True, min_length=6)
+    email = serializers.EmailField()
 
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
@@ -31,8 +31,11 @@ class RegisterSerializer(serializers.Serializer):
         password = validated_data.pop("password")
         username = validated_data.pop("username")
 
+        email = validated_data.pop("email")
+
         user = User.objects.create_user(
             username=username,
+            email=email,
             password=password,
         )
 
@@ -43,9 +46,14 @@ class RegisterSerializer(serializers.Serializer):
 
         return student
 
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Este e-mail já está em uso.")
+        return value
 
 class StudentMeSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username")
+    email = serializers.EmailField(source="user.email")
     profile_photo = serializers.SerializerMethodField()
 
     class Meta:
@@ -63,6 +71,7 @@ class StudentMeSerializer(serializers.ModelSerializer):
             "animation_level",
             "break_suggestions_enabled",
             "break_interval_minutes",
+            "email",
         ]
 
     def get_profile_photo(self, obj):
@@ -80,6 +89,7 @@ class LoginSerializer(serializers.Serializer):
 
 class StudentUpdateSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username", required=False)
+    email = serializers.EmailField(source="user.email", required=False)
     password = serializers.CharField(write_only=True, required=False, min_length=6)
     profile_photo = serializers.ImageField(required=False, allow_null=True)
 
@@ -98,12 +108,19 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
             "animation_level",
             "break_suggestions_enabled",
             "break_interval_minutes",
+            "email",
         ]
 
     def validate_username(self, value):
         user = self.instance.user
         if User.objects.filter(username=value).exclude(id=user.id).exists():
             raise serializers.ValidationError("Este nome de usuário já está em uso.")
+        return value
+    
+    def validate_email(self, value):
+        user = self.instance.user
+        if User.objects.filter(email=value).exclude(id=user.id).exists():
+            raise serializers.ValidationError("Este e-mail já está em uso.")
         return value
 
     def update(self, instance, validated_data):
@@ -120,11 +137,38 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
         instance.save()
 
         username = user_data.get("username")
+        email = user_data.get("email")
+
         if username is not None:
             instance.user.username = username
+
+        if email is not None:
+            instance.user.email = email
 
         if password:
             instance.user.set_password(password)
 
         instance.user.save()
         return instance
+    
+class RequestPasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class VerifyPasswordResetCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+    password = serializers.CharField(write_only=True, min_length=6)
+    confirm_password = serializers.CharField(write_only=True, min_length=6)
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError(
+                {"confirm_password": "As senhas não coincidem."}
+            )
+        return attrs
