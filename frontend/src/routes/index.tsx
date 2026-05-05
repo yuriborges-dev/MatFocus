@@ -14,6 +14,9 @@ import AboutPage from "../pages/AboutPage"
 import EditProfilePage from "../pages/EditProfilePage"
 import ProtectedRoute from "../components/ProtectedRoute"
 import AchievementsPage from "../pages/AchievementsPage"
+import ForgotPasswordPage from "../pages/ForgotPasswordPage"
+import VerifyResetCodePage from "../pages/VerifyResetCodePage"
+import ResetPasswordPage from "../pages/ResetPasswordPage"
 
 function AppRoutes() {
   return (
@@ -21,6 +24,9 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/cadastro" element={<RegisterPage />} />
+        <Route path="/recuperar-senha" element={<ForgotPasswordPage />} />
+        <Route path="/recuperar-senha/codigo" element={<VerifyResetCodePage />} />
+        <Route path="/recuperar-senha/nova-senha" element={<ResetPasswordPage />} />
 
         <Route
           path="/dashboard"

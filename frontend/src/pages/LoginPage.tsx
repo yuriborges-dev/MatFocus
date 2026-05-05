@@ -153,6 +153,7 @@ function LoginPage() {
                 <div className="mt-6 flex flex-col items-center gap-2 text-center sm:mt-7">
                   <button
                     type="button"
+                    onClick={() => navigate("/recuperar-senha")}
                     className="text-[1rem] font-medium text-slate-400 transition hover:text-sky-500"
                   >
                     Esqueci minha senha

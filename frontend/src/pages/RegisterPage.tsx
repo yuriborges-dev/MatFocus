@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ChevronDown, Eye, EyeOff, Lock, User, Users } from "lucide-react"
+import { ChevronDown, Eye, EyeOff, Lock, Mail, User, Users } from "lucide-react"
 import AuthLayout from "../layouts/AuthLayout"
 import logoMatFocus from "../assets/logo - matfocus.png"
 import mascotefoco from "../assets/mascote - login.png"
@@ -14,6 +14,7 @@ type FormData = {
   school_grade: string
   guardian_name: string
   username: string
+  email: string
   password: string
   confirm_password: string
 }
@@ -37,6 +38,7 @@ function RegisterPage() {
     school_grade: "",
     guardian_name: "",
     username: "",
+    email: "",
     password: "",
     confirm_password: "",
   })
@@ -68,6 +70,12 @@ function RegisterPage() {
 
     if (!data.username.trim()) {
       errors.username = "Informe um nome de usuário."
+    }
+
+    if (!data.email.trim()) {
+      errors.email = "Informe o e-mail do responsável."
+    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+      errors.email = "Informe um e-mail válido."
     }
 
     if (!data.password.trim()) {
@@ -174,6 +182,7 @@ function RegisterPage() {
         school_grade: formData.school_grade as "3" | "4" | "5" | "6",
         guardian_name: formData.guardian_name.trim(),
         username: formData.username.trim(),
+        email: formData.email.trim(),
         password: formData.password,
         confirm_password: formData.confirm_password,
       })
@@ -225,6 +234,13 @@ function RegisterPage() {
         setFieldErrors((prev) => ({
           ...prev,
           username: "Este nome de usuário já está em uso.",
+        }))
+      }
+
+      if (typeof data?.email?.[0] === "string") {
+        setFieldErrors((prev) => ({
+          ...prev,
+          email: "Este e-mail já está em uso.",
         }))
       }
 
@@ -470,6 +486,35 @@ function RegisterPage() {
                 {fieldErrors.username && (
                   <p className="mt-2 text-sm font-medium text-red-500">
                     {fieldErrors.username}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="email"
+                  className="mb-2 block text-lg font-semibold text-slate-600"
+                >
+                  E-mail do responsável
+                </label>
+
+                <div className={getFieldWrapperClass("email")}>
+                  <Mail size={20} className="text-slate-400" />
+
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="email@exemplo.com"
+                    className="w-full bg-transparent text-base text-slate-700 outline-none placeholder:text-slate-400"
+                  />
+                </div>
+
+                {fieldErrors.email && (
+                  <p className="mt-2 text-sm font-medium text-red-500">
+                    {fieldErrors.email}
                   </p>
                 )}
               </div>

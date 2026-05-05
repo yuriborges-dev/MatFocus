@@ -5,6 +5,7 @@ export type IntensityLevel = "baixo" | "medio" | "alto"
 export type Student = {
   id: number
   username: string
+  email: string
   full_name: string
   age: number
   sex: string
@@ -26,10 +27,11 @@ export type AuthResponse = {
 export type RegisterPayload = {
   full_name: string
   age: number
-  sex: "M" | "F" | "O"
+  sex: "M" | "F"
   school_grade: "3" | "4" | "5" | "6"
   guardian_name: string
   username: string
+  email: string
   password: string
   confirm_password: string
 }
@@ -41,6 +43,7 @@ export type LoginPayload = {
 
 export type UpdateMePayload = {
   username?: string
+  email?: string
   full_name?: string
   age?: number
   sex?: "M" | "F"
@@ -74,6 +77,10 @@ export async function updateMe(payload: UpdateMePayload) {
 
   if (payload.username !== undefined) {
     formData.append("username", payload.username)
+  }
+
+  if (payload.email !== undefined) {
+    formData.append("email", payload.email)
   }
 
   if (payload.full_name !== undefined) {
@@ -135,6 +142,53 @@ export async function updateMe(payload: UpdateMePayload) {
       "Content-Type": "multipart/form-data",
     },
   })
+
+  return response.data
+}
+
+export type RequestPasswordResetPayload = {
+  email: string
+}
+
+export type VerifyPasswordResetCodePayload = {
+  email: string
+  code: string
+}
+
+export type ResetPasswordPayload = {
+  email: string
+  code: string
+  password: string
+  confirm_password: string
+}
+
+export async function requestPasswordReset(
+  payload: RequestPasswordResetPayload
+) {
+  const response = await api.post<{ detail: string }>(
+    "/auth/password-reset/request/",
+    payload
+  )
+
+  return response.data
+}
+
+export async function verifyPasswordResetCode(
+  payload: VerifyPasswordResetCodePayload
+) {
+  const response = await api.post<{ detail: string }>(
+    "/auth/password-reset/verify/",
+    payload
+  )
+
+  return response.data
+}
+
+export async function resetPassword(payload: ResetPasswordPayload) {
+  const response = await api.post<{ detail: string }>(
+    "/auth/password-reset/confirm/",
+    payload
+  )
 
   return response.data
 }
