@@ -21,6 +21,15 @@ function getGradeLabel(value?: string) {
   return "-"
 }
 
+function maskEmail(email?: string) {
+  if (!email || !email.includes("@")) return "-"
+
+  const [name, domain] = email.split("@")
+  const visible = name.slice(0, 2)
+
+  return `${visible}${"*".repeat(Math.max(name.length - 2, 3))}@${domain}`
+}
+
 function ProfilePage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -36,6 +45,7 @@ function ProfilePage() {
   const schoolGrade = getGradeLabel(student?.school_grade)
   const sexLabel = getSexLabel(student?.sex)
   const guardianName = student?.guardian_name || "-"
+  const email = maskEmail(student?.email)
 
   useEffect(() => {
     if (!location.state?.settingsSaved) return
@@ -146,6 +156,13 @@ function ProfilePage() {
                   <p className="mb-1 text-sm text-slate-400">Responsável</p>
                   <p className="break-words text-xl font-semibold leading-snug text-slate-800 sm:text-2xl">
                     {guardianName}
+                  </p>
+                </div>
+
+                <div className="rounded-[1.8rem] bg-slate-50 px-5 py-4 md:col-span-2">
+                  <p className="mb-1 text-sm text-slate-400">E-mail do responsável</p>
+                  <p className="break-words text-lg font-semibold leading-snug text-slate-700 sm:text-xl">
+                    {email}
                   </p>
                 </div>
               </div>

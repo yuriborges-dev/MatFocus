@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Save, Trash2, Upload } from "lucide-react"
+import { Eye, EyeOff, Mail, Save, Trash2, Upload } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import BackButton from "../components/BackButton"
@@ -19,6 +19,7 @@ type FormData = {
   genero: SexOption
   responsavel: string
   usuario: string
+  email: string
   senha: string
   confirmarSenha: string
 }
@@ -72,6 +73,7 @@ function EditProfilePage() {
       genero: (student?.sex as SexOption | undefined) || "M",
       responsavel: student?.guardian_name || "",
       usuario: student?.username || "",
+      email: student?.email || "",
       senha: "",
       confirmarSenha: "",
     }),
@@ -112,6 +114,12 @@ function EditProfilePage() {
 
     if (!data.usuario.trim()) {
       errors.usuario = "Preencha o nome de usuário."
+    }
+
+    if (!data.email.trim()) {
+      errors.email = "Preencha o e-mail."
+    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+      errors.email = "Informe um e-mail válido."
     }
 
     if (!data.idade.trim()) {
@@ -238,6 +246,7 @@ function EditProfilePage() {
       const updatedStudent = await updateMe({
         full_name: formData.nome.trim(),
         username: formData.usuario.trim(),
+        email: formData.email.trim(),
         age: Number(formData.idade),
         school_grade: formData.serie as GradeOption,
         sex: formData.genero as SexOption,
@@ -287,6 +296,13 @@ function EditProfilePage() {
         setFieldErrors((prev) => ({
           ...prev,
           usuario: "Este nome de usuário já está em uso.",
+        }))
+      }
+
+      if (typeof data?.email?.[0] === "string") {
+        setFieldErrors((prev) => ({
+          ...prev,
+          email: "Este e-mail já está em uso.",
         }))
       }
 
@@ -547,6 +563,36 @@ function EditProfilePage() {
                     </div>
 
                     <div>
+                      <div className={getFieldCardClass("email")}>
+                        <label
+                          htmlFor="email"
+                          className="mb-2 block text-sm text-slate-400"
+                        >
+                          E-mail do responsável
+                        </label>
+
+                        <div className="flex min-h-[34px] items-center gap-3">
+                          <Mail className="h-5 w-5 text-slate-400" />
+
+                          <input
+                            id="email"
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none sm:text-2xl"
+                          />
+                        </div>
+                      </div>
+
+                      {fieldErrors.email && (
+                        <p className="mt-2 px-2 text-sm font-medium text-red-500">
+                          {fieldErrors.email}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="min-h-[120px]">
                       <div className={getFieldCardClass("senha")}>
                         <label
                           htmlFor="senha"
@@ -595,54 +641,52 @@ function EditProfilePage() {
                     </div>
 
                     {isChangingPassword && (
-                      <div
-                        className={`${getFieldCardClass(
-                          "confirmarSenha"
-                        )} md:col-span-2`}
-                      >
-                        <label
-                          htmlFor="confirmarSenha"
-                          className="mb-2 block text-sm text-slate-400"
-                        >
-                          Confirmar nova senha
-                        </label>
-
-                        <div className="flex items-center gap-3">
-                          <input
-                            id="confirmarSenha"
-                            name="confirmarSenha"
-                            type={showConfirmPassword ? "text" : "password"}
-                            value={formData.confirmarSenha}
-                            onChange={handleChange}
-                            placeholder="Confirme a nova senha"
-                            className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none placeholder:text-slate-300 sm:text-2xl"
-                          />
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setShowConfirmPassword((prev) => !prev)
-                            }
-                            className="text-slate-400 transition hover:text-slate-600"
-                            aria-label={
-                              showConfirmPassword
-                                ? "Ocultar confirmação de senha"
-                                : "Mostrar confirmação de senha"
-                            }
+                      <div className="min-h-[120px]">
+                        <div className={getFieldCardClass("confirmarSenha")}>
+                          <label
+                            htmlFor="confirmarSenha"
+                            className="mb-2 block text-sm text-slate-400"
                           >
-                            {showConfirmPassword ? (
-                              <EyeOff className="h-5 w-5" />
-                            ) : (
-                              <Eye className="h-5 w-5" />
-                            )}
-                          </button>
-                        </div>
+                            Confirmar nova senha
+                          </label>
 
-                        {fieldErrors.confirmarSenha && (
-                          <p className="mt-2 text-sm font-medium text-red-500">
-                            {fieldErrors.confirmarSenha}
-                          </p>
-                        )}
+                          <div className="flex items-center gap-3">
+                            <input
+                              id="confirmarSenha"
+                              name="confirmarSenha"
+                              type={showConfirmPassword ? "text" : "password"}
+                              value={formData.confirmarSenha}
+                              onChange={handleChange}
+                              placeholder="Confirme a nova senha"
+                              className="w-full border-none bg-transparent text-xl font-semibold text-slate-800 outline-none placeholder:text-slate-300 sm:text-2xl"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowConfirmPassword((prev) => !prev)
+                              }
+                              className="text-slate-400 transition hover:text-slate-600"
+                              aria-label={
+                                showConfirmPassword
+                                  ? "Ocultar confirmação de senha"
+                                  : "Mostrar confirmação de senha"
+                              }
+                            >
+                              {showConfirmPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                              ) : (
+                                <Eye className="h-5 w-5" />
+                              )}
+                            </button>
+                          </div>
+
+                          {fieldErrors.confirmarSenha && (
+                            <p className="mt-2 text-sm font-medium text-red-500">
+                              {fieldErrors.confirmarSenha}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
