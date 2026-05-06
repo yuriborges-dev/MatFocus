@@ -261,11 +261,22 @@ class StartPhaseSessionView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        session = StudentPhaseSession.objects.filter(
+        open_sessions = StudentPhaseSession.objects.filter(
             student=student,
             phase=phase,
             is_finished=False
-        ).order_by('-started_at').first()
+        ).order_by('-started_at')
+
+        session = open_sessions.first()
+
+        old_open_sessions = open_sessions.exclude(
+            id=session.id
+        ) if session else StudentPhaseSession.objects.none()
+
+        for old_session in old_open_sessions:
+            old_session.finished_at = timezone.now()
+            old_session.is_finished = True
+            old_session.save(update_fields=['finished_at', 'is_finished'])
 
         if not session:
             session = StudentPhaseSession.objects.create(

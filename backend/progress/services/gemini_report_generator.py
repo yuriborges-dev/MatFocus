@@ -14,6 +14,23 @@ def generate_default_student_report(data):
     }
 
     period_label = period_map.get(data["period"], data["period"])
+    accuracy = data["accuracy"]
+    avg_time = data["avg_time"]
+
+    if accuracy >= 85:
+        desempenho = "muito positivo"
+        resumo = "O aluno apresentou ótimo aproveitamento no período analisado, demonstrando boa compreensão das atividades realizadas."
+    elif accuracy >= 60:
+        desempenho = "satisfatório"
+        resumo = "O aluno apresentou um desempenho satisfatório no período analisado, com bons avanços e alguns pontos que ainda podem ser reforçados."
+    else:
+        desempenho = "em desenvolvimento"
+        resumo = "O aluno está em processo de desenvolvimento nas habilidades avaliadas, sendo importante manter uma rotina de prática com apoio e incentivo."
+
+    if avg_time and avg_time >= 10:
+        tempo_texto = f"O tempo médio foi de {avg_time} segundos por questão, indicando o ritmo observado durante as atividades."
+    else:
+        tempo_texto = "O tempo médio foi baixo, indicando rapidez nas respostas durante as atividades."
 
     return f"""Relatório de desempenho — últimos {period_label}
 
@@ -21,22 +38,22 @@ Aluno: {data["name"]}
 Ano escolar: {data["grade"]}
 
 Resumo do desempenho
-O aluno apresentou um bom acompanhamento pedagógico no período analisado, com desempenho geral de {data["accuracy"]}% de taxa de acerto nas atividades realizadas.
+{resumo}
 
 Atividades realizadas
-Foram concluídas {data["activities"]} atividades no período, com tempo médio de {data["avg_time"]} segundos por questão.
+Foram concluídas {data["activities"]} atividades, com taxa de acerto de {accuracy}%. {tempo_texto}
 
 Desempenho por conteúdo
-O melhor desempenho foi observado em {data["best_content"]}. Já o conteúdo que precisa de mais atenção é {data["worst_content"]}.
+O melhor desempenho foi observado em {data["best_content"]}. O conteúdo que merece mais atenção neste momento é {data["worst_content"]}.
 
 Pontos fortes
-O aluno demonstra dedicação, continuidade nas atividades e avanço no processo de aprendizagem.
+O aluno demonstrou participação nas atividades e apresentou desempenho {desempenho}, especialmente nas tarefas relacionadas a {data["best_content"]}.
 
 Áreas para melhorar
-É importante continuar reforçando principalmente o conteúdo de {data["worst_content"]}, com foco em compreensão e prática gradual.
+É importante reforçar {data["worst_content"]} com atividades curtas, exemplos simples e revisão gradual, respeitando o ritmo de aprendizagem do aluno.
 
 Sugestão prática pedagógica
-Recomenda-se realizar pequenas atividades de revisão com apoio do responsável, incentivando a leitura atenta dos enunciados e a resolução com calma, para fortalecer a confiança e o desempenho do aluno.
+Recomenda-se realizar pequenas práticas com acompanhamento do responsável, usando enunciados curtos e leitura pausada. Essa estratégia ajuda a organizar o pensamento, manter o foco e fortalecer a confiança durante a resolução das atividades.
 """
 
 
@@ -53,7 +70,10 @@ def generate_student_report(data):
     school_grade = data["grade"]
 
     prompt = f"""
-Gere um relatório educacional simples para o responsável de um aluno.
+Gere um relatório educacional para o responsável de um aluno do ensino fundamental.
+
+Contexto:
+O sistema MatFocus apoia o estudo de matemática por meio de atividades curtas, feedback positivo e recursos pensados para crianças, incluindo alunos com TDAH. O relatório deve ter tom pedagógico, acolhedor e objetivo, sem parecer laudo clínico.
 
 IMPORTANTE:
 - NÃO usar markdown
@@ -62,40 +82,68 @@ IMPORTANTE:
 - NÃO usar assinatura institucional
 - NÃO formatar como carta
 - NÃO usar emojis
-- usar linguagem simples e objetiva
-- destacar subtópicos e palavras importantes com negrito
+- NÃO inventar números ou informações
+- NÃO afirmar diagnóstico, sintomas ou condições clínicas
+- NÃO usar termos médicos
+- usar linguagem simples, positiva e adequada para responsáveis
+- evitar frases genéricas demais
+- variar a construção das frases
+- escrever como uma análise pedagógica breve
+- pode destacar subtópicos com texto simples, sem símbolos
 - formato ideal para exibição dentro de um sistema educacional
+- usar símbolo % ao invés de escrever "por cento"
+- evitar linguagem acadêmica excessivamente formal
+- cada seção deve ter no máximo 3 frases curtas
+- preferir frases menores e leitura fluida
 
-Dados:
-
-Nome do aluno: {data["name"]}
+Dados do aluno:
+Nome: {data["name"]}
 Ano escolar: {data["grade"]}
-Período analisado: últimos {data["period"]}
-
-Total de atividades: {data["activities"]}
+Período analisado: últimos {period_label}
+Total de atividades concluídas: {data["activities"]}
 Taxa de acerto: {data["accuracy"]}%
 Conteúdo com melhor desempenho: {data["best_content"]}
-Conteúdo com menor desempenho: {data["worst_content"]}
-Tempo médio: {data["avg_time"]} segundos
+Conteúdo que precisa de mais atenção: {data["worst_content"]}
+Tempo médio por questão: {data["avg_time"]} segundos
 
-Estrutura do relatório:
+Regras de interpretação:
+- Se a taxa de acerto for maior ou igual a 85%, descreva desempenho muito positivo.
+- Se a taxa de acerto estiver entre 60% e 84%, descreva desempenho satisfatório, com pontos a reforçar.
+- Se a taxa de acerto for menor que 60%, descreva desempenho em desenvolvimento, com necessidade de prática gradual.
+- Se o tempo médio for menor que 10 segundos, não enfatize o número exato; diga apenas que houve rapidez nas respostas.
+- Se o melhor conteúdo e o conteúdo que precisa de atenção forem iguais, explique que ainda há poucos dados ou pouca variedade de atividades para comparar conteúdos com segurança.
+- Recomendações devem ser práticas, curtas e possíveis de aplicar em casa ou na escola.
+- A sugestão pedagógica deve considerar foco, leitura pausada, organização do raciocínio e reforço positivo.
 
-Título:
+Estrutura obrigatória:
+
 Relatório de desempenho — últimos {period_label}
 
 Aluno: {student_name}
 Ano escolar: {school_grade}
 
 Resumo do desempenho
+Escreva 1 parágrafo curto, personalizado pelos dados.
+
 Atividades realizadas
+Informe atividades, acertos e ritmo de resposta. Não exagere na interpretação do tempo.
+
 Desempenho por conteúdo
+Compare o melhor conteúdo e o conteúdo que precisa de atenção, com cuidado para não parecer julgamento negativo.
+
 Pontos fortes
+Aponte um ponto forte relacionado ao desempenho observado.
+
 Áreas para melhorar
+Explique o que pode ser reforçado, com linguagem acolhedora.
+
 Sugestão prática pedagógica
+Dê uma orientação concreta para o responsável acompanhar o estudo.
 
-Texto claro, positivo e apropriado para responsáveis.
-
-Não inventar números.
+Tamanho:
+- máximo de 450 palavras
+- parágrafos curtos
+- texto natural, sem parecer template repetitivo
 """
 
     try:
