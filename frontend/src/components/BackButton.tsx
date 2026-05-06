@@ -17,15 +17,12 @@ function BackButton({ fallbackPath = "/" }: BackButtonProps) {
   const animationLevel = getAnimationLevel(student?.animation_level)
 
   function handleBack() {
-    if (window.history.length > 1) {
-      navigate(-1)
-    } else {
-      navigate(fallbackPath)
-    }
+    navigate(fallbackPath)
   }
 
   return (
     <button
+      type="button"
       onClick={handleBack}
       className={`mb-4 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-slate-600 shadow-sm ${getCardAnimation(
         animationLevel
