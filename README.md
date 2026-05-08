@@ -209,7 +209,7 @@ Link da aplicação após implantação:
 
 # 👨‍💻 Autor
 
-Samuel Henrique Borges
+Yuri Lima Borges
 
 Graduando em Tecnologia em Análise e Desenvolvimento de Sistemas  
 Instituto Federal Baiano — Campus Guanambi
