@@ -318,6 +318,11 @@ function ExercisePage() {
     )
   }
 
+  function handleAnswerChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const onlyNumbers = e.target.value.replace(/\D/g, "")
+    setAnswer(onlyNumbers)
+  }
+
   const handleSubmitAnswer = async () => {
     if (!answer.trim()) {
       openFeedbackModal(
@@ -563,9 +568,11 @@ function ExercisePage() {
             <div className="mt-5 sm:mt-7">
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Digite sua resposta"
+                onChange={handleAnswerChange}
+                placeholder="Digite apenas números"
                 className={`h-20 w-full rounded-[1.8rem] border border-slate-200 bg-white px-6 text-center text-2xl font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#4a8fd3] focus:ring-4 focus:ring-blue-100 sm:h-24 sm:px-8 sm:text-3xl ${
                   feedbackModal.type === "error" &&
                   feedbackModal.isOpen &&
@@ -592,8 +599,8 @@ function ExercisePage() {
               <button
                 type="button"
                 onClick={handleSubmitAnswer}
-                className={`flex h-20 items-center justify-center gap-3 rounded-[1.5rem] bg-[#8fb7df] px-6 text-xl font-bold text-white transition hover:brightness-105 sm:h-24 sm:text-2xl ${getCardAnimation(animationLevel)}`}
-                >
+                className={`flex h-20 items-center justify-center gap-3 rounded-[1.5rem] bg-[#4f8fd6] px-6 text-xl font-bold text-white shadow-sm transition hover:bg-[#3f84cc] hover:shadow-md sm:h-24 sm:text-2xl ${getCardAnimation(animationLevel)}`}
+              >
                 <span className="text-[1.4rem] sm:text-[1.6rem]">✈</span>
                 Enviar
               </button>

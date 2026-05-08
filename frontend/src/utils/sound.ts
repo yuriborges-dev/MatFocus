@@ -12,7 +12,17 @@ const sounds = {
 
 Object.values(sounds).forEach((sound) => {
   sound.preload = "auto"
+  sound.load()
 })
+
+const clickPool = Array.from({ length: 5 }, () => {
+  const audio = new Audio("/sounds/click.wav")
+  audio.preload = "auto"
+  audio.load()
+  return audio
+})
+
+let clickIndex = 0
 
 function normalizeSoundLevel(level?: SoundLevel) {
   if (level === "baixo" || level === "low") return "low"
@@ -25,6 +35,17 @@ function play(audio: HTMLAudioElement, volume: number) {
 
   sound.volume = volume
   sound.currentTime = 0
+
+  sound.play().catch(() => {})
+}
+
+function playInstantClick(volume: number) {
+  const sound = clickPool[clickIndex]
+  clickIndex = (clickIndex + 1) % clickPool.length
+
+  sound.pause()
+  sound.currentTime = 0
+  sound.volume = volume
 
   sound.play().catch(() => {})
 }
@@ -58,7 +79,7 @@ export function playClickSound(level?: SoundLevel) {
 
   if (normalizedLevel === "low") return
 
-  play(sounds.click, normalizedLevel === "medium" ? 0.25 : 0.35)
+  playInstantClick(normalizedLevel === "medium" ? 0.25 : 0.35)
 }
 
 export function playLevelUpSound(level?: SoundLevel) {
