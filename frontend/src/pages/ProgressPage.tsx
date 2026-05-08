@@ -403,45 +403,45 @@ function ProgressPage() {
                 <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 md:gap-4">
                   <button
                     type="button"
-                    disabled={!hasProgressData}
+                    disabled={!hasProgressData || reportLoading}
                     onClick={() => handleGenerateReport("7d")}
                     className={`rounded-[1rem] border px-4 py-3.5 text-[0.98rem] font-semibold shadow-sm transition sm:rounded-[1.1rem] sm:px-6 sm:py-4 sm:text-[1.02rem] ${
-                      !hasProgressData
+                      !hasProgressData || reportLoading
                         ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 shadow-none"
                         : reportPeriod === "7d"
                           ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
                           : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
-                    }${!hasProgressData ? "" : getCardAnimation(animationLevel)}`}
+                    } ${!hasProgressData || reportLoading ? "" : getCardAnimation(animationLevel)}`}
                   >
                     7 dias
                   </button>
 
                   <button
                     type="button"
-                    disabled={!hasProgressData}
+                    disabled={!hasProgressData || reportLoading}
                     onClick={() => handleGenerateReport("14d")}
                     className={`rounded-[1rem] border px-4 py-3.5 text-[0.98rem] font-semibold shadow-sm transition sm:rounded-[1.1rem] sm:px-6 sm:py-4 sm:text-[1.02rem] ${
-                      !hasProgressData
+                      !hasProgressData || reportLoading
                         ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 shadow-none"
                         : reportPeriod === "14d"
                           ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
                           : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
-                    }${!hasProgressData ? "" : getCardAnimation(animationLevel)}`}
+                    } ${!hasProgressData || reportLoading ? "" : getCardAnimation(animationLevel)}`}
                   >
                     14 dias
                   </button>
 
                   <button
                     type="button"
-                    disabled={!hasProgressData}
+                    disabled={!hasProgressData || reportLoading}
                     onClick={() => handleGenerateReport("30d")}
                     className={`rounded-[1rem] border px-4 py-3.5 text-[0.98rem] font-semibold shadow-sm transition sm:rounded-[1.1rem] sm:px-6 sm:py-4 sm:text-[1.02rem] ${
-                      !hasProgressData
+                      !hasProgressData || reportLoading
                         ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 shadow-none"
                         : reportPeriod === "30d"
                           ? "border-[#4a8fd3] bg-[#4a8fd3] text-white"
                           : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
-                    }${!hasProgressData ? "" : getCardAnimation(animationLevel)}`}
+                    } ${!hasProgressData || reportLoading ? "" : getCardAnimation(animationLevel)}`}
                   >
                     30 dias
                   </button>
