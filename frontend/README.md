@@ -1,4 +1,3 @@
-```md
 # Frontend — MatFocus
 
 Este diretório contém a interface web do MatFocus, desenvolvida com React, TypeScript, Vite e Tailwind CSS.
@@ -30,3 +29,4 @@ Este diretório contém a interface web do MatFocus, desenvolvida com React, Typ
 ```bash
 npm install
 npm run dev
+```
