@@ -234,7 +234,7 @@ function ExercisePage() {
 
       if (!currentSessionId || !currentPhaseId || finished || !token) return
 
-      fetch(`http://127.0.0.1:8000/api/progress/phases/${currentPhaseId}/pause-session/`, {
+      fetch(`${import.meta.env.VITE_API_URL}/progress/phases/${currentPhaseId}/pause-session/`, {
         method: "POST",
         keepalive: true,
         headers: {

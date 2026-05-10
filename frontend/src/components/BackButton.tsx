@@ -8,21 +8,15 @@ import {
 
 type BackButtonProps = {
   fallbackPath?: string
-  useHistoryBack?: boolean
 }
 
-function BackButton({ fallbackPath = "/", useHistoryBack = false }: BackButtonProps) {
+function BackButton({ fallbackPath = "/" }: BackButtonProps) {
   const navigate = useNavigate()
   const { student } = useAuth()
 
   const animationLevel = getAnimationLevel(student?.animation_level)
 
   function handleBack() {
-    if (useHistoryBack && window.history.length > 1) {
-      navigate(-1)
-      return
-    }
-
     navigate(fallbackPath)
   }
 

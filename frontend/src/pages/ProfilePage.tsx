@@ -75,6 +75,13 @@ function ProfilePage() {
     navigate("/")
   }
 
+  const profileBackPath =
+    location.state?.from &&
+    location.state.from !== "/perfil/editar" &&
+    location.state.from !== "/sobre"
+      ? location.state.from
+      : "/dashboard"
+
   return (
     <AppLayout>
       <div className={getPageAnimation(animationLevel)}>
@@ -94,7 +101,7 @@ function ProfilePage() {
 
         <div className="mx-auto max-w-5xl">
           <header className="mb-5 sm:mb-6">
-            <BackButton fallbackPath="/dashboard" useHistoryBack={true} />
+            <BackButton fallbackPath={profileBackPath} />
 
             <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
               Meu Perfil

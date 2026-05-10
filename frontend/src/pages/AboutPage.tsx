@@ -19,7 +19,7 @@ function AboutPage() {
     <AppLayout showProfileCard={false}>
       <div className={`mx-auto max-w-4xl ${getPageAnimation(animationLevel)}`}>
         <header className="mb-6 sm:mb-8">
-          <BackButton />
+          <BackButton fallbackPath="/perfil" />
 
           <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
             Sobre o MatFocus
