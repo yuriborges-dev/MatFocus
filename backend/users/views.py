@@ -7,6 +7,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 import random
 from django.contrib.auth.models import User
 from .models import PasswordResetCode
+from django.core.mail import send_mail
+from django.conf import settings
 
 from .serializers import (
     RegisterSerializer,
@@ -146,7 +148,18 @@ class RequestPasswordResetView(APIView):
             code=code,
         )
 
-        print(f"Código de recuperação para {email}: {code}")
+        send_mail(
+            subject="Código de recuperação de senha - MatFocus",
+            message=(
+                f"Olá!\n\n"
+                f"Seu código de recuperação de senha do MatFocus é: {code}\n\n"
+                f"Este código é válido por 10 minutos.\n\n"
+                f"Se você não solicitou a recuperação de senha, ignore este e-mail."
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+        )
 
         return Response(
             {"detail": "Se este e-mail estiver cadastrado, um código será enviado."},

@@ -70,6 +70,7 @@ function VerifyResetCodePage() {
 
               <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5">
                 <KeyRound className="h-5 w-5 text-slate-400" />
+
                 <input
                   type="text"
                   value={code}
@@ -94,6 +95,17 @@ function VerifyResetCodePage() {
             >
               {loading ? "Validando..." : "Validar código"}
             </button>
+
+            <div className="pt-1 text-center">
+              <p className="text-base font-medium text-slate-400">Não recebeu o código?</p>
+              <button
+                type="button"
+                onClick={() => navigate("/recuperar-senha")}
+                className="text-base font-medium text-slate-400 transition hover:text-sky-500"
+              >
+                Voltar
+              </button>
+            </div>
           </form>
         </div>
       </div>
