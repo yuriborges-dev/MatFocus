@@ -77,7 +77,6 @@ function ExercisePage() {
   const [sessionId, setSessionId] = useState<number | null>(null)
   const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  const [pauseStartedAt, setPauseStartedAt] = useState<number | null>(null)
   const [totalPausedSeconds, setTotalPausedSeconds] = useState(0)
   const [persistedPausedSeconds, setPersistedPausedSeconds] = useState(0)
   const [sessionFinished, setSessionFinished] = useState(false)
@@ -92,9 +91,9 @@ function ExercisePage() {
     description: "",
   })
   const [isPaused, setIsPaused] = useState(false)
-  const [score, setScore] = useState(0)
-  const [correctAnswers, setCorrectAnswers] = useState(0)
-  const [wrongAnswers, setWrongAnswers] = useState(0)
+  const [, setScore] = useState(0)
+  const [, setCorrectAnswers] = useState(0)
+  const [, setWrongAnswers] = useState(0)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
 
@@ -174,7 +173,6 @@ function ExercisePage() {
         setSessionStartedAt(sessionData.started_at)
         setPersistedPausedSeconds(sessionData.total_paused_seconds || 0)
         setTotalPausedSeconds(0)
-        setPauseStartedAt(null)
         setCorrectAnswers(sessionData.correct_answers)
         setWrongAnswers(sessionData.wrong_answers)
         setSessionFinished(false)
@@ -267,7 +265,6 @@ function ExercisePage() {
         session_id: sessionId,
       })
 
-      setPauseStartedAt(Date.now())
       setIsPaused(true)
     } catch (error) {
       console.error("Erro ao pausar sessão:", error)
@@ -286,7 +283,6 @@ function ExercisePage() {
       )
 
       setPersistedPausedSeconds(response.data.total_paused_seconds || 0)
-      setPauseStartedAt(null)
       setIsPaused(false)
     } catch (error) {
       console.error("Erro ao retomar sessão:", error)

@@ -1,7 +1,9 @@
 import axios from "axios"
 
+const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000/api"
+
 export const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: API_URL,
 })
 
 let isRefreshing = false
@@ -12,11 +14,8 @@ let failedQueue: Array<{
 
 function processQueue(error: unknown, token: string | null = null) {
   failedQueue.forEach((promise) => {
-    if (error) {
-      promise.reject(error)
-    } else if (token) {
-      promise.resolve(token)
-    }
+    if (error) promise.reject(error)
+    else if (token) promise.resolve(token)
   })
 
   failedQueue = []
@@ -74,10 +73,9 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        const response = await axios.post(
-          "http://127.0.0.1:8000/api/token/refresh/",
-          { refresh }
-        )
+        const response = await axios.post(`${API_URL}/token/refresh/`, {
+          refresh,
+        })
 
         const newAccess = response.data.access
 
