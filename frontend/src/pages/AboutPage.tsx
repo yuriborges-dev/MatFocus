@@ -7,10 +7,12 @@ import AppLayout from "../layouts/AppLayout"
 import BackButton from "../components/BackButton"
 import { useAuth } from "../contexts/AuthContext"
 import { getAnimationLevel, getPageAnimation } from "../utils/animation"
+import { useLocation } from "react-router-dom"
 
 function AboutPage() {
 
   const { student } = useAuth()
+  const location = useLocation()
   const animationLevel = getAnimationLevel(student?.animation_level)
   const iconStyle =
     "h-8 w-8 shrink-0 text-[#3b82d0] sm:h-9 sm:w-9"
@@ -19,7 +21,10 @@ function AboutPage() {
     <AppLayout showProfileCard={false}>
       <div className={`mx-auto max-w-4xl ${getPageAnimation(animationLevel)}`}>
         <header className="mb-6 sm:mb-8">
-          <BackButton fallbackPath="/perfil" />
+          <BackButton
+              fallbackPath="/perfil"
+              state={{ from: location.state?.from || "/dashboard" }}
+            />
 
           <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
             Sobre o MatFocus

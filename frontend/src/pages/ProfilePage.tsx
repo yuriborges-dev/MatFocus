@@ -137,7 +137,11 @@ function ProfilePage() {
 
                 <button
                   type="button"
-                  onClick={() => navigate("/perfil/editar")}
+                  onClick={() =>
+                    navigate("/perfil/editar", {
+                      state: { from: profileBackPath },
+                    })
+                  }
                   className={`inline-flex w-fit items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold text-[#3b82f6] transition hover:bg-blue-50 sm:px-4 sm:text-base ${getCardAnimation(animationLevel)}`}>
                   <Pencil size={18} />
                   Editar
@@ -198,7 +202,11 @@ function ProfilePage() {
             <div className={`rounded-[1.6rem] bg-white px-5 py-5 shadow-md sm:rounded-[1.75rem] sm:px-6 sm:py-6 ${getCardAnimation(animationLevel)}`}>
               <button
                 type="button"
-                onClick={() => navigate("/sobre")}
+                onClick={() =>
+                  navigate("/sobre", {
+                    state: { from: profileBackPath },
+                  })
+                }
                 className="flex w-full items-center text-left"
               >
                 <div className="flex items-center gap-3">

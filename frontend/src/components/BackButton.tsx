@@ -8,16 +8,19 @@ import {
 
 type BackButtonProps = {
   fallbackPath?: string
+  state?: {
+    from?: string
+  }
 }
 
-function BackButton({ fallbackPath = "/" }: BackButtonProps) {
+function BackButton({ fallbackPath = "/", state }: BackButtonProps) {
   const navigate = useNavigate()
   const { student } = useAuth()
 
   const animationLevel = getAnimationLevel(student?.animation_level)
 
   function handleBack() {
-    navigate(fallbackPath)
+    navigate(fallbackPath, { state })
   }
 
   return (

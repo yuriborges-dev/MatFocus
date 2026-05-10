@@ -1,6 +1,6 @@
 import { Eye, EyeOff, Mail, Save, Trash2, Upload } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import BackButton from "../components/BackButton"
 import AppLayout from "../layouts/AppLayout"
 import { useAuth } from "../contexts/AuthContext"
@@ -61,6 +61,7 @@ function traduzirErroSenha(message: string) {
 
 function EditProfilePage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const { student, updateStudentData } = useAuth()
   const animationLevel = getAnimationLevel(student?.animation_level)
@@ -342,7 +343,10 @@ function EditProfilePage() {
 
         <div className="mx-auto max-w-5xl">
           <header className="mb-5 sm:mb-6">
-            <BackButton fallbackPath="/perfil" />
+            <BackButton
+              fallbackPath="/perfil"
+              state={{ from: location.state?.from || "/dashboard" }}
+            />
 
             <h1 className="text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
               Editar Perfil
