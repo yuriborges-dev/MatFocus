@@ -199,11 +199,9 @@ GEMINI_API_KEY=sua_chave_api
 
 # 🌐 Deploy
 
-Link da aplicação após implantação:
+A aplicação pode ser acessada através do link abaixo:
 
-```text
-[ADICIONAR LINK AQUI]
-```
+🔗 **https://mat-focus.vercel.app/**
 
 ---
 
