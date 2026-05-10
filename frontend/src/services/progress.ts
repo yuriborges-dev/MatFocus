@@ -155,3 +155,11 @@ export async function downloadProgressReportPdf(
 
   window.URL.revokeObjectURL(url)
 }
+
+export async function getAllLevelProgress() {
+  const response = await api.get<Record<string, LevelProgressItem[]>>(
+    "/progress/all-level-progress/"
+  )
+
+  return response.data
+}

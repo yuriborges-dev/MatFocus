@@ -567,6 +567,85 @@ class LevelProgressSummaryView(APIView):
 
         serializer = LevelProgressItemSerializer(result, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class AllLevelProgressSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            student = request.user.student
+        except Student.DoesNotExist:
+            return Response(
+                {"detail": "Aluno não encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        contents = Content.objects.all().order_by("id")
+        levels = list(Level.objects.all().order_by("difficulty_order"))
+
+        all_phases = Phase.objects.filter(
+            is_active=True
+        ).select_related("content", "level")
+
+        progress_items = StudentPhaseProgress.objects.filter(
+            student=student
+        ).select_related("phase", "phase__content", "phase__level")
+
+        progress_by_phase_id = {
+            item.phase_id: item for item in progress_items
+        }
+
+        result = {}
+
+        for content in contents:
+            content_levels = []
+            previous_level_completed = True
+
+            for index, level in enumerate(levels):
+                phases = [
+                    phase for phase in all_phases
+                    if phase.content_id == content.id and phase.level_id == level.id
+                ]
+
+                total_phases = len(phases)
+                completed_phases = 0
+                total_score = 0
+
+                for phase in phases:
+                    progress = progress_by_phase_id.get(phase.id)
+
+                    if progress:
+                        total_score += progress.score
+
+                        if progress.completed:
+                            completed_phases += 1
+
+                level_completed = total_phases > 0 and completed_phases == total_phases
+
+                if total_phases == 0:
+                    unlocked = False
+                elif index == 0:
+                    unlocked = True
+                else:
+                    unlocked = previous_level_completed
+
+                content_levels.append({
+                    "level_id": level.id,
+                    "level_code": level.code,
+                    "level_title": level.title,
+                    "difficulty_order": level.difficulty_order,
+                    "total_phases": total_phases,
+                    "completed_phases": completed_phases,
+                    "total_score": total_score,
+                    "unlocked": unlocked,
+                    "completed": level_completed,
+                })
+
+                previous_level_completed = level_completed
+
+            result[content.slug] = content_levels
+
+        return Response(result, status=status.HTTP_200_OK)
     
 class ProgressSummaryView(APIView):
     permission_classes = [IsAuthenticated]

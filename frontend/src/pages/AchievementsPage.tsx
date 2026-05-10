@@ -3,7 +3,7 @@ import { Award, BookOpen, CheckCircle2, Lock, Medal, Star, Trophy } from "lucide
 import AppLayout from "../layouts/AppLayout"
 import {
   getDashboardSummary,
-  getLevelProgress,
+  getAllLevelProgress,
   type DashboardSummaryResponse,
   type LevelProgressItem,
 } from "../services/progress"
@@ -114,24 +114,7 @@ function AchievementsPage() {
 
         const dashboardData = await getDashboardSummary()
 
-        const levelResults = await Promise.all(
-          contents.map(async (content) => {
-            const levels = await getLevelProgress(content.slug)
-
-            return {
-              slug: content.slug,
-              levels,
-            }
-          })
-        )
-
-        const mappedLevels = levelResults.reduce<Record<string, LevelProgressItem[]>>(
-          (acc, item) => {
-            acc[item.slug] = item.levels
-            return acc
-          },
-          {}
-        )
+        const mappedLevels = await getAllLevelProgress()
 
         setDashboard(dashboardData)
         setLevelsByContent(mappedLevels)
