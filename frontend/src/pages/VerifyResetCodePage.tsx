@@ -58,9 +58,15 @@ function VerifyResetCodePage() {
             Código de verificação
           </h1>
 
-          <p className="mt-2 text-center text-sm text-slate-400">
-            Digite o código enviado para o e-mail.
-          </p>
+          <div className="mt-2 text-center">
+            <p className="text-sm text-slate-400">
+              Digite o código enviado para o e-mail.
+            </p>
+
+            <p className="mt-2 text-xs text-slate-400">
+              Caso não encontre, verifique também a caixa de spam ou lixo eletrônico.
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
