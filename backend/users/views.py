@@ -148,17 +148,52 @@ class RequestPasswordResetView(APIView):
             code=code,
         )
 
+        html_message = f"""
+        <div style="background-color:#eef8fb;padding:40px 20px;font-family:Arial,sans-serif;">
+            <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:24px;padding:40px 32px;text-align:center;box-shadow:0 10px 30px rgba(15,23,42,0.08);">
+
+                <img 
+                    src="https://mat-focus.vercel.app/logo%20-%20matfocus.png"
+                    alt="MatFocus"
+                    style="width:120px;margin-bottom:24px;"
+                />
+
+                <h1 style="color:#1e293b;font-size:28px;margin-bottom:10px;">
+                    Recuperação de senha
+                </h1>
+
+                <p style="color:#64748b;font-size:16px;line-height:1.6;margin-bottom:28px;">
+                    Recebemos uma solicitação para redefinir sua senha no <strong>MatFocus</strong>.
+                </p>
+
+                <div style="background:#eff6ff;border-radius:18px;padding:22px;margin-bottom:28px;">
+                    <p style="margin:0;color:#3b82f6;font-size:14px;font-weight:bold;letter-spacing:0.08em;">
+                        CÓDIGO DE VERIFICAÇÃO
+                    </p>
+
+                    <p style="margin:10px 0 0;font-size:38px;font-weight:800;color:#0f172a;letter-spacing:0.2em;">
+                        {code}
+                    </p>
+                </div>
+
+                <p style="color:#64748b;font-size:14px;line-height:1.6;">
+                    Este código expira em 10 minutos.
+                </p>
+
+                <p style="margin-top:28px;color:#94a3b8;font-size:13px;">
+                    © MatFocus
+                </p>
+            </div>
+        </div>
+        """
+
         send_mail(
             subject="Código de recuperação de senha - MatFocus",
-            message=(
-                f"Olá!\n\n"
-                f"Seu código de recuperação de senha do MatFocus é: {code}\n\n"
-                f"Este código é válido por 10 minutos.\n\n"
-                f"Se você não solicitou a recuperação de senha, ignore este e-mail."
-            ),
+            message=f"Seu código de recuperação é: {code}",
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
             fail_silently=False,
+            html_message=html_message,
         )
 
         return Response(
