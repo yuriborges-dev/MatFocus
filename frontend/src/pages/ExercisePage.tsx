@@ -83,6 +83,7 @@ function ExercisePage() {
 
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answer, setAnswer] = useState("")
+  const [submittingAnswer, setSubmittingAnswer] = useState(false)
   const [feedbackModal, setFeedbackModal] = useState({
     isOpen: false,
     type: "tip" as "tip" | "error" | "warning",
@@ -320,6 +321,8 @@ function ExercisePage() {
   }
 
   const handleSubmitAnswer = async () => {
+    if (submittingAnswer || showSuccessModal) return
+
     if (!answer.trim()) {
       openFeedbackModal(
         "warning",
@@ -353,6 +356,8 @@ function ExercisePage() {
     }
 
     try {
+      setSubmittingAnswer(true)
+
       const response = await api.post(
         `/activities/questions/${currentQuestion.id}/submit-answer/`,
         {
@@ -399,6 +404,7 @@ function ExercisePage() {
       )
 
       setWrongAnswers(data.wrong_answers)
+      setSubmittingAnswer(false)
     } catch (error) {
       console.error("Erro ao enviar resposta:", error)
 
@@ -410,10 +416,13 @@ function ExercisePage() {
         "Erro ao validar resposta.",
         "Tente novamente em alguns instantes."
       )
+
+      setSubmittingAnswer(false)
     }
   }
 
   const handleNextQuestion = () => {
+    setSubmittingAnswer(false)
     setShowSuccessModal(false)
 
     setFeedbackModal((prev) => ({
@@ -594,8 +603,9 @@ function ExercisePage() {
 
               <button
                 type="button"
+                disabled={submittingAnswer || showSuccessModal}
                 onClick={handleSubmitAnswer}
-                className={`flex h-20 items-center justify-center gap-3 rounded-[1.5rem] bg-[#4f8fd6] px-6 text-xl font-bold text-white shadow-sm transition hover:bg-[#3f84cc] hover:shadow-md sm:h-24 sm:text-2xl ${getCardAnimation(animationLevel)}`}
+                className={`flex h-20 items-center justify-center gap-3 rounded-[1.5rem] bg-[#4f8fd6] px-6 text-xl font-bold text-white shadow-sm transition hover:bg-[#3f84cc] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 sm:h-24 sm:text-2xl ${getCardAnimation(animationLevel)}`}
               >
                 <span className="text-[1.4rem] sm:text-[1.6rem]">✈</span>
                 Enviar
