@@ -153,7 +153,7 @@ class RequestPasswordResetView(APIView):
             <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:24px;padding:40px 32px;text-align:center;box-shadow:0 10px 30px rgba(15,23,42,0.08);">
 
                 <img 
-                    src="https://mat-focus.vercel.app/logo%20-%20matfocus.png"
+                    src="https://mat-focus.vercel.app/logo-email.png"
                     alt="MatFocus"
                     style="width:120px;margin-bottom:24px;"
                 />
