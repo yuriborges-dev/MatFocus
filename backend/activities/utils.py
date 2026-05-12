@@ -14,4 +14,8 @@ def normalize_answer(value):
 def is_answer_correct(submitted_answer, correct_answer):
     submitted = normalize_answer(submitted_answer)
     correct = normalize_answer(correct_answer)
-    return submitted == correct
+
+    try:
+        return float(submitted) == float(correct)
+    except ValueError:
+        return submitted == correct
