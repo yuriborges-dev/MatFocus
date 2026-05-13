@@ -7,7 +7,7 @@ from collections import Counter
 
 client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-MODEL_NAME = "gemini-3.1-flash-lite-preview"
+MODEL_NAME = "gemini-3.1-flash-lite"
 
 
 LEVEL_SCHEMA = {

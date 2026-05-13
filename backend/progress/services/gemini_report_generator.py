@@ -3,7 +3,7 @@ from google import genai
 
 client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-MODEL_NAME = "gemini-3.1-flash-lite-preview"
+MODEL_NAME = "gemini-3.1-flash-lite"
 
 
 def generate_default_student_report(data):
